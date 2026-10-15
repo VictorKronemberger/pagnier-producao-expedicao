@@ -61,7 +61,7 @@ try{
  assert.equal(board.details["PV TESTE"].envio.caixas[0].itens[0].lote,"OP TESTE");
  assert.equal(board.details["PV TESTE"].envio.caixas[0].itens[0].validade,"2027-10-15");
  assert.equal(await evaluate('!!document.querySelector(\'[aria-label="Conteúdo por embalagem do item 1 de CX-001"]\')'),false);
- assert((await evaluate('document.querySelector(".item-document").textContent')).includes("10 UNID = 10 produtos"));
+ await click('.item-document summary');await click('[aria-label="Ajuda: Conteúdo por embalagem"]');assert((await evaluate('document.querySelector("[role=tooltip]").textContent')).includes("10 UNID = 10 produtos"));await click('[aria-label="Ajuda: Conteúdo por embalagem"]');
 
  assert(!board.details["PV TESTE"].envio.caixasEmMontagem?.length);
  assert.equal(await evaluate('document.querySelectorAll(".box-model-manager").length'),0);
@@ -97,7 +97,7 @@ try{
  await evaluate('document.querySelector(".card-dialog").scrollTop=0');
  writeFileSync(".sites-runtime/caixas-diretas-desktop.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await click('[data-expedition-step="review"]');
- await clickText("CX-0024 UNID");await until('!!document.querySelector(\'[aria-label="Quantidade do item 1 de CX-002"]\')');
+ await click('.pc-details summary');await clickText("CX-0024 UNID");await until('!!document.querySelector(\'[aria-label="Quantidade do item 1 de CX-002"]\')');
  assert.equal(await evaluate('document.querySelectorAll(".box-focus").length'),1);
  await click('.close');await click('[aria-label="Configurações de caixas"]');await until('!!document.querySelector(".box-settings-page")');
  await clickText("Novo modelo de caixa");await input('[aria-label="Nome do modelo"]',"Caixa 40 teste");

@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"04",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"05",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -159,24 +159,24 @@ export const tutorials = [
     "before": "Tenha os produtos disponíveis para comparar com o pedido e as OPs.",
     "steps": [
       {
-        "title": "Abra a conferência",
-        "text": "No cartão, entre em Expedição → 1. Conferir produtos. Ainda não é necessário criar caixas.",
-        "short": "No cartão, abra Expedição → Conferir produtos."
+        "title": "Localize o produto",
+        "text": "No cartão, abra Expedição → Conferir produtos. Busque por nome, número da OP ou unidade, com ou sem acentos. Todos os produtos do pedido ficam disponíveis, independentemente do recorte de datas do quadro. Listas maiores têm 20 itens por página.",
+        "short": "Abra Expedição → Conferir produtos e use Buscar produto ou OP."
       },
       {
-        "title": "Identifique o responsável",
-        "text": "Selecione quem está realizando a conferência e compare produtos, unidades e quantidades. Revise também mudanças detectadas no Nomus.",
-        "short": "Selecione o responsável e compare produtos e quantidades com o que está disponível."
+        "title": "Identifique o responsável e o envio",
+        "text": "Selecione o responsável e a transportadora planejada: FedEx, DHL ou Outra transportadora. O quadro permite filtrar por Envio. Pedidos agrupados compartilham a transportadora; quando ela não foi definida, o painel consulta as invoices vinculadas.",
+        "short": "Selecione o responsável e a transportadora. Use Filtros → Envio no quadro para localizar FedEx ou DHL."
       },
       {
-        "title": "Resolva divergências",
-        "text": "Confira faltas e excessos antes de embalar. Remessas parciais são possíveis; registre nas caixas somente a quantidade realmente preparada.",
-        "short": "Resolva faltas, excessos ou produtos trocados. Prepare somente o que será enviado."
+        "title": "Compare e resolva diferenças",
+        "text": "Na OP mostra a quantidade atual; Em Caixas 40 mostra o conteúdo cadastrado nas caixas maiores; Falta embalar mostra o saldo. Em pedidos de estoque, No pedido substitui Na OP. A revisar reúne alterações, excessos e dados inconsistentes; A embalar mostra saldos positivos. Compare com a contagem física. Detalhes exibe criação, quantidade programada e atalhos das caixas.",
+        "short": "Compare Na OP, Em Caixas 40 e Falta embalar. Use A revisar ou A embalar para focar as pendências."
       },
       {
-        "title": "Avance para a montagem",
-        "text": "Use Continuar para montagem das caixas. A distribuição dos produtos aparecerá conforme as caixas forem preenchidas.",
-        "short": "Clique em Continuar para montagem das caixas."
+        "title": "Consulte a ajuda e avance",
+        "text": "Passe o mouse sobre o ícone de ajuda, navegue pelo teclado ou toque nele no celular para ver explicações. Escape fecha a dica. Alertas que exigem correção permanecem visíveis. Depois da conferência física, use Continuar para montagem das caixas.",
+        "short": "Use os ícones de ajuda quando precisar. Após conferir fisicamente, continue para a montagem."
       }
     ],
     "done": "Produtos e quantidades foram conferidos e o responsável está identificado.",
@@ -186,7 +186,7 @@ export const tutorials = [
     "code": "POP-04",
     "owner": "Responsável pela conferência",
     "objective": "Confirmar identidade, unidade e quantidade dos produtos antes de embalar.",
-    "records": "Responsável pela conferência no cartão e divergências registradas nas orientações.",
+    "records": "Responsável e transportadora planejada no painel; divergências registradas nas orientações.",
     "deviation": "Produto trocado, falta ou excesso: interrompa a montagem do item divergente, identifique a causa e confira novamente. Para remessa parcial, registre somente o que será enviado."
   },
   {

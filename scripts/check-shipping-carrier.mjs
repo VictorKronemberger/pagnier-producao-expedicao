@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {orderCarrier} from "../lib/shipping-carrier.mjs";
+const b={details:{PV1:{envio:{transportadora:"FedEx",agrupamento:{pedidos:["PV1","PV2"]}}}},invoices:{i:{orderIds:["PV1"],carrier:"DHL"}}};
+assert.equal(orderCarrier(b,"PV2").category,"FedEx");
+b.details.PV1.envio.transportadora="";assert.deepEqual(orderCarrier(b,"PV2"),{value:"DHL",category:"DHL",source:"invoice"});
+b.invoices.j={orderIds:["PV2"],carrier:"FedEx"};assert.equal(orderCarrier(b,"PV1").category,"Múltiplas");
+b.details.PV1.envio.transportadora="DHL Express";assert.equal(orderCarrier(b,"PV1").category,"DHL");
+b.details.PV1.envio.transportadora="Correios";assert.equal(orderCarrier(b,"PV2").category,"Outras");
+assert.equal(orderCarrier(b,"PV3").category,"A definir");
+console.log("OK transportadora: agrupamentos, prioridade do envio, invoice, conflito, outros e ausência.");

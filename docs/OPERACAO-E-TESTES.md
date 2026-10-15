@@ -107,3 +107,14 @@ Atualização da expedição: cada Caixa 40 possui estado persistente de montage
 O lote usa o nome da OP. A sincronização consulta somente GET `lotesSerie`, filtrado pelas OPs presentes nas caixas salvas, dentro do mesmo limite e bloqueio de consultas do painel. A validade usa `dataHoraValidade` do lote do produto/empresa correspondentes, sem cálculo pela criação da OP. Resultados sem validade são consultados novamente após 5 minutos; datas encontradas, após 1 hora. A consulta é paginada e não preenche datas ambíguas. Ajustes manuais são preservados e os campos continuam editáveis. OPs sintéticas de estoque não recebem lote automático.
 
 Conteúdo por embalagem fica dispensado em UNID no padrão de 1 produto por unidade; conversões existentes permanecem visíveis. KG, G, L e outras unidades exibem explicações junto ao campo. Testes específicos: `node scripts/check-product-lots.mjs`, `node scripts/check-ready-boxes.mjs` e `node scripts/check-assembly-clean-browser.mjs`.
+
+
+## Conferência e transportadora — 15/10/2026
+
+Conferência com busca permanente por produto/OP/unidade (acentos ignorados e múltiplos termos), filtros Todos/A revisar/A embalar e 20 itens por página. Quantidades da OP, das Caixas 40 e saldo aparecem alinhadas; criação, quantidade programada e links das caixas ficam em Detalhes. A lista consulta todos os produtos do pedido, independentemente do filtro de datas do quadro.
+
+Transportadora reutiliza o campo persistido do envio. FedEx/DHL aparecem nos cartões e no filtro Envio do quadro; agrupamentos compartilham a escolha. Sem escolha explícita, invoices vinculadas fornecem a indicação; fontes conflitantes aparecem em Múltiplas. A escolha não modifica invoices nem contrata frete.
+
+Ajuda contextual disponível por mouse, foco do teclado e toque; Escape fecha a dica, com ajuste de posição dentro da largura da tela. Divergências permanecem visíveis. Manual de boas práticas revisão 05. Rótulos persistentes e resultados anunciados seguem as orientações [W3C para rótulos](https://www.w3.org/WAI/tutorials/forms/labels/) e [mensagens de estado](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html); isso não equivale a uma auditoria completa de acessibilidade.
+
+Validação: `node scripts/check-shipping-carrier.mjs`, `node scripts/check-conference-browser.mjs`, `node scripts/check-assembly-clean-browser.mjs`, `node scripts/check-quantity-browser.mjs`, `node scripts/check-manual-browser.mjs`, TypeScript e build. Testes de navegador usam APIs simuladas, incluindo salvamento de transportadora sem perder caixas, seleção por FedEx/DHL, busca, paginação, atalhos e tela móvel.

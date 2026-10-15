@@ -2,7 +2,7 @@ export const manual = [
   {
     "category": "start",
     "title": "Busca, filtros e atalhos",
-    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pedido, cliente, OP ou produto. Remova um filtro pelo X sem perder os demais. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio."
+    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pedido, cliente, OP ou produto. Remova um filtro pelo X sem perder os demais. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio. Em Filtros → Envio, escolha FedEx, DHL, Outras, A definir ou Múltiplas. Remover o filtro volta a exibir os demais pedidos."
   },
   {
     "category": "start",
@@ -23,6 +23,21 @@ export const manual = [
     "category": "production",
     "title": "O que significa a diferença entre 100 e 80",
     "text": "Programada é a quantidade da primeira captura disponível, e atual é a quantidade da OP consultada no Nomus. Não é uma medição independente da produção realizada. Alterações anteriores à primeira captura não são recuperadas. Marcar como visto não apaga a diferença nem o histórico; são mantidas até 30 ocorrências recentes por pedido."
+  },
+  {
+    "category": "expedition",
+    "title": "Busca e números na conferência",
+    "text": "Busque produto, OP ou unidade; a busca aceita vários termos e ignora acentos. Todos, A revisar e A embalar filtram a lista, sem confirmar a contagem física. As contagens desses botões representam o pedido inteiro; o resultado da busca aparece ao lado. A lista mostra 20 produtos por página. Em Caixas 40 considera produtos diretos e caixas menores já acomodadas; menores ainda em preparo não entram nesse total. Uma mudança de quantidade no Nomus não representa, por si só, falta física. Abra Detalhes para ver a origem e localizar a caixa."
+  },
+  {
+    "category": "expedition",
+    "title": "Como definir FedEx ou DHL",
+    "text": "Em Expedição → Conferir produtos, selecione Transportadora. Essa escolha fica salva no envio e aparece no cartão e no filtro Envio do quadro. Pedidos agrupados compartilham a escolha. Sem transportadora definida, o painel usa FedEx ou DHL das invoices vinculadas; se houver as duas, o filtro indica Múltiplas até você definir o envio. Escolher a transportadora não contrata frete nem altera invoices: revise o documento separadamente."
+  },
+  {
+    "category": "start",
+    "title": "Onde estão os textos de ajuda?",
+    "text": "As explicações da conferência, quantidade por embalagem, lote, validade e peso sugerido ficam nos ícones de ajuda. Passe o mouse, use Tab para chegar ao ícone ou toque no celular. Escape fecha a dica. Os avisos de divergência continuam visíveis para orientar a correção."
   },
   {
     "category": "expedition",

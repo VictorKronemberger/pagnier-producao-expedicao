@@ -52,6 +52,6 @@ try{
  await send("Emulation.setDeviceMetricsOverride",{width:390,height:844,deviceScaleFactor:1,mobile:true});await pause(150);
  assert(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'));
  const shot=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/quantidade-parcial.png"),Buffer.from(shot.data,"base64"));
- await evaluate('document.querySelector(\'[data-detail-tab="expedition"]\').click()');assert(await evaluate('document.querySelector(".op-quantity-change").textContent.includes("Faltam 20")'));
+ await evaluate('document.querySelector(\'[data-detail-tab="expedition"]\').click()');assert(await evaluate('document.querySelector(".pc-change").textContent.includes("100 → 80")'));
  console.log("OK navegador quantidades: 100 programadas, 80 atuais, faltam 20; diferença continua após marcar como visto e recarregar; Geral, Conferência e celular.");
 }finally{socket?.close();browser.kill()}
