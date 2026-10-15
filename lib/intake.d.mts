@@ -1,1 +1,1 @@
-export function receiveOrders<T extends {sequence:string[];details:Record<string,any>}>(board:T,groups:{id:string;ordens:unknown[]}[]):T;
+export function receiveOrders<T extends {sequence:string[];details:Record<string,any>}>(board:T,groups:{id:string;ordens:unknown[];liberacao?:import("./order-release.mjs").ReleaseState}[]):T;

@@ -10,7 +10,7 @@ const db={prepare(sql){return {bind(...args){return {async first(){
  throw Error("Unexpected SQL");
  }}}}}};
 const imports={"../../../lib/stock-orders.mjs":await import("../lib/stock-orders.mjs"),"../../../lib/dispatch.mjs":await import("../lib/dispatch.mjs"),"cloudflare:workers":{env:{DB:db}},"../../chatgpt-auth":{getChatGPTUser:async()=>authenticated?{displayName:"Teste"}:null},"../../../lib/order-visibility.mjs":{visibleOrderState:s=>s},"../../../lib/nomus-sync.mjs":{publicSync:s=>({snapshot:s.snapshot})},"../../../lib/nomus-store":{readNomus:async()=>({state:{snapshot,hiddenOrderCodes:{}}})}};
-for(const name of ["invoice-delete","packing-delete","box-models","invoice","shipment-groups","company-scope","shipping"])imports["../../../lib/"+name+".mjs"]=await import("../lib/"+name+".mjs");
+for(const name of ["order-release","invoice-delete","packing-delete","box-models","invoice","shipment-groups","company-scope","shipping"])imports["../../../lib/"+name+".mjs"]=await import("../lib/"+name+".mjs");
 const context={exports:{},require:name=>{assert(name in imports,name);return imports[name]},Response,Request,TextEncoder,URL};
 vm.runInNewContext(ts.transpileModule(readFileSync("app/api/board/route.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
 const put=(board,rev=revision,origin="http://site.test")=>context.exports.PUT(new Request("http://site.test/api/board",{method:"PUT",headers:{origin},body:JSON.stringify({board,revision:rev})}));

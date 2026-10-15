@@ -1,3 +1,4 @@
+import {assertReleaseTransitions} from "../../../lib/order-release.mjs";
 import {operationalGroups,stockEligibility} from "../../../lib/stock-orders.mjs";
 import {assertDispatchTransitions} from "../../../lib/dispatch.mjs";
 import {deleteDraftInvoice,assertNoInvoiceRemoval} from "../../../lib/invoice-delete.mjs";
@@ -36,6 +37,7 @@ export async function PUT(request:Request){
  const allowed=new Set<string>(groups.map((g:any)=>g.id));
  const {revision}=data??{};let board=data?.board;if(board&&Array.isArray(board.sequence)&&board.details&&typeof board.details==="object"&&!Array.isArray(board.details))board=scopeBoard(board,excludedCodes);
  if(!Number.isInteger(revision)||revision<0||!board||!Array.isArray(board.sequence)||board.sequence.length>allowed.size||new Set(board.sequence).size!==board.sequence.length||board.sequence.some((id:unknown)=>typeof id!=="string"||!allowed.has(id))||!board.details||typeof board.details!=="object"||Array.isArray(board.details))return json({error:"Fila inválida."},400);
+ try{assertReleaseTransitions(previous,board,groups)}catch(e){return json({error:e instanceof Error?e.message:"Confira a liberação do pedido."},400)}
  try{validateGroups(board,groups)}catch(e){return json({error:e instanceof Error?e.message:"Agrupamento inválido."},400)}
  let invoices;try{invoices=normalizeInvoices(board.invoices??scopeBoard({...previous,sequence:previous.sequence??[]},excludedCodes).invoices??{},[...snapshot.grupos,...(snapshot.pedidos??[])].map((p:any)=>p.id))}catch(e){return json({error:e instanceof Error?e.message:"Invoice inválida."},400)}
  try{assertNoInvoiceRemoval(scopeBoard({...previous,sequence:previous.sequence??[]},excludedCodes).invoices,invoices)}catch(e){return json({error:e instanceof Error?e.message:"Exclusão de invoice inválida."},400)}

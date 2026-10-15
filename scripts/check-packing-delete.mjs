@@ -24,7 +24,7 @@ const db={prepare(sql){return {bind(...args){return {async first(){
  if(sql.startsWith("UPDATE production_board")){assert(sql.includes("AND revision=?"));if(race){revision++;race=false}if(args[4]!==revision)return null;stored=JSON.parse(args[0]);revision++;updates++;return {revision}}
  throw Error("Unexpected database request");
  }}}}}};
-const imports={"../../../lib/stock-orders.mjs":await import("../lib/stock-orders.mjs"),"../../../lib/dispatch.mjs":await import("../lib/dispatch.mjs"),
+const imports={"../../../lib/order-release.mjs":await import("../lib/order-release.mjs"),"../../../lib/stock-orders.mjs":await import("../lib/stock-orders.mjs"),"../../../lib/dispatch.mjs":await import("../lib/dispatch.mjs"),
  "../../../lib/invoice-delete.mjs":await import("../lib/invoice-delete.mjs"),
  "../../../lib/box-models.mjs":await import("../lib/box-models.mjs"),
  "../../../lib/packing-delete.mjs":deletion,

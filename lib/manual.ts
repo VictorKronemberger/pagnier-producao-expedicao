@@ -1,5 +1,10 @@
 export const manual = [
   {
+    "category": "production",
+    "title": "Aguardando liberação e Na fila",
+    "text": "Produção → Aguardando liberação reúne os pedidos ainda pendentes no Nomus. Havendo itens liberados e OP gerada, o pedido entra em Na fila na próxima consulta, inclusive se a liberação for parcial. No cartão, abra o aviso para ver quais itens ainda não foram liberados; a aba Geral também mostra produto, item e quantidade. Sem OP, o pedido liberado continua em Pedidos de venda aguardando sua criação. Pedidos já em produção, conferência ou expedição mantêm a etapa e os registros. Consultando liberação indica dados ainda não confirmados; aguarde a sincronização. A liberação é feita no Nomus, sem alterações no ERP pelo painel."
+  },
+  {
     "category": "start",
     "title": "Busca, filtros e atalhos",
     "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pelo número do pedido de venda, cliente, OP ou produto. Para PD 012345, a busca aceita 12345, 012345, PD012345 ou PV 12345; zeros à esquerda, espaços e o prefixo PD/PV não impedem encontrar o número. A mesma busca funciona em Pedidos de venda e respeita os filtros ativos do quadro. Remova um filtro pelo X sem perder os demais. A data ao lado do número no cartão, no cabeçalho do pedido e em Pedidos de venda é a criação do pedido no Nomus. Sem data indica que ela ainda não está disponível; a data da OP não é usada em seu lugar. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio. Em Filtros → Envio, escolha FedEx, DHL, Outras, A definir ou Múltiplas. Remover o filtro volta a exibir os demais pedidos."

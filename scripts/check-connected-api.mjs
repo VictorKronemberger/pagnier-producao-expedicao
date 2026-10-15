@@ -10,7 +10,7 @@ const sale={id:"STOCK",codigo:"STOCK",cliente:"Teste",criacao:"2026-10-14",orden
 const snapshot={grupos:[],pedidos:[sale]};
 const db={prepare(sql){return {bind(...args){return {async first(){if(sql.startsWith("SELECT"))return {payload:JSON.stringify(stored),revision};if(sql.startsWith("UPDATE")){if(args[4]!==revision)return null;stored=JSON.parse(args[0]);revision++;updates++;return {revision}}throw Error("Unexpected SQL")}}}}}};
 const imports={"cloudflare:workers":{env:{DB:db}},"../../chatgpt-auth":{getChatGPTUser:async()=>({displayName:"Simulação"})},"../../../lib/order-visibility.mjs":{visibleOrderState:s=>s},"../../../lib/nomus-sync.mjs":{publicSync:s=>({snapshot:s.snapshot})},"../../../lib/nomus-store":{readNomus:async()=>({state:{snapshot,hiddenOrderCodes:{}}})}};
-for(const name of ["stock-orders","dispatch","packing-delete","invoice-delete","box-models","invoice","shipment-groups","company-scope","shipping"])imports["../../../lib/"+name+".mjs"]=await import("../lib/"+name+".mjs");
+for(const name of ["order-release","stock-orders","dispatch","packing-delete","invoice-delete","box-models","invoice","shipment-groups","company-scope","shipping"])imports["../../../lib/"+name+".mjs"]=await import("../lib/"+name+".mjs");
 const context={Error,exports:{},require:name=>{assert(name in imports,name);return imports[name]},Response,Request,TextEncoder,URL};vm.runInNewContext(ts.transpileModule(readFileSync("app/api/board/route.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
 const put=board=>context.exports.PUT(new Request("http://site.test/api/board",{method:"PUT",headers:{origin:"http://site.test"},body:JSON.stringify({board,revision})}));
 let board={sequence:[sale.id],details:{STOCK:{responsavel:"",nota:"",situacao:"Concluído",atendimentoEstoque:true}}};
@@ -22,3 +22,9 @@ shipment=confirmBoxReview(shipment,[op],"Pedro","2026-10-14T12:00:00.000Z");boar
 shipment.dataEnvio="2026-10-14";response=await put(board);assert.equal(response.status,200,JSON.stringify(await response.json()));assert.equal(stored.details.STOCK.envio.caixas[0].itens[0].opId,op.id);assert.equal(stored.details.STOCK.situacao,"Atendido totalmente e enviado");
 const read=await(await context.exports.GET()).json();assert.equal(read.board.details.STOCK.atendimentoEstoque,true);
 console.log("OK API conectada: estoque sem OP do catálogo, confirmação de vínculo, gravação e recarga, bloqueio de Enviados sem conferência/data e despacho completo com banco isolado.");
+
+const releaseOrder={id:"RELEASE QA",codigo:"RELEASE QA",cliente:"Teste",liberacao:"waiting",ordens:[{id:"OP RELEASE",nome:"OP RELEASE",produto:"Produto QA",quantidade:"1",unidade:"UNID"}]};snapshot.grupos.push(releaseOrder);
+let releaseBoard=structuredClone(stored);releaseBoard.sequence.push(releaseOrder.id);releaseBoard.details[releaseOrder.id]={responsavel:"",nota:"",situacao:"Programado"};
+response=await put(releaseBoard);assert.equal(response.status,400);assert.match((await response.json()).error,/liberação/);assert(!stored.sequence.includes(releaseOrder.id));
+releaseOrder.liberacao="partial";response=await put(releaseBoard);assert.equal(response.status,200,JSON.stringify(await response.json()));assert(stored.sequence.includes(releaseOrder.id));
+console.log("OK API liberação: pedido pendente bloqueado e liberação parcial com OP aceita.");

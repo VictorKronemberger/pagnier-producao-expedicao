@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import {releaseState,awaitsRelease,pendingReleaseItems,assertReleaseTransitions} from "../lib/order-release.mjs";
+import {receiveOrders} from "../lib/intake.mjs";
+import {initialSync,syncStep,publicSync} from "../lib/nomus-sync.mjs";
+for(const [statuses,expected] of [[[1],"waiting"],[[2],"released"],[[3],"released"],[[1,2],"partial"],[[1,3],"partial"],[[4,5,6,7,8],"closed"],[[],"unknown"],[[undefined],"unknown"]])assert.equal(releaseState(statuses.map(status=>({status}))),expected);
+const group=(id,liberacao,op=true)=>({id,codigo:id,liberacao,ordens:op?[{id:"OP"+id}]:[],vinculo:op?"linked":"none"});
+const waiting=group("waiting","waiting"),partial=group("partial","partial"),released=group("released","released"),noOP=group("noOP","released",false),started=group("started","waiting");
+const previous={sequence:["waiting","started"],details:{waiting:{situacao:"Programado",nota:"Manter orientação",envio:{caixas:[{id:"b"}]}},started:{situacao:"Em acompanhamento",nota:"Preservar"}}};
+const groups=[waiting,partial,released,noOP,started,group("unknown","unknown")];
+const next=receiveOrders(previous,groups);
+assert.deepEqual(next.sequence,["started","partial","released"]);
+assert.equal(next.details.waiting.nota,"Manter orientação");assert.deepEqual(next.details.waiting.envio,previous.details.waiting.envio);assert.equal(next.details.started.situacao,"Em acompanhamento");assert.equal(receiveOrders(next,groups),next);
+assert(awaitsRelease(waiting));assert(!awaitsRelease(partial));assert(awaitsRelease(group("p","partial",false)));assert(!awaitsRelease(started,previous.details.started));
+for(const situacao of ["Concluído","Pronto para envio e documentação","Atendido totalmente e enviado"]){const board={sequence:[started.id],details:{[started.id]:{situacao,nota:"Manter"}}};assert.equal(receiveOrders(board,[started]),board)}
+assert.deepEqual(pendingReleaseItems({itens:[{status:1,item:"00020",produto:"Pendente"},{status:2,produto:"Liberado"}]}).map(i=>i.item),["00020"]);
+assert.throws(()=>assertReleaseTransitions({sequence:[],details:{}},{sequence:[waiting.id],details:{waiting:{situacao:"Programado"}}},[waiting]),/liberação/);
+assert.throws(()=>assertReleaseTransitions(previous,{...previous,details:{...previous.details,waiting:{situacao:"Em acompanhamento"}}},[waiting]),/liberação/);
+assert.doesNotThrow(()=>assertReleaseTransitions(previous,next,groups));
+assert.doesNotThrow(()=>assertReleaseTransitions({sequence:[],details:{}},{sequence:[partial.id],details:{partial:{situacao:"Programado"}}},[partial]));
+let state=initialSync({grupos:[],semVinculo:[]});let status=1;const methods=[];
+const order=()=>({id:1,idEmpresa:1,codigoPedido:"PD QA",idPessoaCliente:2,dataCriacao:"15/10/2026",itensPedido:[{idProduto:3,quantidade:4,status,item:"00010"}]});
+const fetcher=async(url,options)=>{methods.push(options.method);return Response.json(url.includes("/ordens?")?[{nome:"OP QA",dataHoraCriacao:"15/10/2026 00:00:00",descricaoProduto:"Produto QA",qtde:"4",unidadeMedida:"UNID",itensPedido:[{idPedido:1,nomeCliente:"Cliente QA"}]}]:url.includes("/pedidos/")?order():[order()])};
+state=await syncStep(state,"dummy",{fetcher});state=await syncStep({...state,nextAt:0,turn:1},"dummy",{fetcher});
+let view=publicSync(state,true);assert.equal(view.snapshot.grupos[0].liberacao,"waiting");assert.equal(view.snapshot.pedidos[0].itens[0].status,1);assert.equal(view.snapshot.pedidos[0].itens[0].item,"00010");assert.equal(receiveOrders({sequence:[],details:{}},view.snapshot.grupos).sequence.length,0);
+status=2;state=await syncStep({...state,nextAt:0,turn:0},"dummy",{fetcher});view=publicSync(state,true);assert.equal(receiveOrders({sequence:[],details:{}},view.snapshot.grupos).sequence[0],"PD QA");
+delete state.orders[1].items[0].status;assert.equal(publicSync(state,true).snapshot.pedidos[0].liberacao,"unknown");
+let detailPath;state=await syncStep({...state,nextAt:0,turn:4},"dummy",{fetcher:async(url,opts)=>{detailPath=url;return fetcher(url,opts)}});assert(detailPath.endsWith("pedidos/1"));assert.equal(publicSync(state,true).snapshot.grupos[0].liberacao,"released");assert(methods.every(m=>m==="GET"));
+console.log("OK liberação: estados por item, fila parcial, pendentes, dados preservados, guardas do servidor, atualização e migração de consultas antigas; somente GET no Nomus.");

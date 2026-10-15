@@ -506,3 +506,20 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 @media(max-width:760px){.board-tools.simple-tools{margin:14px 14px 0;gap:9px}.simple-tools .search{flex-basis:100%;max-width:none;min-height:48px}.simple-tools .search input{font-size:16px;min-height:46px}.simple-tools .search .search-clear{min-width:36px;min-height:36px}}
 
 .simple-tools .search{margin-right:0}.simple-tools .search input{font-family:inherit;text-overflow:ellipsis}
+
+/* Liberação por item, consultada no Nomus. */
+.release-count{font-size:11px;background:#edf2e8;border-radius:20px;padding:2px 7px}
+.release-state{display:inline-flex;align-items:center;width:fit-content;font-size:11px;font-weight:500;padding:3px 7px;border-radius:5px;background:#f1f4f1;color:#5d6b60}
+.release-waiting,.release-partial{background:#fff3dc;color:#805a16}
+.release-released{background:#e8f4ec;color:#246543}
+.release-notice{margin:12px 0;padding:10px 12px;border:1px solid #eddbb7;border-radius:8px;background:#fffaf0;color:#79591e;font-size:12px}
+.release-notice.compact{margin:8px 0;padding:7px 9px;font-size:11px}
+.release-notice summary{cursor:pointer;font-weight:600}
+.release-notice ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.release-notice li{display:flex;justify-content:space-between;gap:10px;overflow-wrap:anywhere}
+.release-notice li strong{white-space:nowrap;font-size:11px}
+.sales-item.item-awaiting-release{background:#fffaf0;border-radius:5px;padding:10px}
+.sales-order>summary{flex-wrap:wrap}
+.sales-item>.release-state{margin-left:auto;margin-right:12px}
+.production-view-switch{flex-wrap:wrap}
+@media(max-width:640px){.sales-item{flex-wrap:wrap;gap:8px}.sales-item>.release-state{margin-left:0}.release-notice li{flex-wrap:wrap}.production-view-switch button{font-size:12px}}

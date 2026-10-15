@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"08",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"09",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -126,8 +126,8 @@ export const tutorials = [
       },
       {
         "title": "Atualize a etapa real",
-        "text": "Use Na fila → Produzindo → Conferir. Use Bloqueados quando existir um impedimento. Os atalhos Iniciar produção e Concluir produção alteram a etapa do painel.",
-        "short": "Mova o pedido conforme o trabalho: Na fila, Produzindo e Conferir. Use Bloqueados quando necessário."
+        "text": "Antes de produzir, consulte Aguardando liberação. O pedido entra em Na fila quando há itens liberados e OP gerada. Na liberação parcial, confira no aviso do cartão quais itens continuam pendentes. Use Na fila → Produzindo → Conferir. Use Bloqueados quando existir um impedimento. Os atalhos Iniciar produção e Concluir produção alteram a etapa do painel.",
+        "short": "Liberado com OP entra em Na fila. Na liberação parcial, confira os itens pendentes no cartão antes de produzir."
       },
       {
         "title": "Confira as mudanças do Nomus",
