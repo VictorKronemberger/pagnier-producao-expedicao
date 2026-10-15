@@ -1,4 +1,5 @@
 "use client";
+import {directBoxOnly,hasInnerBoxes,applyDirectBoxRule} from "../lib/direct-box-rule.mjs";
 import {isMounted,finishOuterBox,reopenOuterBox} from "../lib/ready-boxes.mjs";
 import ContextHelp from "./context-help";
 import ImportantField,{FillingGuide} from "./important-field";
@@ -14,37 +15,39 @@ import {productUnitWeight} from "../lib/product-weight.mjs";
 import {useEffect,useRef,useState} from "react";
 import {Package,Plus,Trash2,Truck,Scale,Ruler,ArrowRight,Check} from "lucide-react";
 import {emptyShipment,assertPackingCapacity,assemblyBoxes,newItem,isDecimalDraft,MODES,type Shipment,type ShippingBox,type ShippingItem,decimal,type ShippingOP} from "../lib/shipping.mjs";
-export default function ShipmentEditor({value,ops,onChange,disabled=false,mode="boxes",models=[],initialBoxId="",assemblyStep:controlledStep,onAssemblyStepChange}:{initialBoxId?:string;assemblyStep?:"small"|"outer"|"measure";onAssemblyStepChange?:(step:"small"|"outer"|"measure")=>void;models?:BoxModel[];mode?:"boxes"|"documents";value?:Shipment;ops:ShippingOP[];onChange:(value:Shipment)=>void;disabled?:boolean}){
+export default function ShipmentEditor({value,ops,products,onChange,disabled=false,mode="boxes",models=[],initialBoxId="",assemblyStep:controlledStep,onAssemblyStepChange}:{initialBoxId?:string;assemblyStep?:"small"|"outer"|"measure";onAssemblyStepChange?:(step:"small"|"outer"|"measure")=>void;models?:BoxModel[];mode?:"boxes"|"documents";value?:Shipment;ops:ShippingOP[];products?:string[];onChange:(value:Shipment)=>void;disabled?:boolean}){
  const ref=useRef<Shipment>(value??emptyShipment());ref.current=value??emptyShipment();
  const [modelId,setModelId]=useState(""),[suggestionNotice,setSuggestionNotice]=useState("");
  const [localStep,setLocalStep]=useState<"small"|"outer"|"measure">("outer"),[chosenSmall,setChosenSmall]=useState<Record<string,string>>({}),[assemblyError,setAssemblyError]=useState("");
- const assemblyStep=controlledStep??localStep;
+ const allProducts=products??ops.map(o=>o.produto),directOnly=mode==="boxes"&&directBoxOnly(allProducts);
+ const automaticDirect=directOnly&&!hasInnerBoxes(ref.current);
+ const requestedStep=controlledStep??localStep,assemblyStep=automaticDirect&&requestedStep==="small"?"outer":requestedStep;
  const [changingMode,setChangingMode]=useState(false),[activeOuterId,setActiveOuterId]=useState(initialBoxId),[activeSmallId,setActiveSmallId]=useState("");
 
  function goAssembly(step:"small"|"outer"|"measure"){setLocalStep(step);onAssemblyStepChange?.(step);setAssemblyError("")}
  function changeAssembly(action:()=>Shipment){try{commit(action());setAssemblyError("")}catch(e){setAssemblyError(e instanceof Error?e.message:"Revise a montagem.")}}
  const s=ref.current,report=inspectPacking(s,ops),balance=packingBalance(s,ops);
- const organization=assemblyMode(s),showModes=!organization||changingMode;
+ const organization=directOnly?(automaticDirect?"direct":"mixed"):assemblyMode(s),showModes=!directOnly&&(!organization||changingMode);
  const mountedBoxes=s.caixas.filter(isMounted),draftBoxes=s.caixas.filter(b=>!isMounted(b));
  const visibleBoxes=assemblyStep==="measure"?mountedBoxes:draftBoxes;
  const outerId=visibleBoxes.some(b=>b.id===activeOuterId)?activeOuterId:visibleBoxes[0]?.id;
  const smallId=s.caixasEmMontagem?.some(b=>b.id===activeSmallId)?activeSmallId:s.caixasEmMontagem?.[0]?.id;
  const chosenOuter=s.caixas.find(b=>b.id===outerId);
  const chosenInner=s.caixasEmMontagem?.find(b=>b.id===smallId);
- function chooseMode(next:AssemblyMode){try{commit(selectAssemblyMode(ref.current,next));setChangingMode(false);goAssembly(next==="direct"?"outer":"small");setAssemblyError("")}catch(e){setAssemblyError(e instanceof Error?e.message:"Revise a modalidade.")}}
+ function chooseMode(next:AssemblyMode){if(directOnly)return;try{commit(selectAssemblyMode(ref.current,next));setChangingMode(false);goAssembly(next==="direct"?"outer":"small");setAssemblyError("")}catch(e){setAssemblyError(e instanceof Error?e.message:"Revise a modalidade.")}}
  function createOuter(){const box={...boxFromModel(ref.current.caixas,crypto.randomUUID(),selectedModel),montada:false};patch({caixas:[...ref.current.caixas,box]});setActiveOuterId(box.id)}
- function createInner(){const id=crypto.randomUUID();changeAssembly(()=>startSmallBox(ref.current,id));setActiveSmallId(id)}
+ function createInner(){if(directOnly)return;const id=crypto.randomUUID();changeAssembly(()=>startSmallBox(ref.current,id));setActiveSmallId(id)}
  const selectedModel=models.find(m=>m.id===modelId);
  function applySuggestion(boxId:string,itemId:string){const suggestion=suggestPackingQuantity(ref.current,ops,boxId,itemId);if(!suggestion.quantity){setSuggestionNotice(suggestion.reason);return}itemPatch(boxId,itemId,{quantidade:suggestion.quantity});setSuggestionNotice("Sugestão aplicada. Confira o encaixe físico e pese a caixa pronta.")}
 
- useEffect(()=>{if(disabled||mode!=="boxes")return;const next=fillProductLots(fillProductWeights(ref.current,ops),ops);if(next!==ref.current){ref.current=next;onChange(next)}},[value,ops,disabled,onChange,mode]);
- function commit(next:Shipment){assertPackingCapacity(next,ops,ref.current);ref.current=next;onChange(next)}
+ useEffect(()=>{if(disabled||mode!=="boxes")return;const next=applyDirectBoxRule(fillProductLots(fillProductWeights(ref.current,ops),ops),allProducts);if(next!==ref.current){ref.current=next;onChange(next)}},[value,ops,disabled,onChange,mode,directOnly]);
+ function commit(next:Shipment){if(mode==="boxes")next=applyDirectBoxRule(next,allProducts);assertPackingCapacity(next,ops,ref.current);ref.current=next;onChange(next)}
  function patch(p:Partial<Shipment>){commit({...ref.current,...p})}
  function boxPatch(id:string,p:Partial<ShippingBox>){if(ref.current.caixasEmMontagem?.some(b=>b.id===id)){patch({caixasEmMontagem:ref.current.caixasEmMontagem.map(b=>b.id===id?{...b,...(p.codigo!==undefined?{codigo:p.codigo}:{}),...(p.itens?{itens:p.itens}:{}),pronta:false}:b)});return}const next=p.itens?updateBoxContents(ref.current,id,p.itens):ref.current;commit({...next,caixas:next.caixas.map(b=>b.id===id?{...b,...p}:b)})}
  function itemPatch(boxId:string,id:string,p:Partial<ShippingItem>){try{const b=assemblyBoxes(ref.current).find(b=>b.id===boxId);if(b)boxPatch(boxId,{itens:b.itens.map(i=>i.id===id?updatePackingItem(i,p):i)});setAssemblyError("")}catch(e){setAssemblyError(e instanceof Error?e.message:"Revise a quantidade.")}}
  function field(key:keyof Omit<Shipment,"caixas"|"caixasEmMontagem"|"packing"|"agrupamento">,label:string,type="text",max=100){return <label key={key}>{label}<input aria-label={label} type={type} maxLength={max} value={String(s[key]??"")} onChange={e=>patch({[key]:e.target.value})}/></label>}
  function measure(b:ShippingBox,key:keyof ShippingBox,label:string){const required=["comprimentoCm","larguraCm","alturaCm","pesoBrutoKg"].includes(key)||(key==="taraKg"&&!!b.pesoMaximoKg)||(key==="pesoMaximoKg"&&!!b.pesoMaximoKg);const raw=String(b[key]??"");return <ImportantField key={key} label={label} value={raw} required={required} valid={key==="taraKg"?decimal(raw)!==null:(decimal(raw)??0)>0}><input aria-label={label+" de "+b.codigo} inputMode="decimal" placeholder="0,000" maxLength={13} value={String(b[key]??"")} onChange={e=>{if(isDecimalDraft(e.target.value))boxPatch(b.id,{[key]:e.target.value})}}/></ImportantField>}
- function addItem(boxId:string){const b=assemblyBoxes(ref.current).find(v=>v.id===boxId);if(!b||b.itens.length>=100)return;const id=crypto.randomUUID();boxPatch(boxId,{itens:[...b.itens,{...newItem(id),caixaInternaId:ref.current.caixasEmMontagem?.some(v=>v.id===boxId)?boxId:""}]});setTimeout(()=>{const el=document.getElementById("shipment-item-"+id);el?.scrollIntoView({block:"nearest",behavior:"auto"});(el?.querySelector("select") as HTMLSelectElement|null)?.focus({preventScroll:true})},50)}
+ function addItem(boxId:string){if(directOnly&&ref.current.caixasEmMontagem?.some(b=>b.id===boxId))return;const b=assemblyBoxes(ref.current).find(v=>v.id===boxId);if(!b||b.itens.length>=100)return;const id=crypto.randomUUID();boxPatch(boxId,{itens:[...b.itens,{...newItem(id),caixaInternaId:ref.current.caixasEmMontagem?.some(v=>v.id===boxId)?boxId:""}]});setTimeout(()=>{const el=document.getElementById("shipment-item-"+id);el?.scrollIntoView({block:"nearest",behavior:"auto"});(el?.querySelector("select") as HTMLSelectElement|null)?.focus({preventScroll:true})},50)}
  function returnSmall(outerId:string,innerId:string){changeAssembly(()=>unpackSmallBox(ref.current,outerId,innerId,crypto.randomUUID()));setActiveSmallId(innerId);goAssembly("small")}
  function renderItem(b:ShippingBox,item:ShippingItem,i:number){return <div className="packed-item" id={"shipment-item-"+item.id} key={item.id}><div className="item-location"><Package size={13}/><span>{item.caixaInternaId?"Dentro da embalagem":"Direto na caixa"} <strong>{b.codigo}</strong></span></div>
 
@@ -70,7 +73,7 @@ export default function ShipmentEditor({value,ops,onChange,disabled=false,mode="
  <details className="mixed-mode-choice"><summary>Preciso combinar caixas menores e produtos avulsos</summary><p>O modo misto permite os dois tipos de conteúdo, controlados separadamente.</p><button type="button" className="button" onClick={()=>chooseMode("mixed")}>Habilitar modo misto</button></details>
  {organization&&<button type="button" className="text-action" onClick={()=>{setChangingMode(false);setAssemblyError("")}}>Manter modalidade atual</button>}
  </section>:<>
- <div className="shipment-mode-summary"><span><strong>{ASSEMBLY_MODES.find(m=>m.id===organization)?.label}</strong><small>{s.caixas.length} {s.caixas.length===1?"Caixa 40":"Caixas 40"}{organization!=="direct"&&" · "+(s.caixasEmMontagem?.filter(b=>b.pronta).length??0)+" menores prontas"}</small></span><button type="button" className="text-action" onClick={()=>{setChangingMode(true);goAssembly("outer")}}>Alterar modalidade</button></div>
+ <div className="shipment-mode-summary"><span><strong>{ASSEMBLY_MODES.find(m=>m.id===organization)?.label}</strong><small>{s.caixas.length} {s.caixas.length===1?"Caixa 40":"Caixas 40"}{organization!=="direct"&&" · "+(s.caixasEmMontagem?.filter(b=>b.pronta).length??0)+" menores prontas"}</small></span>{directOnly?<ContextHelp label="Caixa 40 automática">Todos os itens deste envio são de 250 g, 500 g ou 1 kg. Novos produtos vão diretamente para a Caixa 40. Caixas menores já registradas são preservadas para revisão. Pedidos com outros tamanhos mantêm a escolha de modalidade.</ContextHelp>:<button type="button" className="text-action" onClick={()=>{setChangingMode(true);goAssembly("outer")}}>Alterar modalidade</button>}</div>
  <nav className="shipment-stage-nav" aria-label="Etapas da montagem">
  {organization!=="direct"&&<button type="button" data-assembly-step="small" aria-current={assemblyStep==="small"?"step":undefined} onClick={()=>goAssembly("small")}><span>1</span>Caixas menores</button>}
  <button type="button" data-assembly-step="outer" aria-current={assemblyStep==="outer"?"step":undefined} onClick={()=>goAssembly("outer")}><span>{organization==="direct"?1:2}</span>Montar Caixa 40 · {draftBoxes.length}</button>
@@ -78,7 +81,7 @@ export default function ShipmentEditor({value,ops,onChange,disabled=false,mode="
  </nav>
  {ops.length>0&&<details className="packing-balance"><summary>{balance.some(b=>b.excess||b.invalid)?"Revisar distribuição":balance.some(b=>b.remainingScaled===null||b.remainingScaled>BigInt(0))?"Produtos a distribuir · "+balance.filter(b=>b.remainingScaled===null||b.remainingScaled>BigInt(0)).length:"Todos os produtos distribuídos"}</summary>{balance.map(b=><div className="packing-balance-row" key={b.opId}><span><strong>{b.produto}</strong><small>{b.opId} · Previsto: {b.target??"—"} {b.unidade} · Distribuído: {b.packed} {b.unidade}</small></span><b>{b.invalid?"Revisar quantidade":b.remaining===null?"Quantidade a confirmar":b.excess?"Excesso: "+b.remaining+" "+b.unidade:b.remainingScaled===BigInt(0)?"Distribuído":"Disponível: "+b.remaining+" "+b.unidade}</b></div>)}</details>}
  {assemblyStep==="small"&&organization!=="direct"?<>
- <div className="assembly-task-header"><div><h4>Organizar caixas menores</h4><p>Monte e confira cada uma antes de distribuir nas Caixas 40.</p></div><button type="button" className="button primary" disabled={(s.caixasEmMontagem?.length??0)>=100} onClick={createInner}><Plus size={16}/>Nova caixa menor</button></div>
+ <div className="assembly-task-header"><div><h4>Organizar caixas menores</h4><p>Monte e confira cada uma antes de distribuir nas Caixas 40.</p></div><button type="button" className="button primary" disabled={directOnly||(s.caixasEmMontagem?.length??0)>=100} onClick={createInner}><Plus size={16}/>Nova caixa menor</button></div>
  {!s.caixasEmMontagem?.length?<p className="packing-empty">Nenhuma caixa menor em preparo. Crie uma para adicionar os produtos.</p>:<div className="box-workspace">
  <nav className="box-selector" aria-label="Selecionar caixa menor">{s.caixasEmMontagem.map(b=><button type="button" key={b.id} aria-pressed={smallId===b.id} onClick={()=>setActiveSmallId(b.id)}><Package size={17}/><span><strong>{b.codigo}</strong><small>{b.itens.length} {b.itens.length===1?"item":"itens"} · {b.pronta?"Pronta":"Em montagem"}</small></span>{smallId===b.id&&<Check size={16}/>}</button>)}</nav>
  {chosenInner&&(()=>{const b=assemblyBoxes(s).find(v=>v.id===chosenInner.id)!;const issue=smallBoxIssue(chosenInner,ops);return <section className="box-focus" aria-label={"Caixa menor "+chosenInner.codigo} key={chosenInner.id}>
@@ -86,7 +89,7 @@ export default function ShipmentEditor({value,ops,onChange,disabled=false,mode="
  <fieldset disabled={chosenInner.pronta} className="shipment-form">
  <label className="box-name-field">Identificação<input aria-label={"Identificação de "+chosenInner.codigo} value={chosenInner.codigo} maxLength={50} onChange={e=>boxPatch(chosenInner.id,{codigo:e.target.value})}/></label>
  {chosenInner.itens.map((item,i)=>renderItem(b,item,i))}
- <button type="button" className="button" disabled={!ops.length||chosenInner.itens.length>=100} onClick={()=>addItem(chosenInner.id)}><Plus size={15}/>Adicionar produto</button>
+ <button type="button" className="button" disabled={directOnly||!ops.length||chosenInner.itens.length>=100} onClick={()=>addItem(chosenInner.id)}><Plus size={15}/>Adicionar produto</button>
  </fieldset>
  {issue&&!chosenInner.pronta&&<p className="check-help">{issue}</p>}
  <div className="flow-actions">{chosenInner.pronta?<><button type="button" className="button primary" onClick={()=>goAssembly("outer")}>Distribuir nas Caixas 40 <ArrowRight size={15}/></button><button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.map(v=>v.id===chosenInner.id?{...v,pronta:false}:v)})}>Editar conteúdo</button></>:<button type="button" className="button primary" disabled={!!issue} onClick={()=>changeAssembly(()=>finishSmallBox(ref.current,chosenInner.id,ops))}>Conferir e finalizar caixa menor</button>}

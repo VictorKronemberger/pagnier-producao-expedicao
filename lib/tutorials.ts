@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"13",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"14",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",

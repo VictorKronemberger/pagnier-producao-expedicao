@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import {directBoxOnly,shipmentProducts,applyDirectBoxRule} from "../lib/direct-box-rule.mjs";
+import {emptyShipment} from "../lib/shipping.mjs";
+assert(directBoxOnly(["A 250g","B 500 g","C 1kg","D 1000g","E 0,5kg"]));
+for(const names of [[],["250g","10g"],["250g","500ml"],["250g","Produto"],["Kit 250g"],["2 x 250g"],["Produto 250g 500g"],["1.000g"]])assert(!directBoxOnly(names),names.join(","));
+const groups=[{id:"a",ordens:[{produto:"250g"}],itens:[{produto:"10g"}]},{id:"b",ordens:[{produto:"1kg"}]}];
+assert(!directBoxOnly(shipmentProducts(undefined,"a",groups)));
+assert(!directBoxOnly(shipmentProducts({agrupamento:{pedidos:["a","b"]}},"b",groups)));
+assert(!directBoxOnly(shipmentProducts(undefined,"missing",groups)));
+let s=emptyShipment();const applied=applyDirectBoxRule(s,["250g"]);assert.equal(applied.organizacao,"direct");assert.equal(applyDirectBoxRule(applied,["500g"]),applied);assert.equal(applyDirectBoxRule(s,["10g"]),s);
+s={...s,organizacao:"inner",caixasEmMontagem:[{id:"old",codigo:"INT-01",itens:[]}]};const previous=JSON.stringify(s);const kept=applyDirectBoxRule(s,["1kg"]);assert.equal(kept.organizacao,"mixed");assert.equal(kept.caixasEmMontagem,s.caixasEmMontagem);assert.equal(JSON.stringify(s),previous);
+console.log("OK: pesos explícitos, mistos, desconhecidos, itens sem OP, agrupamentos e preservação das caixas existentes.");
