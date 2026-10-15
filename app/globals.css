@@ -541,3 +541,58 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 @media(max-width:1250px){.app-topbar{gap:14px;padding:10px 16px}.app-brand>span{display:none}.app-navigation button{padding:11px 9px;gap:6px}.app-connection>span{display:none}}
 @media(max-width:1000px){.app-topbar{flex-wrap:wrap;gap:8px 14px}.app-brand img{width:110px}.app-connection{margin-left:auto}.app-navigation{order:3;flex-basis:100%;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin;scrollbar-color:#52745f transparent}.app-navigation button{flex-shrink:0;min-height:42px}.software-shell .global-bar{padding:10px 16px}}
 @media(max-width:640px){.app-topbar{padding:8px 12px 2px}.app-brand img{width:96px}.app-brand>span{display:block;max-width:none;font-size:10px}.app-navigation{gap:3px}.app-navigation button{font-size:12px;padding:10px}.app-connection>span{display:block}.software-shell .global-bar{min-height:54px;padding:8px 14px}}
+
+.software-shell .kanban-list{flex:1 0 280px;width:auto;min-width:280px}
+
+/* Quadro operacional: navegação clara, controles reunidos e cartões compactos. */
+.trello-shell.software-shell{background:#f5f7f8;color:#243d34}
+.software-shell .app-topbar{background:#fff;color:#243d34;border-bottom:1px solid #e2e8e5;padding:10px 24px;gap:28px;min-height:66px}
+.software-shell .app-brand img{width:108px}.software-shell .app-brand>span{display:none}
+.software-shell .app-navigation{gap:5px}.software-shell .app-navigation button{font-size:13px;font-weight:500;color:#63736a;padding:11px 14px;border-radius:8px;gap:8px}
+.software-shell .app-navigation button:hover{background:#f1f5f2;color:#224c36}
+.software-shell .app-navigation button.active{background:#eaf3ed;box-shadow:none;color:#205d3c;font-weight:650}
+.software-shell .app-navigation button:nth-last-child(2){margin-left:auto}
+.software-shell .app-navigation button:focus-visible,.software-shell .app-brand:focus-visible{outline-color:#397a52}
+.software-shell .app-connection{color:#718278;font-size:11px;border-left:1px solid #e0e7e2;padding-left:18px}
+.software-shell .global-bar{background:transparent;border:0;min-height:78px;padding:20px 24px 16px}
+.software-shell .global-bar h1{font-size:24px;font-weight:650;letter-spacing:-.7px;color:#20392e}.software-shell .header-dot{display:none}
+.software-shell .heading-actions{gap:10px!important}.software-shell .autosave-status{font-size:11px;color:#6e8376}
+.software-shell .workspace-toolbar{display:flex;align-items:flex-start;gap:20px;padding:0 24px 16px;min-width:0}
+.software-shell .workspace-toolbar:empty{display:none}
+.software-shell .production-view-switch{flex-shrink:0;margin:0;padding:4px;border:1px solid #e0e7e3;border-radius:10px;background:#edf1ef;gap:3px;min-height:44px}
+.software-shell .production-view-switch button{font-size:12px;padding:9px 13px;border-radius:7px;min-height:34px;color:#728077;gap:7px}
+.software-shell .production-view-switch button.active{background:#fff;color:#244f37;box-shadow:0 1px 3px #18352712}
+.software-shell .board-tools.simple-tools{flex:1;margin:0;padding:0;gap:9px;min-width:0;justify-content:flex-end}
+.software-shell .simple-tools .search{height:46px;max-width:510px;min-width:220px;flex:1;border:1px solid #dae3dd;border-radius:10px;box-shadow:0 1px 2px #153e2405}
+.software-shell .simple-tools .search input{font-size:13px;color:#274333}.software-shell .simple-tools .search input::placeholder{color:#859288}
+.software-shell .simple-tools .search:focus-within{border-color:#4e9169;box-shadow:0 0 0 3px #3a80521a}
+.software-shell .filter-toggle{min-height:46px;padding:10px 15px;border-color:#dae3dd;border-radius:10px;color:#385444;font-size:12px}
+.software-shell .filters-panel{margin-top:4px;background:#fff;border:1px solid #e0e7e2;border-radius:10px;box-shadow:0 4px 15px #163c2305}
+.software-shell .data-strip{margin:0 24px 13px;color:#78877d;font-size:11px}.software-shell .sync-status{font-size:11px;color:#78877d}
+.software-shell .kanban{gap:14px;padding:0 24px 12px;align-items:stretch}
+.software-shell .kanban-list{flex:1 0 260px;width:auto;min-width:260px;border:1px solid #e0e6e2;border-top:3px solid;border-radius:12px;background:#eef2f0;box-shadow:none}
+.software-shell .list-heading{padding:16px 14px;border:0;background:transparent;min-height:60px;gap:8px}
+.software-shell .list-heading h2{font-size:13px;font-weight:650;color:#3b5043}.software-shell .list-dot{height:6px;width:6px}
+.software-shell .list-count{background:#fff;color:#738477;padding:3px 7px;font-size:11px;border:1px solid #e3e9e4;min-width:23px;text-align:center}
+.software-shell .list-cards{padding:0 9px 9px;scrollbar-width:thin;scrollbar-color:#c8d3ca transparent}
+.software-shell .kanban-card{padding:13px 13px 0;border:1px solid #e0e7e2;border-radius:9px;box-shadow:0 2px 3px #24452e05;margin-bottom:9px;background:#fff}
+.software-shell .kanban-card:hover{border-color:#a9c3af;box-shadow:0 4px 14px #173d2a0a}
+.software-shell .card-top{margin-bottom:8px}.software-shell .order-code{font-size:11px;font-weight:650;letter-spacing:.1px;color:#4d6857}
+.software-shell .card-open h3{font-size:14px;line-height:1.4;letter-spacing:-.15px;color:#273d30;font-weight:650;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.software-shell .product-preview{margin:10px 0;padding-top:9px;border-top:1px solid #f0f3f0;color:#738174;font-size:12px;line-height:1.7}
+.software-shell .product-preview>span{font-size:10px;margin-top:3px}.software-shell .card-bottom{margin-bottom:10px;gap:6px}
+.software-shell .badges{font-size:10px;gap:7px;color:#7d8e80}.software-shell .badges>span{gap:4px}.software-shell .badges svg{width:12px;height:12px}
+.software-shell .badges .priority{background:#f0f5ee;color:#58744e;padding:2px 5px}
+.software-shell .avatar{width:24px;height:24px}.software-shell .empty-avatar{background:#f5f7f4;color:#a6b2a3}
+.software-shell .card-quick{padding:9px 0;border-top:1px solid #f0f3ef}.software-shell .card-quick>button{font-size:11px;font-weight:550;color:#467257;gap:7px}
+.software-shell .card-quick>div button{padding:3px;border-color:#ecf0eb}.software-shell .card-quick>div svg{width:13px;height:13px}
+.software-shell .kanban-card .release-notice.compact{border:0;border-radius:6px;background:#fff5e5;color:#8b6528;padding:7px 8px;font-size:10px;margin:8px 0}
+.software-shell .kanban-card .release-notice.compact summary{font-weight:550}
+.software-shell .kanban-card .release-state{margin-top:7px;font-size:10px}
+.software-shell .company-tag,.software-shell .carrier-tag{font-size:10px;margin-top:7px}
+.software-shell .change-badge{font-size:10px;padding:4px 6px;margin-top:6px;border-color:#e9eee4;background:#f4f7ee}
+.software-shell .empty-list{margin:0;min-height:100px;background:transparent;border:0;font-size:12px;color:#a0afa3;border-radius:8px}
+.software-shell .board-footer{padding:6px 24px 10px;font-size:10px;color:#9aa69b}
+@media(max-width:1150px){.software-shell .app-topbar{gap:15px;padding:10px 18px}.software-shell .app-navigation button{padding:10px 9px;font-size:12px}.software-shell .app-connection{display:none}.software-shell .workspace-toolbar{gap:12px}.software-shell .production-view-switch button{padding:9px}}
+@media(max-width:1000px){.software-shell .app-topbar{flex-wrap:wrap;gap:8px}.software-shell .app-brand img{width:98px}.software-shell .app-navigation{flex-basis:100%;order:3}.software-shell .app-navigation button:nth-last-child(2){margin-left:0}.software-shell .workspace-toolbar{flex-wrap:wrap}.software-shell .board-tools.simple-tools{flex-basis:100%;justify-content:flex-start}.software-shell .simple-tools .search{max-width:none}}
+@media(max-width:640px){.software-shell .app-topbar{padding:8px 14px 2px;min-height:0}.software-shell .app-brand>span{display:block;color:#839086;font-size:10px}.software-shell .app-navigation{padding-bottom:5px}.software-shell .app-navigation button{font-size:12px;min-height:40px}.software-shell .global-bar{min-height:67px;padding:16px 16px 12px}.software-shell .global-bar h1{font-size:22px}.software-shell .workspace-toolbar{padding:0 16px 12px;gap:10px}.software-shell .production-view-switch{width:100%;justify-content:center}.software-shell .production-view-switch button{flex:1}.software-shell .simple-tools .search{min-width:180px;height:44px}.software-shell .simple-tools .search input{font-size:16px}.software-shell .filter-toggle{min-height:44px;padding:10px}.software-shell .data-strip{margin:0 16px 12px}.software-shell .kanban{padding:0 16px 10px;gap:12px}.software-shell .kanban-list{flex:0 0 calc(100vw - 44px);min-width:calc(100vw - 44px)}.software-shell .board-footer{padding:5px 16px 8px}}

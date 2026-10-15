@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"10",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"13",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -97,7 +97,7 @@ export const tutorials = [
       },
       {
         "title": "Identifique o que já existe",
-        "text": "Se o pedido já tiver caixas ou documento, retome o cadastro existente. Se os produtos saem do estoque, use Separar do estoque no catálogo: o pedido entra em Conferir sem OP. Aguarde a confirmação de vínculo e os itens completos no Nomus antes dessa ação.",
+        "text": "Se o pedido já tiver caixas ou documento, retome o cadastro existente. Se os produtos saem do estoque, use Separar do estoque no catálogo: o pedido entra em Preparar envio sem OP. Aguarde a confirmação de vínculo e os itens completos no Nomus antes dessa ação.",
         "short": "Se já houver caixas ou documento, abra o cadastro existente."
       }
     ],
@@ -126,7 +126,7 @@ export const tutorials = [
       },
       {
         "title": "Atualize a etapa real",
-        "text": "Antes de produzir, consulte Aguardando liberação. O pedido entra em Na fila quando há itens liberados e OP gerada. Na liberação parcial, confira no aviso do cartão quais itens continuam pendentes. Use Na fila → Produzindo → Conferir. Use Bloqueados quando existir um impedimento. Os atalhos Iniciar produção e Concluir produção alteram a etapa do painel.",
+        "text": "Antes de produzir, confira a coluna Aguardando liberação, à esquerda de Na fila. O pedido entra em Na fila quando há itens liberados e OP gerada. Na liberação parcial, confira no aviso do cartão quais itens continuam pendentes. Use Na fila → Produzindo → Preparar envio. Registre impedimentos nas orientações do supervisor. Os atalhos Iniciar produção e Concluir produção alteram a etapa do painel.",
         "short": "Liberado com OP entra em Na fila. Na liberação parcial, confira os itens pendentes no cartão antes de produzir."
       },
       {
@@ -148,7 +148,7 @@ export const tutorials = [
     "owner": "Supervisor e equipe de produção",
     "objective": "Disponibilizar os produtos previstos e identificar diferenças de quantidade.",
     "records": "Prioridade, etapa, responsável e orientações no cartão; quantidades da OP e histórico consultado.",
-    "deviation": "Em caso de impedimento, use Bloqueados e registre a orientação. Ajuste a quantidade da OP no Nomus conforme a rotina real e confira a atualização antes de embalar."
+    "deviation": "Em caso de impedimento, registre a orientação no pedido. Para cartões com impedimento anterior, revise as notas e use Retomar produção. Ajuste a quantidade da OP no Nomus conforme a rotina real e confira a atualização antes de embalar."
   },
   {
     "id": "conference",
