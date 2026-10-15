@@ -2,7 +2,7 @@ export const manual = [
   {
     "category": "start",
     "title": "Busca, filtros e atalhos",
-    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pedido, cliente, OP ou produto. Remova um filtro pelo X sem perder os demais. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio. Em Filtros → Envio, escolha FedEx, DHL, Outras, A definir ou Múltiplas. Remover o filtro volta a exibir os demais pedidos."
+    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pedido, cliente, OP ou produto. Remova um filtro pelo X sem perder os demais. A data ao lado do número no cartão, no cabeçalho do pedido e em Pedidos de venda é a criação do pedido no Nomus. Sem data indica que ela ainda não está disponível; a data da OP não é usada em seu lugar. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio. Em Filtros → Envio, escolha FedEx, DHL, Outras, A definir ou Múltiplas. Remover o filtro volta a exibir os demais pedidos."
   },
   {
     "category": "start",
