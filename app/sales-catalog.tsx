@@ -1,4 +1,5 @@
 "use client";
+import {matchesOrderSearch} from "../lib/order-search.mjs";
 import OrderCreated from "./order-created";
 import {stockEligibility} from "../lib/stock-orders.mjs";
 import {useEffect,useState} from "react";
@@ -6,8 +7,7 @@ import {ChevronLeft,ChevronRight,ArrowRight,ClipboardList} from "lucide-react";
 type Sale={criacao?:string;id:string;codigo:string;cliente:string;ordens:{id:string;nome:string;produto:string;quantidade:string;unidade:string}[];itens?:{produto:string;quantidade:string;unidade:string}[];vinculo?:string};
 export default function SalesCatalog({onStock,stockIds,orders,search,complete,identified,nextPage,boardIds,onOpen,onPacking,onInvoice}:{onStock:(id:string)=>void;stockIds:Set<string>;orders:Sale[];search:string;complete:boolean;identified:number;nextPage:number;boardIds:Set<string>;onOpen:(id:string)=>void;onPacking:(id:string)=>void;onInvoice:(id:string)=>void}){
  const [page,setPage]=useState(0);useEffect(()=>setPage(0),[search]);
- const q=search.toLocaleLowerCase("pt-BR");
- const filtered=orders.filter(p=>[p.codigo,p.cliente,...(p.itens??[]).map(i=>i.produto),...p.ordens.map(o=>o.nome)].join(" ").toLocaleLowerCase("pt-BR").includes(q)).sort((a,b)=>b.codigo.localeCompare(a.codigo,"pt-BR",{numeric:true}));
+ const filtered=orders.filter(p=>matchesOrderSearch(p,search)).sort((a,b)=>b.codigo.localeCompare(a.codigo,"pt-BR",{numeric:true}));
  const totalPages=Math.max(1,Math.ceil(filtered.length/50)),current=Math.min(page,totalPages-1),visible=filtered.slice(current*50,(current+1)*50);
  return <section className="sales-catalog"><div className="sales-summary"><ClipboardList size={22}/><div><h2>{orders.length.toLocaleString("pt-BR")} pedidos disponíveis</h2><p>{complete?"Todas as páginas da última leitura de pedidos foram percorridas.":"Captura de pedidos em andamento ou parcial · próxima página "+nextPage+"."} {identified.toLocaleString("pt-BR")} com nomes de cliente e produtos identificados.</p></div></div>
  <p className="sales-help">Pedidos sem OP entram somente quando criados a partir de 01/10/2026. Pedidos com OP vinculada são preservados. Pedidos sem data confirmada aguardam a consulta do Nomus. A empresa Medicina Sagrada permanece fora deste catálogo. Use as páginas abaixo para consultar toda a lista; o quadro mantém os trabalhos em andamento.</p>
