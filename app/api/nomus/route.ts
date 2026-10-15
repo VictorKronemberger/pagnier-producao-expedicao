@@ -8,5 +8,8 @@ export async function GET(){if(!await getChatGPTUser())return json({error:"Entre
 export async function POST(request:Request){
  if(!await getChatGPTUser())return json({error:"Entre para atualizar."},401);
  if(request.headers.get("origin")!==new URL(request.url).origin)return json({error:"Origem inválida."},403);
- try{return json(await pollNomus())}catch{return json({error:"Consulta indisponível. Dados anteriores preservados."},503)}
+ let requestedProduction:string[]=[];
+ const body=await request.text();
+ if(body){try{const value=JSON.parse(body);if(!Array.isArray(value.productionOps)||value.productionOps.length>20||value.productionOps.some((n:unknown)=>typeof n!=="string"||!/^OP[0-9]{1,12}$/.test(n)))return json({error:"Lista de OPs inválida."},400);requestedProduction=value.productionOps}catch{return json({error:"Consulta inválida."},400)}}
+ try{return json(await pollNomus(requestedProduction))}catch{return json({error:"Consulta indisponível. Dados anteriores preservados."},503)}
 }

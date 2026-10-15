@@ -9,7 +9,7 @@ export async function readNomus(){
  const row=await db.prepare("SELECT payload,revision FROM production_board WHERE id=?").bind("nomus").first<{payload:string;revision:number}>();
  return {state:applyCompanyScope(row?JSON.parse(row.payload):initialSync(snapshot)),revision:row?.revision??0};
 }
-export async function pollNomus(){
+export async function pollNomus(requestedProduction:string[]=[]){
  const db=env.DB;if(!db)throw Error("Banco indisponível.");
  const {state,revision}=await readNomus(),key=nomusKey();
  if(!key||Date.now()<state.nextAt)return publicSync(state,!!key);
@@ -22,7 +22,7 @@ export async function pollNomus(){
  const fetcher:typeof fetch=token?async(input,init)=>{const path=String(input).replace("https://pagnier.nomus.com.br/pagnier/rest/","");return fetch("http://127.0.0.1:5173/__nomus-read?path="+encodeURIComponent(path),{method:"GET",headers:{"x-nomus-preview":token},signal:init?.signal})}:fetch;
  const boardRow=await db.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();
  const requestedLots=requestedLotNames(boardRow?JSON.parse(boardRow.payload):{});
- const next=await syncStep(state,key,{fetcher,requestedLots,refreshRecentOrders:true});
+ const next=await syncStep(state,key,{fetcher,requestedLots,requestedProduction,refreshRecentOrders:true});
  await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=?").bind(JSON.stringify(next),now,"nomus",revision+1).run();
  return publicSync((await readNomus()).state,true);
 }

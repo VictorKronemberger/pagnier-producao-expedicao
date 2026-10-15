@@ -17,7 +17,7 @@ semVinculo:[{id:"OP PENDENTE",nome:"OP PENDENTE",produto:"Produto sem vínculo",
 snapshot.pedidos=[...snapshot.grupos,...Array.from({length:51},(_,i)=>({id:"PV CAT "+i,codigo:"PV CAT "+i,cliente:"Cliente catálogo",ordens:[],itens:[{produto:"Produto catálogo",quantidade:"2",unidade:"KG"}]}))];
 let board={sequence:[],details:{"PV TESTE":{responsavel:"Nome anterior",nota:"",situacao:"A programar",conferidas:["OP TESTE"]}}},revision=0,writes=0,concurrent=0,maxConcurrent=0;
 
-snapshot.grupos[0].ordens=Array.from({length:25},(_,i)=>({id:i===0?"OP TESTE":"OP"+(i+1),nome:i===0?"OP TESTE":"OP"+(i+1),produto:i===0?"Rapé Kuntanawa 250g":"Produto "+(i+1)+" 10g",quantidade:i===0?"10":"4",quantidadeProgramada:i===0?"12":"4",unidade:"UNID",criacao:"2026-10-21"}));
+snapshot.grupos[0].ordens=Array.from({length:25},(_,i)=>({id:i===0?"OP TESTE":"OP"+(i+1),nome:i===0?"OP TESTE":"OP"+(i+1),produto:i===0?"Rapé Kuntanawa 250g":"Produto "+(i+1)+" 10g",quantidadeProduzida:i===0?"7":i===1?"0":undefined,producaoConsultadaEm:i<2?"2026-10-15T15:00:00Z":"",operacaoProducao:i<2?"Finalizar embalagem":"",quantidade:i===0?"10":"4",quantidadeProgramada:i===0?"12":"4",unidade:"UNID",criacao:"2026-10-21"}));
 snapshot.grupos.push({id:"PV DHL",codigo:"PV DHL",cliente:"Cliente DHL",vinculo:"linked",ordens:[{id:"OP DHL",nome:"OP DHL",produto:"Produto DHL",quantidade:"2",unidade:"UNID",criacao:"2026-10-21"}]});
 snapshot.pedidos=[...snapshot.grupos];
 const op=snapshot.grupos[0].ordens[0];
@@ -69,11 +69,17 @@ try{
  await click('[data-detail-tab="expedition"]');await until('!!document.querySelector(".product-conference")');
  assert.equal(await evaluate('document.querySelector("[aria-label="+JSON.stringify("Transportadora do envio")+"]").value'),"DHL");
  assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),20);
+ assert.equal(await evaluate('document.querySelector(".app-brand img").getAttribute("src")'),"/pagnier-logo-botanico.png");
+ await until('document.querySelector(".app-brand img").naturalWidth===2172');
+ assert.equal(await evaluate('document.querySelectorAll(".pc-columns>span").length'),5);
+ assert.deepEqual(await evaluate('[...document.querySelectorAll(".pc-produced strong")].slice(0,3).map(e=>e.textContent)'),["7","0","—"]);
+ assert.equal(await evaluate('document.querySelectorAll(".pc-production-state")[2].textContent'),"Consultando Nomus");
+
  assert.equal(await evaluate('document.querySelector(".pc-result").textContent'),"1–20 de 25");
  assert.equal(await evaluate('document.querySelectorAll("[role=tooltip]").length'),0);
  await click('.pc-pagination button:last-child');assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),5);
  await input('.pc-search input',"RAPE OP TESTE");assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),1);
- assert.deepEqual(await evaluate('[...document.querySelectorAll(".pc-row .pc-number strong")].map(e=>e.textContent)'),["10","4","6"]);
+ assert.deepEqual(await evaluate('[...document.querySelectorAll(".pc-row .pc-number strong")].map(e=>e.textContent)'),["7","10","4","6"]);
  await click('[data-conference-filter="attention"]');assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),1);
  await input('.pc-search input',"inexistente");assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),0);assert(await evaluate('document.querySelector(".pc-empty").textContent.includes("Nenhum produto")'));
  await click('.pc-empty button');assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),20);
