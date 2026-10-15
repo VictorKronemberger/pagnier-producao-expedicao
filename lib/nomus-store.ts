@@ -22,7 +22,7 @@ export async function pollNomus(){
  const fetcher:typeof fetch=token?async(input,init)=>{const path=String(input).replace("https://pagnier.nomus.com.br/pagnier/rest/","");return fetch("http://127.0.0.1:5173/__nomus-read?path="+encodeURIComponent(path),{method:"GET",headers:{"x-nomus-preview":token},signal:init?.signal})}:fetch;
  const boardRow=await db.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();
  const requestedLots=requestedLotNames(boardRow?JSON.parse(boardRow.payload):{});
- const next=await syncStep(state,key,{fetcher,requestedLots});
+ const next=await syncStep(state,key,{fetcher,requestedLots,refreshRecentOrders:true});
  await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=?").bind(JSON.stringify(next),now,"nomus",revision+1).run();
  return publicSync((await readNomus()).state,true);
 }

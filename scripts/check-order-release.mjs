@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {releaseState,awaitsRelease,pendingReleaseItems,assertReleaseTransitions} from "../lib/order-release.mjs";
+import {restoreReleaseItems,pendingFulfillmentItems,releaseState,awaitsRelease,pendingReleaseItems,assertReleaseTransitions} from "../lib/order-release.mjs";
 import {receiveOrders} from "../lib/intake.mjs";
 import {initialSync,syncStep,publicSync} from "../lib/nomus-sync.mjs";
 for(const [statuses,expected] of [[[1],"waiting"],[[2],"released"],[[3],"released"],[[1,2],"partial"],[[1,3],"partial"],[[4,5,6,7,8],"closed"],[[],"unknown"],[[undefined],"unknown"]])assert.equal(releaseState(statuses.map(status=>({status}))),expected);
@@ -23,6 +23,21 @@ const fetcher=async(url,options)=>{methods.push(options.method);return Response.
 state=await syncStep(state,"dummy",{fetcher});state=await syncStep({...state,nextAt:0,turn:1},"dummy",{fetcher});
 let view=publicSync(state,true);assert.equal(view.snapshot.grupos[0].liberacao,"waiting");assert.equal(view.snapshot.pedidos[0].itens[0].status,1);assert.equal(view.snapshot.pedidos[0].itens[0].item,"00010");assert.equal(receiveOrders({sequence:[],details:{}},view.snapshot.grupos).sequence.length,0);
 status=2;state=await syncStep({...state,nextAt:0,turn:0},"dummy",{fetcher});view=publicSync(state,true);assert.equal(receiveOrders({sequence:[],details:{}},view.snapshot.grupos).sequence[0],"PD QA");
-delete state.orders[1].items[0].status;assert.equal(publicSync(state,true).snapshot.pedidos[0].liberacao,"unknown");
+delete state.orders[1].items[0].status;assert.equal(publicSync(state,true).snapshot.pedidos[0].liberacao,"released");
+delete state.orders[1].listFacts;delete state.orders[1].detailFacts;assert.equal(publicSync(state,true).snapshot.pedidos[0].liberacao,"unknown");
 let detailPath;state=await syncStep({...state,nextAt:0,turn:4},"dummy",{fetcher:async(url,opts)=>{detailPath=url;return fetcher(url,opts)}});assert(detailPath.endsWith("pedidos/1"));assert.equal(publicSync(state,true).snapshot.grupos[0].liberacao,"released");assert(methods.every(m=>m==="GET"));
 console.log("OK liberação: estados por item, fila parcial, pendentes, dados preservados, guardas do servidor, atualização e migração de consultas antigas; somente GET no Nomus.");
+
+assert.equal(releaseState([{status:4},{status:1}]),"partial");
+assert.deepEqual(pendingFulfillmentItems({itens:[{item:"1",status:4},{item:"2",status:2},{item:"3",status:3},{item:"4",status:1}]}).map(i=>i.item),["2","3","4"]);
+assert.deepEqual(pendingFulfillmentItems({itens:[{status:4},{status:5}]}),[]);
+const legacy={items:[{productId:1,quantity:"4"},{productId:2,quantity:"2"}],listFacts:{"a:produto":{value:"Produto #1"},"a:quantidade":{value:"4"},"a:situacao":{value:"4"},"b:produto":{value:"Produto #2"},"b:quantidade":{value:"2"},"b:situacao":{value:"1"}}};
+assert.deepEqual(restoreReleaseItems(legacy).map(i=>i.status),[4,1]);assert.equal(legacy.items[0].status,undefined);
+const conflicting=structuredClone(legacy);conflicting.detailFacts=structuredClone(legacy.listFacts);conflicting.detailFacts["b:situacao"].value="2";assert.equal(restoreReleaseItems(conflicting),conflicting.items);
+const mismatched=structuredClone(legacy);mismatched.items[0].quantity="5";assert.equal(restoreReleaseItems(mismatched),mismatched.items);
+const reordered=structuredClone(legacy);reordered.items.reverse();assert.equal(restoreReleaseItems(reordered),reordered.items);
+const recentPaths=[];const time="2026-10-15T17:00:00.000Z";
+let recent=await syncStep({...state,nextAt:0,pages:{...state.pages,orders:22}},"dummy",{refreshRecentOrders:true,now:time,fetcher:async(url,opts)=>{recentPaths.push(url);return fetcher(url,opts)}});
+assert(recentPaths[0].endsWith("pedidos?pagina=1"));assert.equal(recent.pages.orders,22);assert.equal(recent.recentOrdersNextAt,Date.parse(time)+300000);
+let requests=0;await syncStep(recent,"dummy",{refreshRecentOrders:true,now:time,fetcher:async()=>{requests++;return Response.json([])}});assert.equal(requests,0);
+console.log("OK recuperação: fatos por item consistentes, conflitos preservados, atendimento parcial destacado e pedidos recentes consultados sem reiniciar paginação ou ignorar intervalo.");

@@ -523,3 +523,21 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 .sales-item>.release-state{margin-left:auto;margin-right:12px}
 .production-view-switch{flex-wrap:wrap}
 @media(max-width:640px){.sales-item{flex-wrap:wrap;gap:8px}.sales-item>.release-state{margin-left:0}.release-notice li{flex-wrap:wrap}.production-view-switch button{font-size:12px}}
+
+/* Navegação superior do sistema. */
+.trello-shell.software-shell{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);transition:none}
+.app-topbar{display:flex;align-items:center;gap:24px;min-width:0;padding:10px 24px;background:#123f30;color:#f3faf6;border-bottom:1px solid #ffffff1a}
+.app-brand{display:flex;align-items:center;gap:14px;border:0;padding:0;background:transparent;color:inherit;flex-shrink:0;text-align:left}
+.app-brand img{display:block;width:132px;height:auto}
+.app-brand>span{max-width:80px;font-size:11px;line-height:1.5;color:#bed4c6}
+.app-navigation{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
+.app-navigation button{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;padding:11px 12px;border:0;border-radius:7px;background:transparent;color:#c3d8cb;font:inherit;font-size:12px;line-height:1.3}
+.app-navigation button:hover{background:#ffffff0e;color:white}.app-navigation button.active{background:#ffffff15;color:white;box-shadow:inset 0 -2px #b3d677}
+.app-navigation button svg{flex-shrink:0}.app-navigation button:focus-visible,.app-brand:focus-visible{outline:2px solid #c4e893;outline-offset:3px}
+.app-navigation .pending-count{position:static;min-width:18px;height:18px;margin-left:0;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
+.app-connection{display:flex;align-items:center;gap:6px;font-size:11px;color:#a8c5b3;flex-shrink:0}
+.software-shell .global-bar{min-height:58px;padding:10px 24px}.software-shell .global-bar h1{font-size:18px}
+.fulfillment-item-status{display:block;margin-top:3px;font-weight:500}
+@media(max-width:1250px){.app-topbar{gap:14px;padding:10px 16px}.app-brand>span{display:none}.app-navigation button{padding:11px 9px;gap:6px}.app-connection>span{display:none}}
+@media(max-width:1000px){.app-topbar{flex-wrap:wrap;gap:8px 14px}.app-brand img{width:110px}.app-connection{margin-left:auto}.app-navigation{order:3;flex-basis:100%;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin;scrollbar-color:#52745f transparent}.app-navigation button{flex-shrink:0;min-height:42px}.software-shell .global-bar{padding:10px 16px}}
+@media(max-width:640px){.app-topbar{padding:8px 12px 2px}.app-brand img{width:96px}.app-brand>span{display:block;max-width:none;font-size:10px}.app-navigation{gap:3px}.app-navigation button{font-size:12px;padding:10px}.app-connection>span{display:block}.software-shell .global-bar{min-height:54px;padding:8px 14px}}

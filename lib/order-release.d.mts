@@ -6,3 +6,6 @@ export function hasStarted(detail?:{situacao?:string;atendimentoEstoque?:boolean
 export function awaitsRelease(order:{liberacao?:ReleaseState;ordens?:unknown[]},detail?:{situacao?:string;atendimentoEstoque?:boolean}):boolean;
 export function pendingReleaseItems<T extends {status?:number|string}>(order:{itens?:T[]}):T[];
 export function assertReleaseTransitions(previous:any,next:any,groups:any[]):void;
+
+export function restoreReleaseItems(order:any,products?:any):any[];
+export function pendingFulfillmentItems<T extends {status?:number|string}>(order:{itens?:T[]}):T[];

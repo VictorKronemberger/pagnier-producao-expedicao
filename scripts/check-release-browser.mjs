@@ -8,9 +8,10 @@ const browser=spawn("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.ex
 let socket;let rejectNextConfirmation=false;const confirmations=[];const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const op=id=>({id:"OP "+id,nome:"OP "+id,produto:"Produto liberado",quantidade:"4",unidade:"UNID",criacao:"2026-10-15"});
 const sale=(id,liberacao,withOP,statuses)=>({id,codigo:id,cliente:"Cliente "+id,criacao:"2026-10-15",liberacao,ordens:withOP?[op(id)]:[],vinculo:withOP?"linked":"none",itens:statuses.map((status,i)=>({status,item:"000"+(i+1)+"0",produto:status===1?"Produto pendente QA":"Produto liberado QA",quantidade:"4",unidade:"UNID"}))});
-const waiting=sale("PD 09001","waiting",false,[1]),partial=sale("PD 09002","partial",true,[2,1]),released=sale("PD 09003","released",true,[2]),noOP=sale("PD 09004","released",false,[2]),started=sale("PD 09005","waiting",true,[1]);
-const snapshot={consultadoEm:"2026-10-15",ordensConsultadas:3,grupos:[waiting,partial,released,noOP,started],semVinculo:[]};snapshot.pedidos=[...snapshot.grupos];
-let board={sequence:[started.id],details:{[started.id]:{responsavel:"",nota:"Manter orientação",situacao:"Em acompanhamento"}}},revision=0,writes=0;
+const waiting=sale("PD 09001","waiting",false,[1]),partial=sale("PD 09002","partial",true,[4,2,1]),released=sale("PD 09003","released",true,[2]),noOP=sale("PD 09004","released",false,[2]),started=sale("PD 09005","waiting",true,[1]);
+const legacy=sale("PD 09006","unknown",true,[undefined]),newUnknown=sale("PD 09007","unknown",true,[undefined]);
+const snapshot={consultadoEm:"2026-10-15",ordensConsultadas:3,grupos:[waiting,partial,released,noOP,started,legacy,newUnknown],semVinculo:[]};snapshot.pedidos=[...snapshot.grupos];
+let board={sequence:[started.id,legacy.id],details:{[legacy.id]:{responsavel:"",nota:"Prioridade antiga",situacao:"Programado"},[started.id]:{responsavel:"",nota:"Manter orientação",situacao:"Em acompanhamento"}}},revision=0,writes=0;
 try{
  let pages;for(let i=0;i<60;i++){try{pages=await(await fetch("http://127.0.0.1:9244/json")).json();if(pages.some(p=>p.type==="page"))break}catch{}await pause(200)}
  socket=new WebSocket(pages.find(p=>p.type==="page").webSocketDebuggerUrl);await new Promise((r,j)=>{socket.onopen=r;socket.onerror=j});
@@ -31,30 +32,49 @@ try{
  const waitForSave=async()=>{await pause(150);await until('[...document.querySelectorAll(".autosave-status")].every(el=>el.textContent==="Salvo")')};
  await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5173/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
 
- await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/"});await until('document.querySelectorAll(".kanban-card").length===3');await waitForSave();
+ await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/"});await until('document.querySelectorAll(".kanban-card").length===4');await waitForSave();
  const click=async selector=>{await evaluate('document.querySelector('+JSON.stringify(selector)+').click()');await pause(100)};
  const input=async(selector,value)=>{await evaluate('const el=document.querySelector('+JSON.stringify(selector)+');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(el,'+JSON.stringify(value)+');el.dispatchEvent(new Event("input",{bubbles:true}))');await pause(120)};
+ assert(await evaluate('[...document.querySelectorAll(".kanban-card")].some(e=>e.textContent.includes("09006")&&e.textContent.includes("Consultando liberação"))'));
+ assert(!await evaluate('[...document.querySelectorAll(".kanban-card")].some(e=>e.textContent.includes("09007"))'));
+ await evaluate('[...document.querySelectorAll(".kanban-card")].find(e=>e.textContent.includes("09006")).querySelector(".card-next-action").click()');
+ assert(await evaluate('!!document.querySelector(".card-dialog")'));assert.equal(board.details[legacy.id].situacao,"Programado");await click('.close');
+ assert(await evaluate('!!document.querySelector(".app-topbar")&&!document.querySelector(".sidebar")'));
+ assert(await evaluate('document.querySelector(".board-main").getBoundingClientRect().left===0'));
+ assert.equal(await evaluate('document.querySelectorAll(".app-navigation button").length'),7);
  assert(!board.sequence.includes(waiting.id));assert(board.sequence.includes(partial.id));assert(!board.sequence.includes(noOP.id));assert.equal(board.details[started.id].situacao,"Em acompanhamento");
- assert.equal(await evaluate('[...document.querySelectorAll(".kanban-list")].find(e=>e.querySelector("h2").textContent==="Na fila").querySelector(".list-count").textContent'),"2");
+ assert.equal(await evaluate('[...document.querySelectorAll(".kanban-list")].find(e=>e.querySelector("h2").textContent==="Na fila").querySelector(".list-count").textContent'),"3");
  await evaluate('[...document.querySelectorAll(".kanban-card")].find(e=>e.textContent.includes("09002")).querySelector(".release-notice summary").click()');
- assert(await evaluate('[...document.querySelectorAll(".release-notice[open]")].some(e=>e.innerText.includes("Produto pendente QA")&&e.innerText.includes("00020"))'));
+ assert(await evaluate('[...document.querySelectorAll(".release-notice[open]")].some(e=>e.innerText.includes("Produto pendente QA")&&e.innerText.includes("00030"))'));
  await evaluate('[...document.querySelectorAll(".kanban-card")].find(e=>e.textContent.includes("09002")).querySelector(".card-open").click()');
  assert(await evaluate('document.querySelector(".card-dialog .release-notice").textContent.includes("Produto pendente QA")'));
- await click('.close');await click('[data-production-tab="release"]');
+ assert(await evaluate('document.querySelector(".card-dialog .release-notice").textContent.includes("Ainda não atendido")'));
+ await click('.close');
+ for(const [label,selector] of [["Pedidos de venda",".sales-catalog"],["Packing lists",".packing-workspace"],["Configurações de caixas",".box-settings-page"],["Manual de boas práticas",".manual-panel"]]){
+ await click('[aria-label="'+label+'"]');if(selector!==".packing-workspace")await until('!!document.querySelector('+JSON.stringify(selector)+')');
+ }
+ await click('[aria-label="Produção"]');await click('[data-production-tab="release"]');
  assert.equal(await evaluate('document.querySelectorAll(".sales-order").length'),1);
+ assert(await evaluate('document.body.innerText.includes("2 pedido(s) com liberação em consulta")'));
  await click('.sales-order summary');assert(await evaluate('document.querySelector(".sales-order-body").innerText.includes("Aguardando liberação")'));
  assert.equal(await evaluate('document.querySelectorAll(".sales-order-footer button").length'),0);
  await input('.search input',"9001");assert.equal(await evaluate('document.querySelectorAll(".sales-order").length'),1);
  await input('.search input',"9002");assert.equal(await evaluate('document.querySelectorAll(".sales-order").length'),0);await click('.search-clear');
- writeFileSync(".sites-runtime/liberacao-desktop.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
+ writeFileSync(".sites-runtime/barra-superior-desktop.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await send("Emulation.setDeviceMetricsOverride",{width:390,height:844,deviceScaleFactor:1,mobile:true});await pause(250);
  assert(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'));
- writeFileSync(".sites-runtime/liberacao-mobile.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
+ await evaluate('const nav=document.querySelector(".app-navigation");nav.scrollLeft=nav.scrollWidth');await pause(150);
+ await click('[aria-label="Manual de boas práticas"]');await until('!!document.querySelector(".manual-panel")');
+ await click('[aria-label="Produção"]');await click('[data-production-tab="release"]');
+ writeFileSync(".sites-runtime/barra-superior-mobile.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
  const savedWrites=writes;await pause(500);assert.equal(writes,savedWrites);
+ await evaluate('[...document.querySelectorAll("button")].find(e=>e.textContent==="Ver todos os pedidos").click()');await until('document.querySelectorAll(".sales-order").length===7');
+ await click('[aria-label="Produção"]');await click('[data-production-tab="release"]');
  // New ERP result: release + production order moves the order automatically on refresh.
  waiting.liberacao="released";waiting.itens[0].status=2;waiting.ordens=[op(waiting.id)];waiting.vinculo="linked";
  await click('[aria-label="Recarregar quadro"]');await until('document.querySelectorAll(".sales-order").length===0');await waitForSave();assert(board.sequence.includes(waiting.id));
- await send("Page.reload");await until('document.querySelectorAll(".kanban-card").length===4');await waitForSave();assert.equal(board.sequence.filter(id=>id===waiting.id).length,1);assert.equal(board.details[started.id].nota,"Manter orientação");
- console.log("OK navegador: aba pendentes, busca por pedido, parcial na fila com itens identificados, etapas preservadas, transição após consulta, persistência e celular. APIs simuladas.");
+ await send("Page.reload");await until('document.querySelectorAll(".kanban-card").length===5');await waitForSave();assert.equal(board.sequence.filter(id=>id===waiting.id).length,1);assert.equal(board.details[started.id].nota,"Manter orientação");
+ assert.equal(board.details[legacy.id].nota,"Prioridade antiga");assert(board.sequence.includes(legacy.id));
+ console.log("OK navegador: pedidos antigos com status desconhecido preservados na fila e catálogo completo; aba pendentes, busca por pedido, parcial na fila com itens identificados, etapas preservadas, transição após consulta, persistência e celular. APIs simuladas.");
 }finally{socket?.close();browser.kill()}

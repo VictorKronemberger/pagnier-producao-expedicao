@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {initialSync,syncStep,publicSync} from "../lib/nomus-sync.mjs";
 import {mergeSalesImport} from "../lib/sales-import.mjs";
 let s=initialSync({grupos:[],semVinculo:[]});
-s.ordersComplete=true;s.turn=4;s.orders={1:{createdDate:"2026-10-01",companyId:1,code:"HIST",clientId:9,active:false,items:[{productId:8,quantity:"2"}]}};
+s.ordersComplete=true;s.turn=4;s.orders={1:{createdDate:"2026-10-01",companyId:1,code:"HIST",clientId:9,active:false,items:[{productId:8,quantity:"2",status:4}]}};
 let url="";
 s=await syncStep(s,"dummy",{fetcher:async u=>{url=u;return Response.json({nome:"Cliente histórico"})}});
 assert(url.endsWith("/clientes/9"));assert.equal(s.clients[9],"Cliente histórico");
