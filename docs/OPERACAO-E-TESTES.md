@@ -129,3 +129,5 @@ Conferência — filtros avançados (manual revisão 06): situação da embalage
 A identificação do pedido mostra sua criação em DD/MM/AAAA ao lado do número no cartão, no cabeçalho e no catálogo. Usa `criacao` do pedido (origem Nomus `dataCriacao`), sem substituir pela data da OP. Ausência aparece como Sem data; título e nome acessível identificam a origem. Manual revisão 07.
 
 Busca por pedido de venda (manual revisão 08): quadro e catálogo compartilham `matchesOrderSearch`. O número aceita prefixos PD/PV, espaços/separadores e zeros à esquerda, mantendo a busca textual por cliente, OP e produto. Filtros ativos continuam aplicados.
+
+Barra de busca: superfície única com foco no contorno externo, ícone discreto e controles alinhados. Botão de limpeza mantém o foco na pesquisa; atalhos existentes preservados. Campo com fonte de 16 px em telas pequenas, sem molduras duplicadas.
