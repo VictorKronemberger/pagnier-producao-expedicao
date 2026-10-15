@@ -118,3 +118,7 @@ Transportadora reutiliza o campo persistido do envio. FedEx/DHL aparecem nos car
 Ajuda contextual disponível por mouse, foco do teclado e toque; Escape fecha a dica, com ajuste de posição dentro da largura da tela. Divergências permanecem visíveis. Manual de boas práticas revisão 05. Rótulos persistentes e resultados anunciados seguem as orientações [W3C para rótulos](https://www.w3.org/WAI/tutorials/forms/labels/) e [mensagens de estado](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html); isso não equivale a uma auditoria completa de acessibilidade.
 
 Validação: `node scripts/check-shipping-carrier.mjs`, `node scripts/check-conference-browser.mjs`, `node scripts/check-assembly-clean-browser.mjs`, `node scripts/check-quantity-browser.mjs`, `node scripts/check-manual-browser.mjs`, TypeScript e build. Testes de navegador usam APIs simuladas, incluindo salvamento de transportadora sem perder caixas, seleção por FedEx/DHL, busca, paginação, atalhos e tela móvel.
+
+A faixa Geral do pedido inclui Envio ao lado de Etiqueta e Empresa: DHL em amarelo e FedEx em roxo. A identificação usa a mesma transportadora da conferência e dos filtros, sem criar um segundo cadastro.
+
+Logos locais em `public/carriers/`: [DHL](https://commons.wikimedia.org/wiki/File:DHL_Logo.svg) e [FedEx](https://commons.wikimedia.org/wiki/File:FedEx_Corporation_-_2016_Logo.svg), obtidas no Wikimedia Commons. Usadas para identificar a transportadora selecionada, preservando proporção e cores. O seletor nativo mantém o nome acessível ao teclado e leitores de tela.

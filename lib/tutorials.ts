@@ -165,7 +165,7 @@ export const tutorials = [
       },
       {
         "title": "Identifique o responsável e o envio",
-        "text": "Selecione o responsável e a transportadora planejada: FedEx, DHL ou Outra transportadora. O quadro permite filtrar por Envio. Pedidos agrupados compartilham a transportadora; quando ela não foi definida, o painel consulta as invoices vinculadas.",
+        "text": "Selecione o responsável e a transportadora planejada: FedEx, DHL ou Outra transportadora. Você também pode definir a etiqueta de envio na aba Geral, ao lado de Etiqueta e Empresa. O quadro permite filtrar por Envio. Pedidos agrupados compartilham a transportadora; quando ela não foi definida, o painel consulta as invoices vinculadas.",
         "short": "Selecione o responsável e a transportadora. Use Filtros → Envio no quadro para localizar FedEx ou DHL."
       },
       {

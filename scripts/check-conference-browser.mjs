@@ -48,7 +48,7 @@ try{
  }
  socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.id){const p=pending.get(m.id);pending.delete(m.id);if(m.error)p?.reject(Error(m.error.message));else p?.resolve(m.result)}else if(m.method==="Fetch.requestPaused")void respond(m.params);else if(m.method==="Page.javascriptDialogOpening"){confirmations.push(m.params.message);void send("Page.handleJavaScriptDialog",{accept:!rejectNextConfirmation});rejectNextConfirmation=false}};
  async function evaluate(expression){const r=await send("Runtime.evaluate",{expression:"{"+expression+"}",awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value}
- async function until(expression){for(let i=0;i<80;i++){if(await evaluate(expression))return;await pause(150)}throw Error("Timeout: "+expression)}
+ async function until(expression){for(let i=0;i<80;i++){if(await evaluate(expression))return;await pause(150)}throw Error("Timeout: "+expression+"; body="+await evaluate("document.body.innerText.slice(0,1800)"))}
  const waitForSave=async()=>{await pause(150);await until('[...document.querySelectorAll(".autosave-status")].every(el=>el.textContent==="Salvo")')};
  await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5173/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
 
@@ -56,7 +56,11 @@ try{
  const click=async selector=>{await evaluate('document.querySelector('+JSON.stringify(selector)+').click()');await pause(100)};
  const input=async(selector,value)=>{await evaluate('const el=document.querySelector('+JSON.stringify(selector)+');Object.getOwnPropertyDescriptor(el.tagName==="SELECT"?HTMLSelectElement.prototype:HTMLInputElement.prototype,"value").set.call(el,'+JSON.stringify(value)+');el.dispatchEvent(new Event(el.tagName==="SELECT"?"change":"input",{bubbles:true}))');await pause(120)};
  await evaluate('[...document.querySelectorAll(".kanban-card")].find(e=>e.textContent.includes("Cliente de teste")).querySelector(".card-open").click()');
+ await input('[aria-label="Etiqueta de envio"]',"DHL");await waitForSave();assert.equal(board.details["PV TESTE"].envio.transportadora,"DHL");
+ await until('!!document.querySelector(".carrier-fields .carrier-logo-dhl")&&document.querySelector(".carrier-fields .carrier-logo-dhl").naturalWidth>0');
+ writeFileSync(".sites-runtime/etiqueta-envio.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await click('[data-detail-tab="expedition"]');await until('!!document.querySelector(".product-conference")');
+ assert.equal(await evaluate('document.querySelector("[aria-label="+JSON.stringify("Transportadora do envio")+"]").value'),"DHL");
  assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),20);
  assert.equal(await evaluate('document.querySelector(".pc-result").textContent'),"1–20 de 25");
  assert.equal(await evaluate('document.querySelectorAll("[role=tooltip]").length'),0);
@@ -68,7 +72,7 @@ try{
  await click('.pc-empty button');assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),20);
  await input('.pc-search input',"OP TESTE");
  await input('[aria-label="Responsável pela conferência"]',"Victor");await input('[aria-label="Transportadora do envio"]',"FedEx");await waitForSave();
- assert.equal(board.details["PV TESTE"].responsavelConferencia,"Victor");assert.equal(board.details["PV TESTE"].envio.transportadora,"FedEx");assert.equal(board.details["PV TESTE"].envio.caixas[0].itens[0].quantidade,"4");
+ assert.equal(board.details["PV TESTE"].responsavelConferencia,"Victor");assert.equal(board.details["PV TESTE"].envio.transportadora,"FedEx");await until('!!document.querySelector(".pc-carrier .carrier-logo-fedex")&&document.querySelector(".pc-carrier .carrier-logo-fedex").naturalWidth>0');assert.equal(await evaluate('document.querySelector("[aria-label="+JSON.stringify("Etiqueta de envio")+"]").value'),"FedEx");assert.equal(board.details["PV TESTE"].envio.caixas[0].itens[0].quantidade,"4");
  await click('[aria-label="Ajuda: Conferência dos produtos"]');assert(await evaluate('document.querySelector("[role=tooltip]").textContent.includes("contagem física")'));await click('[aria-label="Ajuda: Conferência dos produtos"]');
  // Real pointer and keyboard interactions: explanations stay hidden until requested.
  const helpSelector='[aria-label="Ajuda: Conferência dos produtos"]';
@@ -89,7 +93,7 @@ try{
  writeFileSync(".sites-runtime/conferencia-mobile.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await click('.pc-details summary');await click('.pc-box-links button');await until('!!document.querySelector(".box-focus")');
  assert(await evaluate('document.querySelector(".box-focus").textContent.includes("CX-001")'));
- await click('.close');await click('.filter-toggle');
+ await click('.close');assert(await evaluate('document.querySelectorAll(".kanban-card .carrier-logo-fedex").length===1&&document.querySelectorAll(".kanban-card .carrier-logo-dhl").length===1'));await click('.filter-toggle');
  await input('[aria-label="Filtrar transportadora"]',"FedEx");assert.equal(await evaluate('document.querySelectorAll(".kanban-card").length'),1);assert(await evaluate('document.querySelector(".kanban-card").textContent.includes("Cliente de teste")'));
  assert.equal(await evaluate('JSON.parse(localStorage.getItem("pagnier-view")).carrier'),"FedEx");
  await input('[aria-label="Filtrar transportadora"]',"DHL");assert(await evaluate('document.querySelector(".kanban-card").textContent.includes("Cliente DHL")'));

@@ -32,7 +32,7 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Como definir FedEx ou DHL",
-    "text": "Em Expedição → Conferir produtos, selecione Transportadora. Essa escolha fica salva no envio e aparece no cartão e no filtro Envio do quadro. Pedidos agrupados compartilham a escolha. Sem transportadora definida, o painel usa FedEx ou DHL das invoices vinculadas; se houver as duas, o filtro indica Múltiplas até você definir o envio. Escolher a transportadora não contrata frete nem altera invoices: revise o documento separadamente."
+    "text": "Na aba Geral do pedido, use Envio ao lado de Etiqueta e Empresa para identificar DHL ou FedEx. Ao selecionar DHL ou FedEx, a logo identifica o envio no campo e no cartão. A mesma escolha aparece em Expedição → Conferir produtos, no campo Transportadora. Essa escolha fica salva no envio e aparece no cartão e no filtro Envio do quadro. Pedidos agrupados compartilham a escolha. Sem transportadora definida, o painel usa FedEx ou DHL das invoices vinculadas; se houver as duas, o filtro indica Múltiplas até você definir o envio. Escolher a transportadora não contrata frete nem altera invoices: revise o documento separadamente."
   },
   {
     "category": "start",
