@@ -1,0 +1,26 @@
+
+import assert from "node:assert/strict";
+import {assemblyMode,selectAssemblyMode} from "../lib/assembly-mode.mjs";
+import {emptyShipment,newBox,newItem,normalizeShipment,assertPackingCapacity} from "../lib/shipping.mjs";
+const op={id:"op",nome:"OP teste",produto:"Produto",unidade:"UN",quantidade:"10"},ops=[op];
+const item=(id,q)=>({...newItem(id),opId:op.id,produto:op.produto,unidade:op.unidade,quantidade:q});
+const box=(id,q)=>({...newBox([],id),itens:[item("i"+id,q)]});
+let s=emptyShipment();assert.equal(assemblyMode(s),"");
+s=selectAssemblyMode(s,"direct");assert.equal(normalizeShipment(s,ops).organizacao,"direct");assert(!s.caixasEmMontagem);
+s.caixas=[box("a","4"),box("b","6")];
+assert.equal(assemblyMode(s),"direct");assert.throws(()=>selectAssemblyMode(s,"inner"),/avulsos/);
+let mixed=selectAssemblyMode(s,"mixed");
+mixed.caixasEmMontagem=[{id:"inner",codigo:"CX-M-001",pronta:false,itens:[]}];
+assert.equal(normalizeShipment(mixed,ops).organizacao,"mixed");
+assert.throws(()=>selectAssemblyMode(mixed,"direct"),/menores/);
+const excess=structuredClone(s);excess.caixas[1].itens[0].quantidade="7";
+assert.throws(()=>normalizeShipment(excess,ops,s),/excede/);
+const staged=structuredClone(s);staged.caixasEmMontagem=[{id:"inner",codigo:"Menor",itens:[{...item("staged","1"),caixaInternaId:"inner"}]}];staged.organizacao="mixed";
+assert.throws(()=>normalizeShipment(staged,ops,s),/excede/);
+assert.doesNotThrow(()=>normalizeShipment({...excess,observacoes:"Preservar legado"},ops,excess));
+const fixed=structuredClone(excess);fixed.caixas[1].itens[0].quantidade="6";assert.doesNotThrow(()=>normalizeShipment(fixed,ops,excess));
+const legacy=structuredClone(mixed);delete legacy.organizacao;assert.equal(assemblyMode(legacy),"mixed");
+assert.equal(normalizeShipment({...mixed,organizacao:undefined},ops,mixed).organizacao,"mixed");
+assert.throws(()=>normalizeShipment({...s,organizacao:"invalid"},ops),/Escolha/);
+const fractional=[{...op,quantidade:"0,3"}];const fraction={...s,caixas:[box("c","0,1"),box("d","0,2")]};assert.doesNotThrow(()=>assertPackingCapacity(fraction,fractional));
+console.log("OK modalidades: persistência, legado, troca protegida, misto explícito, saldo entre caixas e menores, precisão e correção de excesso antigo.");

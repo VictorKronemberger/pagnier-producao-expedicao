@@ -1,0 +1,15 @@
+﻿import assert from 'node:assert/strict';
+import {initialSync,syncStep,publicSync} from '../lib/nomus-sync.mjs';
+const order={id:1,idEmpresa:1,codigoPedido:'PV1',idPessoaCliente:9,dataCriacao:'01/10/2026 12:00:00',itensPedido:[{id:100,idProduto:8,quantidade:'10',status:2}]};
+let op={nome:'OP1',idEmpresa:1,descricaoProduto:'Produto de teste',qtde:'10',unidadeMedida:'KG',status:'Liberada',itensPedido:[{idPedido:1,nomeCliente:'Cliente'}]};
+let s=initialSync({grupos:[],semVinculo:[]});const fetcher=async url=>Response.json(url.includes('/ordens?')?[op]:[order]);
+s=await syncStep(s,'test',{fetcher});s=await syncStep({...s,nextAt:0,turn:1},'test',{fetcher});
+let change=s.changes.PV1;assert.equal(change.events[0].kind,'created');assert(change.events[0].fields.some(f=>f.label==='Produto'&&f.after==='Produto de teste'));
+op={...op,qtde:'12',dataHoraEntrega:'22/10/2026 00:00:00'};s=await syncStep({...s,nextAt:0,turn:1},'test',{fetcher});
+change=s.changes.PV1;assert(change.events[0].fields.some(f=>f.label==='Quantidade'&&f.before==='10'&&f.after==='12'));assert(change.events[0].fields.some(f=>f.label==='Entrega prevista'&&f.after.includes('22/10')));
+const count=change.events.length;s=await syncStep({...s,nextAt:0,turn:1},'test',{fetcher});assert.equal(s.changes.PV1.events.length,count);
+order.itensPedido[0].quantidade='13';s=await syncStep({...s,nextAt:0,turn:0},'test',{fetcher});assert(s.changes.PV1.events[0].fields.some(f=>f.label.includes('quantidade')&&f.before==='10'&&f.after==='13'));
+assert(publicSync(s,true).changes.PV1.events.length);assert(!JSON.stringify(publicSync(s,true)).includes('listFacts'));
+delete s.ops.OP1.facts;op={...op,qtde:'14'};s=await syncStep({...s,nextAt:0,turn:1},'test',{fetcher});assert.equal(s.changes.PV1.events[0].fields.length,0);assert.match(s.changes.PV1.events[0].note,/anterior não foi registrado/);
+for(let i=0;i<32;i++){op={...op,qtde:String(20+i)};s=await syncStep({...s,nextAt:0,turn:1},'test',{fetcher});}assert.equal(s.changes.PV1.events.length,30);
+console.log('OK alterações: OP nova detalhada, Antes/Agora de quantidade e prazo, itens do pedido, sem repetição, histórico limitado e ausência de valores antigos indicada.');

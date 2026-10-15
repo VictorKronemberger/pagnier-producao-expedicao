@@ -1,0 +1,47 @@
+import assert from "node:assert/strict";
+import {initialSync,syncStep,nomusGet,publicSync} from "../lib/nomus-sync.mjs";
+import {receiveOrders} from "../lib/intake.mjs";
+const snapshot={grupos:[{id:"PV1",codigo:"PV1",cliente:"C",ordens:[{id:"OP1",nome:"OP1",produto:"P",quantidade:"1",unidade:"KG"}]}],semVinculo:[],ordensConsultadas:1};
+let op={nome:"OP1",dataHoraCriacao:"21/03/2026 00:00:00",descricaoProduto:"P",qtde:"1",unidadeMedida:"KG",status:"Liberada",itensPedido:[{idPedido:1,nomeCliente:"C"},{idPedido:1,nomeCliente:"C"}]};
+let orders=[{id:1,idEmpresa:1,codigoPedido:"PV1",idPessoaCliente:2,valorTotal:"100",itensPedido:[{idProduto:3,quantidade:"1",status:2}]},{id:4,idEmpresa:1,codigoPedido:"PV2",idPessoaCliente:2,itensPedido:[{idProduto:3,quantidade:"2",status:2}]},{id:5,idEmpresa:1,codigoPedido:"FECHADO",idPessoaCliente:2,itensPedido:[{idProduto:3,quantidade:"1",status:4}]}];
+for(const p of orders)p.dataCriacao="01/10/2026 12:00:00";
+const methods=[];
+const fetcher=async(url,options)=>{methods.push(options.method);return Response.json(url.includes("/ordens?")?[op]:url.includes("/pedidos?")?orders:url.includes("/clientes?")?[{id:2,nome:"Cliente de teste",email:"segredo"}]:url.includes("/produtos?")?[{id:3,descricao:"Produto de teste",siglaUnidadeMedida:"KG",preco:999}]:url.includes("/clientes/")?{nome:"Cliente de teste"}:{descricao:"Produto de teste",siglaUnidadeMedida:"KG"})};
+let state=initialSync(snapshot),tick=0;
+async function step(turn){state=await syncStep({...state,nextAt:0,...(turn===undefined?{}:{turn})},"dummy",{fetcher,now:new Date(Date.UTC(2026,2,25,12,tick++)).toISOString()})}
+await step();assert(state.ordersComplete);assert.equal(state.snapshot.grupos.find(g=>g.id==="PV2").vinculo,"unknown");
+await step(1);assert.equal(state.snapshot.grupos[0].ordens.length,1);assert.equal(state.snapshot.grupos[0].ordens[0].criacao,"2026-03-21");
+assert.equal(state.snapshot.grupos.find(g=>g.id==="PV2").vinculo,"none");assert(!state.changes.PV1);
+await step(2);await step(3);const view=publicSync(state,true);
+assert.equal(view.snapshot.pedidos.length,3);assert.equal(view.pedidosIdentificados,3);assert(view.snapshot.pedidos.some(p=>p.id==="FECHADO"));assert(!state.snapshot.grupos.some(p=>p.id==="FECHADO"));
+for(const restricted of ["valorTotal","email","segredo","productId","clientId","listHash","preco"])assert(!JSON.stringify(view).includes(restricted));
+orders[0].valorTotal="200";op={...op,qtde:"2"};
+await step(0);assert(state.changes.PV1.items.includes("Pedido atualizado no Nomus"));
+await step(1);assert(state.changes.PV1.items.some(v=>v.includes("OP1")));assert(!JSON.stringify(publicSync(state,true)).includes("200"));assert(methods.every(m=>m==="GET"));
+const failed=await syncStep({...state,nextAt:0,turn:1,pages:{...state.pages,ops:17}},"dummy",{fetcher:async()=>new Response("",{status:400}),now:"2026-03-26T12:00:00.000Z"});
+assert(failed.partial);assert.deepEqual(failed.snapshot.grupos,state.snapshot.grupos);assert.equal(failed.pages.ops,1);assert(!failed.opsComplete);
+const blocked=await syncStep({...state,nextAt:0},"dummy",{fetcher:async()=>new Response("",{status:401}),now:"2026-03-26T12:00:00.000Z"});assert(blocked.partial);assert.deepEqual(blocked.snapshot.grupos,state.snapshot.grupos);
+const pages=[];let scanning=initialSync({grupos:[],semVinculo:[]});
+for(let i=0;i<2;i++)scanning=await syncStep({...scanning,nextAt:0},"dummy",{fetcher:async(url)=>{pages.push(url);return Response.json(i===0?Array.from({length:50},(_,j)=>({id:j+1,idEmpresa:1,codigoPedido:"P"+j,itensPedido:[]})):[])}});
+assert(pages[0].endsWith("pedidos?pagina=1"));assert(pages[1].endsWith("pedidos?pagina=2"));assert(scanning.ordersComplete);
+let redirects=0;await assert.rejects(nomusGet("ordens?pagina=1","dummy",async(_u,options)=>{redirects++;assert.equal(options.redirect,"manual");return new Response("",{status:302})}));assert.equal(redirects,1);await assert.rejects(nomusGet("ordens/1","dummy",fetcher));
+const board={sequence:["P0"],details:{P0:{situacao:"Em acompanhamento",nota:"preservar",empresa:"Maya"}}};
+const received=receiveOrders(board,[{id:"P0",ordens:[{}]},{id:"P1",ordens:[{}]},{id:"P2",ordens:[]}]);
+assert.deepEqual(received.sequence,["P0","P1"]);assert.equal(received.details.P0.situacao,"Em acompanhamento");assert.equal(received.details.P0.empresa,"Maya");assert.equal(received.details.P1.situacao,"Programado");assert.equal(receiveOrders(received,[{id:"P1",ordens:[{},{}]}]),received);
+console.log("OK: catálogo inclui pedidos fechados, captura por páginas, nomes, privacidade, vínculos, avisos, falhas e ERP somente GET.");
+
+const noOP=receiveOrders(received,[{id:"P0",ordens:[],vinculo:"none"}]);assert.deepEqual(noOP.sequence,["P1"]);assert.equal(noOP.details.P0.nota,"preservar");assert.equal(noOP.details.P0.situacao,"A programar");assert.equal(receiveOrders(received,[{id:"P0",ordens:[],vinculo:"unknown"}]),received);
+// An unlinked OP stays outside sales-order cards; KG/internal production may legitimately remain unlinked.
+const linkedOP=structuredClone(op);
+op={...op,itensPedido:[]};await step(1);
+assert(state.snapshot.semVinculo.some(o=>o.id==='OP1'));
+assert(!state.snapshot.grupos.some(g=>g.ordens.some(o=>o.id==='OP1')));
+assert(!receiveOrders({sequence:[],details:{}},state.snapshot.grupos).sequence.includes('PV1'));
+op=linkedOP;await step(1);
+assert(!state.snapshot.semVinculo.some(o=>o.id==='OP1'));
+assert.equal(state.snapshot.grupos.find(g=>g.id==='PV1').ordens.filter(o=>o.id==='OP1').length,1);
+const afterLink=receiveOrders({sequence:[],details:{}},state.snapshot.grupos);
+assert(afterLink.sequence.includes('PV1'));
+await step(1);assert.equal(state.snapshot.grupos.find(g=>g.id==='PV1').ordens.filter(o=>o.id==='OP1').length,1);
+assert(methods.every(m=>m==='GET'));
+console.log('OK vínculos: OP interna em KG pode ficar sem pedido; quando vinculada, aparece uma única vez no pedido, sem gravar no ERP.');

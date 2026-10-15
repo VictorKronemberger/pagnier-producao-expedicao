@@ -1,0 +1,10 @@
+const base="http://127.0.0.1:5173";
+const auth=await fetch(base+"/signin-with-chatgpt?return_to=/",{redirect:"manual"});
+const cookie=auth.headers.getSetCookie().map(c=>c.split(";")[0]).join("; ");
+if(!cookie)throw Error("Sessão de leitura indisponível.");
+const get=async path=>{const r=await fetch(base+path,{headers:{cookie},signal:AbortSignal.timeout(55000)});if(!r.ok)throw Error("Consulta HTTP "+r.status);return r.json()};
+const list=await get("/api/packing-clients");
+if(!Array.isArray(list.clientes)||!list.clientes.length)throw Error("Nenhum cliente disponível.");
+const doc=await get("/api/packing-clients?key="+encodeURIComponent(list.clientes[0].key));
+if(!doc.cliente?.nome||!Array.isArray(doc.cliente.enderecos))throw Error("Cadastro inválido.");
+console.log(JSON.stringify({somenteLeitura:true,clientesDisponiveis:list.clientes.length,cadastroRecebido:true,enderecosDisponiveis:doc.cliente.enderecos.length,campos:Object.keys(doc.cliente)}));

@@ -1,0 +1,3 @@
+import {nomusGet,initialSync,syncStep} from "../lib/nomus-sync.mjs";import {readFileSync} from "node:fs";
+try{const rows=await nomusGet("ordens?pagina=1",process.env.NOMUS_API_KEY);console.log(JSON.stringify({read:!!rows.length,count:rows.length}));
+const s=await syncStep(initialSync(JSON.parse(readFileSync(new URL("../lib/production-snapshot.json",import.meta.url)))),process.env.NOMUS_API_KEY);console.log(JSON.stringify({lastChecked:s.lastChecked,page:s.page,message:s.message}));}catch(e){console.log(JSON.stringify({error:e.message}));process.exitCode=1}

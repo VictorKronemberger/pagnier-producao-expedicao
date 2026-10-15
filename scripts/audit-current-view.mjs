@@ -1,0 +1,11 @@
+﻿import {scopeBoard} from '../lib/company-scope.mjs';
+import {SITE_START_DATE} from '../lib/date-filter.mjs';
+const base='http://127.0.0.1:5173';
+const login=await fetch(base+'/signin-with-chatgpt?return_to=/',{redirect:'manual'});
+const cookie=login.headers.getSetCookie().map(v=>v.split(';')[0]).join('; ');
+const res=await fetch(base+'/api/board',{headers:{cookie}});if(!res.ok)throw Error('Falha de leitura: '+res.status);
+const v=await res.json();
+const old=(v.snapshot.pedidos??[]).filter(p=>p.vinculo==='none'&&(!p.criacao||p.criacao<SITE_START_DATE));
+const medicine=[...v.snapshot.grupos,...(v.snapshot.pedidos??[])].filter(p=>/medicina/i.test(p.codigo+' '+p.cliente));
+if(old.length||medicine.length)throw Error('Registro fora do escopo ainda visível.');
+console.log(JSON.stringify({apiLocal:res.status,inicio:SITE_START_DATE,pedidosVisiveis:v.snapshot.pedidos.length,pedidosAntigosSemOPExpostos:old.length,pedidosMedicinaExpostos:medicine.length,grupos:v.snapshot.grupos.length,erpAlterado:false}));

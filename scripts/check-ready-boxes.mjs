@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import {emptyShipment,newBox,newItem,normalizeShipment} from "../lib/shipping.mjs";
+import {finishOuterBox,reopenOuterBox,isMounted} from "../lib/ready-boxes.mjs";
+import {updateBoxContents} from "../lib/assembly-flow.mjs";
+import {inspectBoxReview,confirmBoxReview} from "../lib/box-review.mjs";
+const op={id:"OP1",nome:"OP1",produto:"Produto",quantidade:"10",unidade:"UNID"};
+const item={...newItem("item"),opId:op.id,produto:op.produto,unidade:op.unidade,quantidade:"10",unidadesEmbaladas:"10",pesoUnitarioKg:"0,01"};
+let s={...emptyShipment(),caixas:[{...newBox([],"box"),montada:false,itens:[item],pesoBrutoKg:"1",comprimentoCm:"40",larguraCm:"30",alturaCm:"20"}]};
+assert(!isMounted(s.caixas[0]));assert(inspectBoxReview(s,[op]).issues.some(i=>i.includes("montagem")));
+s=finishOuterBox(s,"box",[op]);assert(isMounted(s.caixas[0]));s=normalizeShipment(JSON.parse(JSON.stringify(s)),[op]);assert.equal(s.caixas[0].montada,true);
+s=confirmBoxReview(s,[op],"Teste","2026-10-15T12:00:00Z");assert(inspectBoxReview(s,[op]).reviewed);
+const reopened=reopenOuterBox(s,"box");assert(!isMounted(reopened.caixas[0]));assert(!inspectBoxReview(reopened,[op]).reviewed);
+const edited=updateBoxContents(s,"box",[{...item,quantidade:"9"}]);assert.equal(edited.caixas[0].montada,false);assert.equal(edited.caixas[0].pesoBrutoKg,"");
+assert.throws(()=>finishOuterBox({...s,caixas:[{...s.caixas[0],itens:[]}]},"box",[op]),/produtos/);
+assert.throws(()=>finishOuterBox({...s,caixas:[{...s.caixas[0],itens:[{...item,quantidade:"11"}]}]},"box",[op]),/excede/);
+assert(isMounted({...s.caixas[0],montada:undefined}),"caixa antiga já pesada continua na conferência");
+assert.throws(()=>normalizeShipment({...s,caixas:[{...s.caixas[0],montada:"true"}]},[op]),/Estado/);
+console.log("OK: finalizar, persistir, reabrir, invalidar conferência e peso após edição, rejeitar caixa vazia/excesso e preservar caixas antigas.");

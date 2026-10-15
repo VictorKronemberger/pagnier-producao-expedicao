@@ -1,0 +1,82 @@
+export const manual = [
+  {
+    "category": "start",
+    "title": "Busca, filtros e atalhos",
+    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pedido, cliente, OP ou produto. Remova um filtro pelo X sem perder os demais. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio."
+  },
+  {
+    "category": "start",
+    "title": "Responsáveis e acesso compartilhado",
+    "text": "Responsável pela conferência, pela embalagem e pela revisão identificam funções diferentes. A lista inclui Pedro, Romulo, Hannibal, Victor e Daniel; nomes anteriores são preservados. Esses campos não criam contas nem bloqueiam edição por cargo. Use orientações do supervisor para tarefas e impedimentos."
+  },
+  {
+    "category": "production",
+    "title": "Medicina e produção interna em KG",
+    "text": "Medicina Sagrada permanece fora do painel, considerando empresa e a palavra Medicina na identificação do pedido ou no cliente. OPs internas em KG podem ficar sem pedido e aparecem em Produção → Interna em KG, sem aviso de vínculo. As demais OPs precisam de pedido e item corretos."
+  },
+  {
+    "category": "production",
+    "title": "Pedidos de estoque sem OP",
+    "text": "Em Pedidos de venda, use Separar do estoque quando os produtos estiverem disponíveis e o Nomus confirmar que não há OP. O pedido entra em Conferir com seus produtos, seguindo a mesma montagem de caixas, agrupamento e documentação. A ação identifica a forma de atendimento; não confirma saldo nem baixa estoque no Nomus. Mudanças nos itens exigem revisão das caixas."
+  },
+  {
+    "category": "production",
+    "title": "O que significa a diferença entre 100 e 80",
+    "text": "Programada é a quantidade da primeira captura disponível, e atual é a quantidade da OP consultada no Nomus. Não é uma medição independente da produção realizada. Alterações anteriores à primeira captura não são recuperadas. Marcar como visto não apaga a diferença nem o histórico; são mantidas até 30 ocorrências recentes por pedido."
+  },
+  {
+    "category": "expedition",
+    "title": "Quantidade, unidades embaladas e peso",
+    "text": "Quantidade segue a unidade da OP. Unidades embaladas conta pacotes ou frascos; Conteúdo por embalagem informa quanto produto vai em cada um. Exemplo: OP em KG, quatro pacotes de 250 g → 4 unidades embaladas, conteúdo 0,250 e quantidade total 1 kg. OP em L, dez frascos de 100 ml → conteúdo 0,100 e quantidade total 1 litro. Em UNID, 10 unidades equivalem a 10 produtos no padrão de 1 por unidade; o campo de conteúdo fica dispensado. Peso líquido por unidade é informado em kg e não é o peso da embalagem vazia. Para litros, confirme o peso por pesagem."
+  },
+  {
+    "category": "expedition",
+    "title": "Caixa maior, peso líquido, bruto e tara",
+    "text": "Só a caixa maior conta como volume documental. O líquido soma os produtos uma vez; o bruto é obtido pesando a caixa pronta. A tara inclui embalagens vazias e proteções. Pesos claros no nome do produto podem ser sugeridos; correções manuais são preservadas. Peso e medidas não garantem encaixe: confira espaço, fragilidade e empilhamento."
+  },
+  {
+    "category": "expedition",
+    "title": "Corrija sem perder o conteúdo",
+    "text": "Em Caixas 40 montadas, selecione a caixa e use Voltar à montagem. Ela retorna à área de criação com seus produtos. Para uma menor já acomodada, Retirar para ajustar devolve a embalagem inteira com o conteúdo. Ajuste, finalize e confira novamente. Mudanças físicas exigem nova pesagem; alterações documentais exigem revisão do documento. Caixas só são excluídas vazias."
+  },
+  {
+    "category": "expedition",
+    "title": "Para onde vai a Caixa 40 finalizada?",
+    "text": "Montar Caixa 40 reúne somente caixas em criação. Ao clicar em Finalizar Caixa 40, ela sai dessa aba e aparece em Caixas 40 montadas para pesagem e conferência posterior. O conteúdo permanece salvo. Finalizar não equivale a conferir fisicamente nem a despachar. Para corrigir, use Voltar à montagem; não crie outra caixa para substituir o mesmo volume."
+  },
+  {
+    "category": "expedition",
+    "title": "Lote e validade automáticos",
+    "text": "Ao selecionar a OP, o lote é preenchido com seu número. A validade vem do lote correspondente ao produto e à empresa no Nomus, durante a sincronização. Aguarde Salvo e mantenha o painel aberto para receber a consulta. A data de criação da OP não é usada como validade. Se o campo continuar vazio, confira o lote no Nomus e informe a validade confirmada. Ajustes manuais são preservados. Em separações do estoque sem OP, informe o lote manualmente."
+  },
+  {
+    "category": "expedition",
+    "title": "Onde configurar os modelos de caixa?",
+    "text": "Abra Configurações de caixas no menu do painel para cadastrar modelos, medidas, limite de peso e tara. Na montagem, escolha o modelo em Modelo para novas caixas antes de criar a Caixa 40. Alterar o cadastro do modelo vale para novas caixas; confira os dados das caixas já existentes. A pesagem real continua sendo feita em Caixas 40 montadas."
+  },
+  {
+    "category": "documents",
+    "title": "Qual documento e qual formato usar",
+    "text": "Packing list descreve volumes e pode reunir pedidos; o site gera seu PDF. Invoice FedEx/DHL é comercial, contém um pedido e pode ser exportada em PDF ou Excel editável. Escolha conforme a operação; um não substitui automaticamente o outro. O PDF oficial do pedido de venda continua sendo gerado no Nomus."
+  },
+  {
+    "category": "documents",
+    "title": "Limites e seleção de agrupamentos",
+    "text": "Um envio aceita até 50 pedidos e 100 caixas. Pedidos já agrupados ficam fixos; não há desmembramento automático e um pedido não participa de dois agrupamentos. Uma OP vinculada a mais de um pedido é considerada uma única vez. Confirme ou descarte seleções pendentes antes de sair."
+  },
+  {
+    "category": "documents",
+    "title": "Reaproveitamento, códigos e valores",
+    "text": "Consulta de destinatário preenche campos vazios por padrão. Substituir dados existentes exige revisão e confirmação. Descrição, SKU e HS Code podem ser reaproveitados entre itens da mesma OP. O formato do HS Code é validado, mas sua classificação deve ser confirmada pelo responsável. Na invoice, alterações da origem aparecem em Revisar atualização e impedem o PDF final até a comparação. Aplicar atualização substitui as linhas importadas, preserva itens manuais e preços da mesma unidade. Se a unidade comercial mudar, preencha novamente o preço. Preços dos PDFs de exemplo não são importados, e moedas não são convertidas."
+  },
+  {
+    "category": "shipping",
+    "title": "O que finaliza um documento",
+    "text": "Data de envio no envio ou pedido do envio em Enviados impede excluir packing list e invoice vinculados. A data de envio da própria invoice também a protege. Data de exportação, emissão, assinatura ou download não registram a saída. Excluir um packing list em preparação retira o documento da lista e preserva caixas, agrupamento, destinatário e rastreio. Use Novo packing list e Recriar packing list para reutilizá-los. Enviados exige conferência física atual, alocação completa e data real de despacho. A assinatura permanece para preenchimento."
+  },
+  {
+    "category": "support",
+    "title": "O que o sistema altera no Nomus",
+    "text": "A integração é somente leitura. Prioridades, etapas, notas, caixas, documentos e rastreio são salvos no painel. O site não baixa estoque, fatura pedidos, encerra OPs nem altera o cadastro do Nomus. Exportar CSV considera os pedidos visíveis; informações ausentes podem depender da conclusão das consultas."
+  }
+];

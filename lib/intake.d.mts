@@ -1,0 +1,1 @@
+export function receiveOrders<T extends {sequence:string[];details:Record<string,any>}>(board:T,groups:{id:string;ordens:unknown[]}[]):T;

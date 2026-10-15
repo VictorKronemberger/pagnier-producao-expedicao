@@ -1,0 +1,2 @@
+export function canonical(board:any):string;
+export function createAutosave(options:{write:(board:any,revision:number)=>Promise<any>;read:()=>Promise<any>;onState:(state:{status:string;dirty:boolean;error:string})=>void;onSaved:(data:any)=>void;delay?:number}):{reset:(board:any,revision:number)=>void;enqueue:(board:any)=>void;flush:()=>Promise<void>;retry:()=>Promise<void>;pause:()=>void;dispose:()=>void;isDirty:()=>boolean};

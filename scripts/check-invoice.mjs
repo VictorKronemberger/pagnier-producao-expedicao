@@ -1,0 +1,37 @@
+﻿import assert from "node:assert/strict";
+import {writeFileSync,mkdirSync} from "node:fs";
+import {emptyInvoice,newInvoiceLine,normalizeInvoices,inspectInvoice,addInvoiceSources,fillInvoiceFromShipment} from "../lib/invoice.mjs";
+import {invoiceDefinition,invoicePdfBlob} from "../lib/invoice-pdf.mjs";
+import {invoiceWorkbook,invoiceExcelBlob} from "../lib/invoice-excel.mjs";
+import {canonical} from "../lib/autosave.mjs";
+import {scopeBoard,preserveExcludedNotes} from "../lib/company-scope.mjs";
+import {receiveOrders} from "../lib/intake.mjs";
+import {emptyShipment,newBox,newItem} from "../lib/shipping.mjs";
+mkdirSync(".sites-runtime/invoice-qa",{recursive:true});
+const v=emptyInvoice("invoice-qa");Object.assign(v,{orderIds:["P1"],number:"TESTE-001",date:"2026-10-14",exportDate:"2026-10-14",waybill:"AWB-TESTE",countryDestination:"USA",freight:"93,58",packagesTotal:"1",signerName:"Responsável de teste",signerTitle:"Operações",signatureDate:"2026-10-14"});
+Object.assign(v.consignee,{company:"Destinatário de teste",address:"Endereço fictício",country:"USA"});
+v.items=[{...newInvoiceLine("line-1"),sourceOrder:"P1",marks:"CX-001",packages:"1",packaging:"Bag",description:"Produto fictício",hsCode:"12119090",quantity:"3",unit:"KG",unitWeightKg:"1",unitValue:"15,00"}];
+assert.equal(inspectInvoice(v).issues.length,0);assert.equal(inspectInvoice(v).subtotal,4500n);assert.equal(inspectInvoice(v).total,13858n);assert.equal(inspectInvoice(v).weight,3000n);
+assert.deepEqual(normalizeInvoices({[v.id]:v},["P1"])[v.id],v);
+assert.throws(()=>normalizeInvoices({[v.id]:{...v,orderIds:["P1","P2"]}},["P1","P2"]));
+assert.throws(()=>normalizeInvoices({[v.id]:{...v,orderIds:["EXCLUDED"]}},["P1"]));
+assert.throws(()=>normalizeInvoices({[v.id]:{...v,date:"2026-02-30"}},["P1"]));
+assert.throws(()=>normalizeInvoices({[v.id]:{...v,items:[v.items[0],v.items[0]]}},["P1"]));
+const exact=structuredClone(v);exact.items[0].quantity="0,125";exact.items[0].unitValue="0,12";assert.equal(inspectInvoice(exact).subtotal,2n);
+const blank=emptyInvoice("blank");assert.throws(()=>invoiceDefinition(blank));assert(invoiceDefinition(blank,{draft:true}).watermark);
+const board={sequence:[],details:{},invoices:{[v.id]:v}};assert.notEqual(canonical(board),canonical({...board,invoices:{}}));assert.equal(receiveOrders(board,[{id:"P1",ordens:[{}]}]).invoices[v.id].number,v.number);
+const hidden=scopeBoard(board,{P1:true});assert.deepEqual(hidden.invoices,{});assert.equal(preserveExcludedNotes(board,hidden,{P1:true}).invoices[v.id].number,v.number);
+const order={id:"P1",ordens:[{id:"OP1",produto:"Produto",quantidade:"3",unidade:"KG"}]};let serial=0;
+const imported=addInvoiceSources({...blank,orderIds:["P1"]},[order],undefined,()=>"i"+(serial++));assert.equal(imported.items.length,1);assert.equal(addInvoiceSources(imported,[order],undefined,()=>"i"+(serial++)).items.length,1);assert.equal(imported.items[0].unitValue,"");
+const shipment={...emptyShipment(),rastreio:"NEW-AWB",packing:{...emptyShipment().packing,destinatarioNome:"Nome cadastrado"},caixas:[{...newBox([],"b1"),itens:[{...newItem("i1"),opId:"OP1",produto:"Produto",quantidade:"3",unidade:"KG",unidadesEmbaladas:"3",pesoUnitarioKg:"1"}]}]};
+const reused=addInvoiceSources({...blank,orderIds:["P1"]},[order],shipment,()=>"i"+(serial++));assert.equal(reused.packagesTotal,"1");assert.equal(reused.items[0].quantity,"3");assert.equal(reused.items[0].unitWeightKg,"1");assert.equal(addInvoiceSources(reused,[order],shipment,()=>"i"+(serial++)).items.length,1);
+shipment.agrupamento={pedidos:["P1","P2"]};assert(addInvoiceSources({...blank,orderIds:["P1"]},[order],shipment,()=>"i"+(serial++)).items[0].sourceKey.startsWith("op:"));
+assert.equal(fillInvoiceFromShipment(v,shipment).consignee.company,"Destinatário de teste");assert.equal(fillInvoiceFromShipment(v,shipment).waybill,"AWB-TESTE");
+for(const carrier of ["FedEx","DHL"]){
+ const value={...v,carrier};const pdf=await invoicePdfBlob(value);writeFileSync(`.sites-runtime/invoice-qa/${carrier}.pdf`,Buffer.from(await pdf.arrayBuffer()));
+ const workbook=await invoiceWorkbook(value);const sheet=workbook.worksheets[0];assert.equal(sheet.getCell("J11").value.result,45);assert.match(sheet.getCell("J11").value.formula,/ROUND/);assert.equal(sheet.getCell("J14").value.result,138.58);
+ const excel=await invoiceExcelBlob(value);writeFileSync(`.sites-runtime/invoice-qa/${carrier}.xlsx`,Buffer.from(await excel.arrayBuffer()));
+}
+const many={...v,items:Array.from({length:60},(_,i)=>({...v.items[0],id:"line"+i,description:"Produto de teste para paginação "+(i+1)}))};writeFileSync(".sites-runtime/invoice-qa/multipage.pdf",Buffer.from(await(await invoicePdfBlob(many)).arrayBuffer()));
+const hostile=structuredClone(v);hostile.items[0].description="=HYPERLINK(\"https://example.invalid\")";const workbook=await invoiceWorkbook(hostile);assert.equal(workbook.worksheets[0].getCell("B11").type,3);
+console.log("OK invoices: um pedido, valores em centavos, pesos, escopo de empresa, autosave, fontes sem duplicação, envios agrupados, PDFs FedEx/DHL e XLSX com fórmulas editáveis.");
