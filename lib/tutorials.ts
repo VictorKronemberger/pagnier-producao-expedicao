@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"15",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"18",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -36,7 +36,7 @@ export const tutorials = [
   {
     "id": "overview",
     "category": "start",
-    "title": "Como começar",
+    "title": "Primeiro dia: entenda o fluxo do sistema",
     "target": "board",
     "action": "Abrir quadro",
     "before": "Use esta orientação no início do trabalho ou para treinar alguém da equipe.",
@@ -45,6 +45,11 @@ export const tutorials = [
         "title": "Siga a ordem da operação",
         "text": "Localize o pedido → acompanhe a produção, quando houver → confira os produtos → monte as caixas → revise os volumes → prepare os documentos → registre a saída.",
         "short": "Encontre o pedido. Depois acompanhe a produção, confira, embale, prepare os documentos e registre o envio."
+      },
+      {
+        "title": "Entenda o quadro de produção",
+        "short": "Aguardando liberação → Na fila → Produzindo → Preparar envio → Enviados.",
+        "text": "Aguardando liberação reúne os pedidos pendentes no Nomus. Liberados com OP vão para Na fila; pedidos parcialmente liberados mostram os itens pendentes no cartão. Use os atalhos para iniciar e concluir a produção. O menu superior leva a Pedidos de venda, Packing lists, Invoices, Pendências, Caixas e Manual. No celular, deslize o menu."
       },
       {
         "title": "Use o cartão do pedido",
@@ -60,6 +65,11 @@ export const tutorials = [
         "title": "Confirme o salvamento",
         "text": "Aguarde Salvo antes de sair, exportar ou excluir. Consulte Pendências e ajuda se houver falha ou conflito entre sessões.",
         "short": "Antes de sair, espere aparecer Salvo."
+      },
+      {
+        "title": "Saiba de onde vêm os dados",
+        "short": "O Nomus é consultado por etapas; veja o horário e os avisos de consulta.",
+        "text": "A consulta é de leitura. O painel salva a organização, as caixas e os documentos, mas não libera pedidos nem registra produção no Nomus. Com o painel aberto e visível, as consultas atualizam os dados em ciclos. Base parcial ou Sem confirmação não significa quantidade zero."
       }
     ],
     "done": "Você identificou o pedido e sabe em qual etapa ele está.",
@@ -71,6 +81,45 @@ export const tutorials = [
     "objective": "Executar a operação na sequência correta.",
     "records": "Pedido identificado, etapa do cartão e indicação Salvo.",
     "deviation": "Se não souber a etapa atual, confira o cartão e as orientações do supervisor antes de continuar."
+  },
+  {
+    "id": "handoff",
+    "category": "start",
+    "title": "Continuar o trabalho de outro funcionário",
+    "target": "packing",
+    "action": "Abrir packing lists",
+    "before": "Use na troca de turno ou quando precisar assumir um envio em andamento.",
+    "steps": [
+      {
+        "title": "Encontre o mesmo envio",
+        "short": "Busque pelo pedido, cliente ou invoice; abra o registro existente.",
+        "text": "Confira os pedidos vinculados e o destinatário. Evite criar outro packing list para continuar um que já existe."
+      },
+      {
+        "title": "Leia a próxima ação e os responsáveis",
+        "short": "Veja quem conferiu as caixas e quem está indicado para revisar o documento.",
+        "text": "A faixa Próxima ação identifica a primeira pendência nos dados salvos. Os nomes indicam as funções registradas; não são uma assinatura nem impedem outra pessoa de continuar."
+      },
+      {
+        "title": "Continue da etapa indicada",
+        "short": "Complete a pendência, confira os dados herdados e espere Salvo.",
+        "text": "Se o colega deixou uma seleção de pedidos sem confirmar no navegador dele, ela ainda não é um agrupamento salvo. Trabalhe com os pedidos confirmados no registro compartilhado e verifique com o supervisor se faltar informação."
+      },
+      {
+        "title": "Faça sua própria revisão final",
+        "short": "Antes de baixar o PDF, revise o conjunto e marque a confirmação.",
+        "text": "Identifique corretamente o responsável pela revisão em Dados do documento. Uma etapa preenchida ou um nome anterior não dispensa sua conferência. Se alterar caixas, pesos ou medidas, volte à conferência física."
+      }
+    ],
+    "done": "O envio foi retomado no mesmo cadastro, com dados revisados e salvamento concluído.",
+    "next": [
+      "document"
+    ],
+    "code": "POP-13",
+    "owner": "Funcionário que assume a atividade",
+    "objective": "Permitir continuidade sem duplicar envios nem presumir conferências.",
+    "records": "Dados salvos no envio e responsáveis informados para cada função.",
+    "deviation": "Se faltar informação, consulte a orientação do supervisor e registre a pendência; não estime pesos, validade ou quantidade produzida."
   },
   {
     "id": "orders",
@@ -169,9 +218,14 @@ export const tutorials = [
         "short": "Selecione o responsável e a transportadora. Use Filtros → Envio no quadro para localizar FedEx ou DHL."
       },
       {
-        "title": "Compare e resolva diferenças",
-        "text": "Na OP mostra a quantidade atual; Em Caixas 40 mostra o conteúdo cadastrado nas caixas maiores; Falta embalar mostra o saldo. Em pedidos de estoque, No pedido substitui Na OP. A revisar reúne alterações, excessos e dados inconsistentes; A embalar mostra saldos positivos. Compare com a contagem física. Detalhes exibe criação, quantidade programada e atalhos das caixas. Em Filtros, combine situação da embalagem, divergência, unidade e Caixa 40. Ordene por produto, número da OP ou maior saldo dentro de cada unidade.",
-        "short": "Compare Na OP, Em Caixas 40 e Falta embalar. Use A revisar, A embalar ou Filtros para focar as pendências."
+        "title": "Leia as quatro quantidades",
+        "short": "Atendido pela produção é o produzido confirmado. Na OP é o programado. Em Caixas 40 é o embalado. Falta embalar é OP menos caixas.",
+        "text": "A quantidade produzida vem da última operação do roteiro da OP no Nomus; etapas intermediárias não são somadas. Produção pendente significa zero confirmado; parcial significa menos que a OP; concluída significa igual ou maior. Consultando Nomus ou Sem confirmação não permite concluir se houve produção. Abra Detalhes para ver operação e horário da consulta. Falta embalar continua sendo o saldo da OP menos Caixas 40, não o saldo do que já foi produzido. Pedidos separados do estoque mostram No pedido e não têm essa coluna de produção."
+      },
+      {
+        "title": "Encontre o que precisa conferir",
+        "short": "Use A revisar, A embalar ou Filtros. Compare sempre com os produtos físicos.",
+        "text": "Filtros combinam situação da embalagem, divergência, unidade e Caixa 40. Ordene por produto, número da OP ou maior saldo na mesma unidade. A contagem dos atalhos considera o pedido inteiro; a busca e a paginação restringem a visualização. Caixas menores ainda fora da Caixa 40 não entram no total embalado."
       },
       {
         "title": "Consulte a ajuda e avance",
@@ -198,9 +252,9 @@ export const tutorials = [
     "before": "Conclua a conferência dos produtos antes de iniciar a montagem.",
     "steps": [
       {
-        "title": "Escolha a modalidade",
-        "short": "Escolha Sem caixas menores ou Com caixas menores. Selecione uma caixa por vez.",
-        "text": "Em Expedição → Montar caixas, escolha Sem caixas menores ou Com caixas menores. Habilite o modo misto somente se o envio combinar os dois tipos. A modalidade fica salva no embarque."
+        "title": "Veja qual montagem se aplica",
+        "short": "Se todos os itens forem de 250 g, 500 g ou 1 kg, monte diretamente a Caixa 40. Nos demais envios, escolha a modalidade.",
+        "text": "O painel verifica todos os itens do envio, inclusive pedidos agrupados e itens ainda sem OP. Quando todos têm peso explícito de 250 g, 500 g ou 1 kg, dispensa a etapa de caixas menores. Se houver outro tamanho ou descrição incerta, escolha Sem caixas menores ou Com caixas menores; o modo misto permite ambos. Menores já cadastradas são preservadas para revisão."
       },
       {
         "title": "Monte a Caixa 40 com produtos diretos",
@@ -258,14 +312,14 @@ export const tutorials = [
     "before": "Use este caminho para o documento de volumes, inclusive quando vários pedidos viajam juntos.",
     "steps": [
       {
-        "title": "Retome ou crie o envio",
-        "text": "Em Packing lists, procure Documentos e envios existentes. Se já houver caixas, abra esse envio. Use Novo packing list somente para um pedido ainda sem envio cadastrado.",
-        "short": "Procure o envio existente. Use Novo packing list somente se ainda não houver envio cadastrado."
+        "title": "Localize o envio e veja a próxima ação",
+        "short": "Pesquise pedido, cliente ou invoice. Use A preparar, Prontos para revisão ou Despachados.",
+        "text": "Abra o envio existente para retomar a primeira pendência dos dados salvos. A faixa Próxima ação orienta a continuidade. Use Novo packing list somente quando ainda não houver documento para aquele envio; caixas existentes são reaproveitadas."
       },
       {
-        "title": "Selecione os pedidos",
-        "text": "Em Pedidos e destinatário, marque os pedidos que viajarão juntos. Confira cada cliente e quem receberá fisicamente a mercadoria.",
-        "short": "Selecione os pedidos que viajarão juntos."
+        "title": "Etapa 1 — Pedidos e destinatário",
+        "short": "Confira os pedidos selecionados. Para incluir outros, abra Adicionar outros pedidos ao envio.",
+        "text": "Selecione somente pedidos que viajarão juntos. Confirme ou descarte a seleção antes de mudar de etapa ou sair. A escolha de pedidos sozinha ainda não confirma o agrupamento."
       },
       {
         "title": "Confirme o destinatário",
@@ -298,7 +352,7 @@ export const tutorials = [
     "steps": [
       {
         "title": "Abra o mesmo envio",
-        "text": "Localize o packing list existente. Use Ver os pedidos deste envio → Abrir expedição para corrigir caixas; os pedidos agrupados compartilham o mesmo cadastro.",
+        "text": "Abra o envio existente em Packing lists. Use Itens e caixas para consultar os volumes; siga o atalho Abrir expedição quando precisar corrigir conteúdo físico. Os pedidos agrupados compartilham o mesmo cadastro.",
         "short": "Abra o envio que já existe."
       },
       {
@@ -330,45 +384,50 @@ export const tutorials = [
   {
     "id": "document",
     "category": "documents",
-    "title": "Packing list: revise e gere o PDF",
+    "title": "Packing list: revise e baixe PDF ou Excel",
     "target": "packing",
     "action": "Abrir documentação do packing list",
-    "before": "Tenha pedidos, destinatário e caixas conferidos. Para invoice FedEx/DHL, use o procedimento próprio desta categoria.",
+    "before": "Abra o envio existente em Packing lists. Siga as quatro etapas no alto da tela; a faixa Próxima ação aponta o que falta.",
     "steps": [
       {
-        "title": "Revise os itens",
-        "text": "Abra Dados dos itens. Confira descrição documental, SKU quando houver, HS Code confirmado e tipo de embalagem. Use os atalhos da expedição se precisar corrigir conteúdo ou quantidade.",
-        "short": "Confira descrição, código e embalagem dos produtos."
+        "title": "Etapa 1 — Pedidos e destinatário",
+        "short": "Confira os pedidos do envio, o titular e o endereço real de entrega.",
+        "text": "Consulte o destinatário quando necessário e confirme as alterações. Se houver seleção de pedidos pendente, confirme ou descarte antes de avançar. Ao reunir novos volumes, refaça a conferência física do conjunto."
       },
       {
-        "title": "Complete o documento",
-        "text": "Em Revisar e exportar → Completar dados do documento, confira número, exportador, destinatário, comprador quando diferente, países, referências, transporte e condições comerciais aplicáveis.",
-        "short": "Em Revisar e exportar, complete os dados do documento e do destinatário."
+        "title": "Etapa 2 — Itens e caixas",
+        "short": "Confira descrição documental, HS Code, embalagem, lote e validade dos produtos.",
+        "text": "As caixas precisam da conferência física na Expedição. Se faltar essa confirmação, use o atalho para conferir. Para ajustes físicos, volte à montagem; depois pese e confira novamente. Dados documentais não substituem a contagem física."
       },
       {
-        "title": "Confira os totais",
-        "text": "Revise caixas, unidades, peso líquido, peso bruto e volume externo. Corrija as pendências; o resumo verifica preenchimento e cálculos, mas a conferência física cabe à equipe.",
-        "short": "Confira caixas, quantidades e pesos. Resolva as pendências."
+        "title": "Etapa 3 — Dados do documento",
+        "short": "Preencha invoice, datas, exportador, destinatário, países e responsável pela revisão.",
+        "text": "Use Preencher ou Revisar para localizar campos pendentes. Comprador diferente, referências, transporte e condições comerciais devem corresponder ao envio; dados opcionais podem ficar vazios quando não se aplicarem."
       },
       {
-        "title": "Revise a versão final",
-        "text": "Baixar rascunho permite conferir a apresentação. Para a versão final, resolva as pendências, aguarde Salvo e confirme a revisão. Em agrupamentos, confira também titular e pedidos.",
-        "short": "Baixe um rascunho se quiser conferir a apresentação. Depois confirme a revisão."
+        "title": "Etapa 4 — Revisar e baixar",
+        "short": "Confira destinatário, caixas, unidades e pesos. Resolva as pendências e aguarde Salvo.",
+        "text": "Baixar rascunho permite verificar a apresentação. Para o PDF final, marque a confirmação da revisão e use Baixar packing list PDF. Ao editar dados ou reabrir o envio, a confirmação deve ser feita novamente. Prontos para revisão significa dados completos, não que alguém já revisou ou enviou o PDF."
       },
       {
-        "title": "Baixe o PDF",
-        "text": "Clique em Baixar packing list PDF. Uma alteração exige nova revisão. Baixar o documento não registra a saída nem move os cartões para Enviados.",
-        "short": "Aguarde Salvo e clique em Baixar packing list PDF."
+        "title": "Se precisar de planilha, baixe o Excel",
+        "short": "Clique em Baixar Excel editável na etapa Revisar e baixar.",
+        "text": "O arquivo .xlsx tem quatro abas: Packing list (referências e totais), Produtos (uma linha por produto em cada caixa), Caixas (medidas e pesos) e Guia e pendências. Após salvar e conferir fisicamente as caixas, é possível baixar a cópia editável mesmo com pendências documentais. Elas são listadas na planilha. O Excel não exige a confirmação de emissão do PDF."
+      },
+      {
+        "title": "Mantenha os dados consistentes",
+        "short": "Edições no Excel não voltam automaticamente ao painel. Baixar um arquivo não registra despacho.",
+        "text": "Para emitir no painel um PDF com uma alteração feita no Excel, atualize também os campos do site. Fórmulas recalculam pesos líquidos e totais; o peso bruto exige pesagem real. Se inserir linhas, confira os intervalos das fórmulas. Registre saída e rastreio somente após o despacho físico."
       }
     ],
-    "done": "O PDF corresponde ao envio conferido e está pronto para acompanhar a operação.",
+    "done": "O arquivo corresponde às caixas conferidas. O PDF final foi revisado; a planilha editável identifica eventuais pendências.",
     "next": [
       "dispatch"
     ],
     "code": "POP-08",
     "owner": "Responsável pela documentação e revisão",
     "objective": "Emitir o packing list correspondente aos volumes conferidos.",
-    "records": "Dados documentais salvos e PDF revisado para o envio.",
+    "records": "Dados do documento salvos, responsável pela revisão e arquivos PDF ou Excel baixados. A confirmação final é solicitada novamente ao reabrir.",
     "deviation": "Pendência de cálculo, código, destinatário ou volume: corrija antes de emitir a versão final. Se mudar conteúdo, peso ou medidas, retorne à conferência física."
   },
   {
@@ -430,7 +489,7 @@ export const tutorials = [
     "steps": [
       {
         "title": "Envio com packing list",
-        "text": "Abra Packing lists → Dados dos itens → Após o despacho: registrar rastreio. Preencha transportadora, código e data efetiva do envio. O registro é compartilhado entre pedidos agrupados.",
+        "text": "Abra Packing lists → Itens e caixas → Após o despacho: registrar rastreio. Preencha transportadora, código e data efetiva do envio. O registro é compartilhado entre pedidos agrupados.",
         "short": "Após o despacho, abra o packing list e registre transportadora, rastreio e data de envio."
       },
       {

@@ -1,5 +1,6 @@
 ﻿"use client";
 import {useLayoutEffect,useEffect,useRef,useState} from "react";
+import ContextHelp from "./context-help";
 import {Users,Download,AlertCircle} from "lucide-react";
 import {shipmentOwner} from "../lib/shipment-groups.mjs";
 import {recipientPatch,pendingOrderSelection} from "../lib/packing-flow.mjs";
@@ -35,11 +36,13 @@ export default function PackingClients({owner,groups,board,disabled,onApply,onPe
  }
  return <details className="client-document-section" open><summary><Users size={17}/>Pedidos e destinatário do packing list</summary>
  {current&&<p className="group-notice"><strong>{current.titularNome}</strong> · Destinatário confirmado. Você pode acrescentar pedidos sem consultar o cadastro novamente.</p>}
- <p className="document-help">Selecione os pedidos que viajam juntos. As caixas já cadastradas serão aproveitadas; cada pedido mantém sua etapa e prioridade.</p>
+ <div className="pl-client-intro"><strong>1. Pedidos neste envio</strong><ContextHelp label="Reunir pedidos">Selecione somente pedidos que viajarão juntos. As caixas já cadastradas serão aproveitadas. Pedidos confirmados são mantidos para preservar seus volumes; cada pedido mantém sua etapa e prioridade.</ContextHelp></div><div className="pl-selected-orders">{selected.map(g=><span key={g.id}>{g.codigo}</span>)}</div><details className="pl-add-orders" open={selectionPending}><summary>{selectionPending?"Revisar seleção de pedidos":"Adicionar outros pedidos ao envio"}</summary>
  <fieldset disabled={busy||disabled} className="client-fields"><label>Selecione os pedidos para reunir<input aria-label="Buscar pedidos para agrupar" placeholder="Buscar pedido ou cliente…" value={search} onChange={e=>setSearch(e.target.value)}/></label>
  <div className="group-order-list">{groups.filter(g=>[g.codigo,g.cliente].join(" ").toLocaleLowerCase().includes(search.toLocaleLowerCase())).map(g=>{const other=shipmentOwner(board,g.id)!==g.id&&shipmentOwner(board,g.id)!==owner||g.id!==owner&&!!board.details[g.id]?.envio?.agrupamento;const fixed=g.id===owner||current?.pedidos.includes(g.id);return <label key={g.id}><input type="checkbox" checked={ids.includes(g.id)} disabled={fixed||other||!ids.includes(g.id)&&ids.length>=50} onChange={e=>setIds(e.target.checked?[...ids,g.id]:ids.filter(id=>id!==g.id))}/><span><strong>{g.codigo}</strong> · {g.cliente}{other&&<small>Já pertence a outro envio</small>}</span></label>})}</div>
- <p className="document-help">{ids.length} de 50 pedidos selecionados. {selectionPending?"Seleção ainda não confirmada.":"Pedidos já confirmados são mantidos para preservar as caixas."}</p>
- </fieldset>
+ <p className="document-help">{ids.length} de 50 pedidos selecionados{selectionPending?" · Confirmação pendente":""}</p>
+ </fieldset></details>
+ <div className="pl-client-intro"><strong>2. Destinatário</strong><ContextHelp label="Destinatário do packing list">Consulte o cadastro no Nomus, selecione o cliente titular e o endereço, e confirme para aplicar. Dados existentes são preservados, a menos que você solicite sua substituição.</ContextHelp></div>
+ {shipment?.packing?.destinatarioNome&&!loaded&&<div className="pl-saved-recipient"><strong>{shipment.packing.destinatarioNome}</strong><span>{shipment.packing.destinatarioEndereco||"Endereço ainda não preenchido"}</span><span>{shipment.packing.paisDestino}</span></div>}
  <button className="button" type="button" disabled={busy||disabled} onClick={()=>void load()}><Download size={15}/>{busy?"Consultando…":current||loaded?"Consultar / atualizar destinatário":"Consultar clientes no Nomus"}</button>
  {loaded&&<fieldset disabled={busy||disabled} className="client-fields">
  <label>Cliente titular<select aria-label="Cliente titular do envio" value={key} onChange={e=>void select(e.target.value)}><option value="">Selecione o cliente titular</option>{options.map(c=><option key={c.key} value={c.key}>{c.nome}</option>)}</select></label>
