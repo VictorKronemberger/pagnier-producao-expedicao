@@ -2,7 +2,7 @@
 
 Código do sistema de produção e expedição, salvo para VictorKronemberger em 15/10/2026.
 
-Inclui pedidos, ordens de produção, caixas menores, Montar Caixa 40, Caixas 40 montadas, conferência física, lote e validade consultados no Nomus, packing list, invoices em PDF/Excel e Manual de boas práticas revisão 05, conferência com busca e filtros de envio FedEx/DHL.
+Inclui pedidos, ordens de produção, caixas menores, Montar Caixa 40, Caixas 40 montadas, conferência física, lote e validade consultados no Nomus, packing list, invoices em PDF/Excel e Manual de boas práticas revisão 06, conferência com busca e filtros de envio FedEx/DHL.
 
 ## Estado desta cópia
 

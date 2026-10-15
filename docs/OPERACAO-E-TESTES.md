@@ -122,3 +122,6 @@ Validação: `node scripts/check-shipping-carrier.mjs`, `node scripts/check-conf
 A faixa Geral do pedido inclui Envio ao lado de Etiqueta e Empresa: DHL em amarelo e FedEx em roxo. A identificação usa a mesma transportadora da conferência e dos filtros, sem criar um segundo cadastro.
 
 Logos locais em `public/carriers/`: [DHL](https://commons.wikimedia.org/wiki/File:DHL_Logo.svg) e [FedEx](https://commons.wikimedia.org/wiki/File:FedEx_Corporation_-_2016_Logo.svg), obtidas no Wikimedia Commons. Usadas para identificar a transportadora selecionada, preservando proporção e cores. O seletor nativo mantém o nome acessível ao teclado e leitores de tela.
+
+
+Conferência — filtros avançados (manual revisão 06): situação da embalagem, tipo de divergência, unidade e Caixa 40 combináveis com busca e atalhos. Ordenação natural por produto/OP e maior saldo dentro de cada unidade, com valores desconhecidos ao final. Critérios ativos permanecem visíveis com o painel recolhido; limpar filtros mantém a busca. Filtrar caixa não muda os totais do pedido. Preferências desta lista são locais à conferência, sem gravações operacionais. Cobertura em `scripts/check-conference-browser.mjs`: combinações, resultado vazio, paginação, remoção individual, busca preservada, ordenação, ausência de gravações e celular.

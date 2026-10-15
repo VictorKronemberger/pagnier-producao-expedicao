@@ -22,6 +22,13 @@ snapshot.grupos.push({id:"PV DHL",codigo:"PV DHL",cliente:"Cliente DHL",vinculo:
 snapshot.pedidos=[...snapshot.grupos];
 const op=snapshot.grupos[0].ordens[0];
 board.details["PV TESTE"].envio={...emptyShipment(),organizacao:"direct",caixas:[{...newBox([],"box"),montada:false,itens:[{...newItem("item"),opId:op.id,produto:op.produto,unidade:op.unidade,quantidade:"4"}]}]};
+const filterOps=snapshot.grupos[0].ordens;
+Object.assign(filterOps[2],{unidade:"KG",quantidade:"8",quantidadeProgramada:"8"});
+Object.assign(filterOps[3],{quantidade:"",quantidadeProgramada:""});
+Object.assign(filterOps[5],{unidade:"G",quantidade:"20",quantidadeProgramada:"20"});
+Object.assign(filterOps[6],{unidade:"L",quantidade:"3",quantidadeProgramada:"3"});
+board.details["PV TESTE"].envio.caixas[0].itens.push({...newItem("complete"),opId:"OP2",produto:filterOps[1].produto,unidade:"UNID",quantidade:"4"});
+board.details["PV TESTE"].envio.caixas.push({...newBox(board.details["PV TESTE"].envio.caixas,"box2"),itens:[{...newItem("kg"),opId:"OP3",produto:filterOps[2].produto,unidade:"KG",quantidade:"2"},{...newItem("excess"),opId:"OP5",produto:filterOps[4].produto,unidade:"UNID",quantidade:"6"}]});
 board.details["PV DHL"]={responsavel:"",nota:"",situacao:"Programado",envio:{...emptyShipment(),transportadora:"DHL"}};
 try{
  let pages;for(let i=0;i<60;i++){try{pages=await(await fetch("http://127.0.0.1:9241/json")).json();if(pages.some(p=>p.type==="page"))break}catch{}await pause(200)}
@@ -70,6 +77,35 @@ try{
  await click('[data-conference-filter="attention"]');assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),1);
  await input('.pc-search input',"inexistente");assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),0);assert(await evaluate('document.querySelector(".pc-empty").textContent.includes("Nenhum produto")'));
  await click('.pc-empty button');assert.equal(await evaluate('document.querySelectorAll(".pc-row").length'),20);
+ // Combined filters are view-only, reset pagination and preserve the search on clear.
+ const rowIds=()=>evaluate('[...document.querySelectorAll(".pc-row")].map(e=>e.dataset.opId)');
+ const filterInput=(label,value)=>input('[aria-label="'+label+'"]',value);
+ const writesBeforeFilters=writes;
+ assert.equal(await evaluate('!!document.querySelector(".pc-advanced")'),false);
+ await click('.pc-pagination button:last-child');await click('.pc-filter-toggle');
+ await filterInput("Filtrar situação da embalagem","complete");assert.deepEqual(await rowIds(),["OP2"]);
+ await filterInput("Filtrar situação da embalagem","partial");assert.deepEqual(await rowIds(),["OP TESTE","OP3"]);
+ await filterInput("Filtrar unidade","KG");assert.deepEqual(await rowIds(),["OP3"]);
+ await filterInput("Filtrar caixa","box");assert.deepEqual(await rowIds(),[]);
+ await click('.pc-empty button');assert.equal((await rowIds()).length,20);
+ await filterInput("Filtrar situação da embalagem","none");assert(!(await rowIds()).some(id=>["OP TESTE","OP2","OP3","OP4","OP5"].includes(id)));
+ await filterInput("Filtrar situação da embalagem","all");
+ for(const [kind,expected] of [["any",["OP TESTE","OP4","OP5"]],["changed",["OP TESTE"]],["excess",["OP5"]],["incomplete",["OP4"]]]){await filterInput("Filtrar divergência",kind);assert.deepEqual(await rowIds(),expected)}
+ await filterInput("Filtrar divergência","all");await filterInput("Filtrar caixa","box2");assert.deepEqual(await rowIds(),["OP3","OP5"]);
+ await click('.pc-filter-toggle');assert.equal(await evaluate('!!document.querySelector(".pc-advanced")'),false);assert(await evaluate('document.querySelector(".pc-active-filters").textContent.includes("CX-002")'));
+ await click('.pc-active-filters button');assert.equal((await rowIds()).length,20);await click('.pc-filter-toggle');
+ await filterInput("Ordenar produtos","op");assert.deepEqual((await rowIds()).slice(0,3),["OP TESTE","OP2","OP3"]);assert((await rowIds()).indexOf("OP2")<(await rowIds()).indexOf("OP10"));
+ await filterInput("Ordenar produtos","product");assert.deepEqual((await rowIds()).slice(0,3),["OP2","OP3","OP4"]);
+ await filterInput("Filtrar unidade","UNID");await filterInput("Ordenar produtos","remaining");assert.equal((await rowIds())[0],"OP TESTE");
+ await input('.pc-search input',"OP TESTE");await click('.pc-filter-actions .text-action');assert.equal(await evaluate('document.querySelector(".pc-search input").value'),"OP TESTE");assert.deepEqual(await rowIds(),["OP TESTE"]);
+ await click('[data-conference-filter="attention"]');await filterInput("Filtrar divergência","changed");assert.deepEqual(await rowIds(),["OP TESTE"]);
+ await click('.pc-filter-actions .text-action');await pause(450);assert.equal(writes,writesBeforeFilters);
+ await evaluate('document.querySelector(".pc-filter-toggle").scrollIntoView({block:"start"})');
+ writeFileSync(".sites-runtime/conferencia-filtros-desktop.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
+ await send("Emulation.setDeviceMetricsOverride",{width:390,height:844,deviceScaleFactor:1,mobile:true});await pause(150);
+ assert(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'));assert(await evaluate('const e=document.querySelector(".pc-advanced");e.scrollWidth<=e.clientWidth+1'));
+ await evaluate('document.querySelector(".pc-filter-toggle").scrollIntoView({block:"start"})');writeFileSync(".sites-runtime/conferencia-filtros-mobile.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
+ await click('.pc-filter-toggle');await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
  await input('.pc-search input',"OP TESTE");
  await input('[aria-label="Responsável pela conferência"]',"Victor");await input('[aria-label="Transportadora do envio"]',"FedEx");await waitForSave();
  assert.equal(board.details["PV TESTE"].responsavelConferencia,"Victor");assert.equal(board.details["PV TESTE"].envio.transportadora,"FedEx");await until('!!document.querySelector(".pc-carrier .carrier-logo-fedex")&&document.querySelector(".pc-carrier .carrier-logo-fedex").naturalWidth>0');assert.equal(await evaluate('document.querySelector("[aria-label="+JSON.stringify("Etiqueta de envio")+"]").value'),"FedEx");assert.equal(board.details["PV TESTE"].envio.caixas[0].itens[0].quantidade,"4");
@@ -99,5 +135,5 @@ try{
  await input('[aria-label="Filtrar transportadora"]',"DHL");assert(await evaluate('document.querySelector(".kanban-card").textContent.includes("Cliente DHL")'));
  await input('[aria-label="Filtrar transportadora"]',"A definir");assert.equal(await evaluate('document.querySelectorAll(".kanban-card").length'),0);
  await click('[aria-label="Remover filtro: Envio: A definir"]');assert.equal(await evaluate('document.querySelectorAll(".kanban-card").length'),2);
- console.log("OK conferência: busca sem acento/múltiplos termos, paginação, filtros, quantidades, ajuda sob demanda, celular, responsável e transportadora salvos, atalhos e FedEx/DHL no quadro. Dados simulados.");
+ console.log("OK conferência: busca sem acento/múltiplos termos, paginação, filtros combinados de embalagem/divergência/unidade/caixa, ordenação, limpeza preservando busca, filtros sem gravação, quantidades, ajuda sob demanda, celular, responsável e transportadora salvos, atalhos e FedEx/DHL no quadro. Dados simulados.");
 }finally{socket?.close();browser.kill()}

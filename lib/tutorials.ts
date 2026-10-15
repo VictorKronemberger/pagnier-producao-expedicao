@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"05",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"06",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -170,8 +170,8 @@ export const tutorials = [
       },
       {
         "title": "Compare e resolva diferenças",
-        "text": "Na OP mostra a quantidade atual; Em Caixas 40 mostra o conteúdo cadastrado nas caixas maiores; Falta embalar mostra o saldo. Em pedidos de estoque, No pedido substitui Na OP. A revisar reúne alterações, excessos e dados inconsistentes; A embalar mostra saldos positivos. Compare com a contagem física. Detalhes exibe criação, quantidade programada e atalhos das caixas.",
-        "short": "Compare Na OP, Em Caixas 40 e Falta embalar. Use A revisar ou A embalar para focar as pendências."
+        "text": "Na OP mostra a quantidade atual; Em Caixas 40 mostra o conteúdo cadastrado nas caixas maiores; Falta embalar mostra o saldo. Em pedidos de estoque, No pedido substitui Na OP. A revisar reúne alterações, excessos e dados inconsistentes; A embalar mostra saldos positivos. Compare com a contagem física. Detalhes exibe criação, quantidade programada e atalhos das caixas. Em Filtros, combine situação da embalagem, divergência, unidade e Caixa 40. Ordene por produto, número da OP ou maior saldo dentro de cada unidade.",
+        "short": "Compare Na OP, Em Caixas 40 e Falta embalar. Use A revisar, A embalar ou Filtros para focar as pendências."
       },
       {
         "title": "Consulte a ajuda e avance",
