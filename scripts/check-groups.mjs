@@ -21,5 +21,5 @@ assert.equal(doc.enderecos.length,2);assert.equal(doc.email,"teste@example.inval
 const choices=await clientOptions({orders:{1:{clientId:7}},clients:{7:"Titular",8:"Cliente fora do escopo"}});assert.equal(choices.length,1);assert.match(choices[0].key,/^[a-f0-9]{64}$/);
 const line={...newItem("old"),opId:a.id,produto:a.produto,unidade:a.unidade,quantidade:"2",pesoUnitarioKg:"3",lote:"OLD"};
 const switched=updatePackingItem(line,productFieldsForOP({...emptyShipment(),caixas:[{...newBox([],"box"),itens:[line]}]},b,line.id));
-assert.equal(switched.quantidade,"");assert.equal(switched.pesoUnitarioKg,"");assert.equal(switched.lote,"");
+assert.equal(switched.quantidade,"");assert.equal(switched.pesoUnitarioKg,"");assert.equal(switched.lote,"OP-B");assert.equal(switched.origemLote,"ordem");
 console.log("OK: agrupamento, titular, preservação das caixas, códigos únicos, OP compartilhada sem duplicação, escopo, conflitos, cadastro documental e troca de produto.");

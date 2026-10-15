@@ -1,4 +1,5 @@
 "use client";
+import {reuseProductDocuments} from "../lib/product-document-reuse.mjs";
 import {directBoxOnly,hasInnerBoxes,applyDirectBoxRule} from "../lib/direct-box-rule.mjs";
 import {isMounted,finishOuterBox,reopenOuterBox} from "../lib/ready-boxes.mjs";
 import ContextHelp from "./context-help";
@@ -26,6 +27,7 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
 
  function goAssembly(step:"small"|"outer"|"measure"){setLocalStep(step);onAssemblyStepChange?.(step);setAssemblyError("")}
  function changeAssembly(action:()=>Shipment){try{commit(action());setAssemblyError("")}catch(e){setAssemblyError(e instanceof Error?e.message:"Revise a montagem.")}}
+ const repeatedDocuments=mode==="documents"?reuseProductDocuments(ref.current):null;
  const s=ref.current,report=inspectPacking(s,ops),balance=packingBalance(s,ops);
  const organization=directOnly?(automaticDirect?"direct":"mixed"):assemblyMode(s),showModes=!directOnly&&(!organization||changingMode);
  const mountedBoxes=s.caixas.filter(isMounted),draftBoxes=s.caixas.filter(b=>!isMounted(b));
@@ -131,6 +133,7 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  {suggestionNotice&&<p className="check-help" role="status">{suggestionNotice}</p>}
  </>}
 </>:<>
+ {!!repeatedDocuments?.filled&&<div className="next-task document-reuse"><div><strong>Dados já preenchidos em outras caixas</strong><p>{repeatedDocuments.items} item(ns) da mesma OP podem aproveitar os campos vazios.</p><ContextHelp label="Completar dados repetidos">Copia somente descrição, SKU, HS Code e embalagem que estejam vazios, para a mesma OP, produto e unidade. Valores diferentes já preenchidos são mantidos. Quantidades, pesos, lotes e validades não são alterados.</ContextHelp></div><button type="button" className="button" onClick={()=>commit(repeatedDocuments.shipment)}>Completar dados repetidos</button></div>}
  {s.caixas.map(b=><details className="shipping-box" key={b.id} open={s.caixas.length===1}><summary><Package size={18}/><strong>{b.codigo}</strong><span>{b.itens.length} {b.itens.length===1?"item":"itens"} conferidos</span></summary><div className="box-body">{b.itens.map((item,i)=><div className="packed-item" key={item.id}><p className="packed-description">{item.produto} · {item.quantidade} {item.unidade}</p><div className="shipping-grid"> <ImportantField label={"Descrição documental"} value={item.descricaoDocumento} className="packing-wide"><textarea aria-label={"Descrição documental do item "+(i+1)+" de "+b.codigo} rows={3} maxLength={700} value={item.descricaoDocumento??""} onChange={e=>itemPatch(b.id,item.id,{descricaoDocumento:e.target.value})}/></ImportantField>
  <label>SKU / referência<input aria-label={"SKU do item "+(i+1)+" de "+b.codigo} maxLength={100} value={item.sku??""} onChange={e=>itemPatch(b.id,item.id,{sku:e.target.value})}/></label>
  <ImportantField label={"HS Code confirmado"} value={item.hsCode} valid={/^[0-9. ]+$/.test(item.hsCode??"")&&[6,8,10].includes((item.hsCode??"").replace(/[^0-9]/g,"").length)} hint="Use 6, 8 ou 10 dígitos confirmados pelo responsável."><input aria-label={"HS Code do item "+(i+1)+" de "+b.codigo} maxLength={40} value={item.hsCode??""} onChange={e=>itemPatch(b.id,item.id,{hsCode:e.target.value})}/></ImportantField>

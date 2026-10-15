@@ -45,9 +45,9 @@ try{
  await until('!!document.querySelector(\'[data-invoice-step="orders"]\')');
  await evaluate('[...document.querySelectorAll(".group-order-list label")].find(l=>l.textContent.includes("PV TESTE")).querySelector("input").click()');await waitForSave();
  assert.equal(Object.values(board.invoices)[0].orderIds.length,1);
- await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Aproveitar produtos / caixas").click()');await waitForSave();
+ await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Aproveitar dados e produtos").click()');await waitForSave();
  assert.equal(Object.values(board.invoices)[0].items.length,1);
- await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Aproveitar produtos / caixas").click()');await waitForSave();assert.equal(Object.values(board.invoices)[0].items.length,1);
+ await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Aproveitar dados e produtos").click()');await waitForSave();assert.equal(Object.values(board.invoices)[0].items.length,1);
  await evaluate('[...document.querySelectorAll(".group-order-list label")].find(l=>l.textContent.includes("PV SEM OP")).querySelector("input").click()');
  assert.deepEqual(Object.values(board.invoices)[0].orderIds,["PV TESTE"]);
  const step=async key=>{await evaluate(`document.querySelector('[data-invoice-step="${key}"]').click()`);await pause(80)};

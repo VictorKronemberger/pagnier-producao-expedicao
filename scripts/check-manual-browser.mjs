@@ -53,12 +53,12 @@ try{
  for(const [name,width,height,mobile] of [["desktop",1280,900,false],["mobile",390,844,true]]){
  await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile});await evaluate('document.querySelector(".manual-view-title").scrollIntoView({block:"start"})');await pause(120);assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));const shot=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/manual-leve-inicio-"+name+".png"),Buffer.from(shot.data,"base64"));
  }
- await evaluate('document.querySelector("[data-manual-category=expedition]").click()');
+ await evaluate('document.querySelector(".manual-browse-categories").open=true;document.querySelector("[data-manual-category=expedition]").click()');
  assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);
  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-manual-topic]")].map(e=>e.dataset.manualTopic)'),["conference","boxes"]);
  assert.equal(await evaluate('document.querySelector(".manual-category-questions").open'),false);
  await evaluate('document.querySelector("[data-manual-topic=conference]").click()');await until('!!document.querySelector("#tutorial-conference")');
- await evaluate('document.querySelector("#tutorial-conference .manual-next button").click()');await until('!!document.querySelector("#tutorial-boxes")');
+ await evaluate('document.querySelector("#tutorial-conference [data-manual-next=boxes]").click()');await until('!!document.querySelector("#tutorial-boxes")');
  assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),1);
  assert.equal(await evaluate('document.querySelector(".manual-full-details").open'),false);
  assert.equal(await evaluate('document.querySelector(".pop-metadata").getClientRects().length'),0);
@@ -67,15 +67,15 @@ try{
  await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile});await evaluate('document.querySelector(".manual-reading-area").scrollIntoView({block:"start"})');await pause(120);assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));const shot=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/manual-leve-leitura-"+name+".png"),Buffer.from(shot.data,"base64"));
  }
  await evaluate('document.querySelector(".manual-full-details summary").click()');assert(await evaluate('document.querySelector(".manual-full-details").textContent.includes("POP-05")'));assert(await evaluate('document.querySelector(".pop-metadata").getClientRects().length>0'));
- await evaluate('[...document.querySelectorAll("#tutorial-boxes .manual-next button")].find(b=>b.textContent.includes("Invoice")).click()');await until('!!document.querySelector("#tutorial-invoices")');assert.equal(await evaluate('document.querySelector(".manual-full-details").open'),false);
+ await evaluate('document.querySelector("#tutorial-boxes [data-manual-next=packing]").click()');await until('!!document.querySelector("#tutorial-packing")');assert.equal(await evaluate('document.querySelector(".manual-full-details").open'),false);
  const search=async text=>evaluate(`const el=document.querySelector('[aria-label="Buscar no manual"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(el,${JSON.stringify(text)});el.dispatchEvent(new Event("input",{bubbles:true}));`);
  await search("POP-05");assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);assert.equal(await evaluate('document.querySelectorAll("[data-manual-topic]").length'),1);
  await evaluate('document.querySelector("[data-manual-topic=boxes]").click()');assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),1);
  await search("rastreio");assert(await evaluate('!!document.querySelector("[data-manual-topic=dispatch]")'));assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);
  await search("zzzxqnenhum");assert(await evaluate('document.querySelector(".packing-empty").textContent.includes("Nenhuma orientação")'));
  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Limpar busca").click()');assert.equal(await evaluate('document.querySelectorAll("[data-manual-category]").length'),6);
- await evaluate('document.querySelector("[data-manual-category=expedition]").click();');await evaluate('document.querySelector(".manual-category-questions summary").click()');await evaluate('document.querySelector(".manual-reference-link").click()');assert.equal(await evaluate('document.querySelectorAll(".manual-note").length'),1);assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);
+ await evaluate('document.querySelector(".manual-browse-categories").open=true;document.querySelector("[data-manual-category=expedition]").click();');await evaluate('document.querySelector(".manual-category-questions summary").click()');await evaluate('document.querySelector(".manual-reference-link").click()');assert.equal(await evaluate('document.querySelectorAll(".manual-note").length'),1);assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);
  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Voltar às orientações").click()');assert.equal(await evaluate('document.querySelectorAll("[data-manual-topic]").length'),2);
  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Voltar ao trabalho").click()');await until('!!document.querySelector(".kanban")');
- console.log("OK manual leve: início só com categorias, tarefas por etapa, uma leitura por vez, instruções curtas, POPs preservados em detalhes, busca sem abrir textos, navegação, referências e desktop/mobile.");
+ console.log("OK manual: abertura, índice cronológico, tarefas por etapa, uma leitura por vez, instruções curtas, POPs preservados em detalhes, busca sem abrir textos, navegação, referências e desktop/mobile.");
 }finally{socket?.close();browser.kill()}

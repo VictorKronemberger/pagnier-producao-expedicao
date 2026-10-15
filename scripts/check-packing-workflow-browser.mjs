@@ -99,6 +99,10 @@ try{
  await send("Page.reload");await until('!!document.querySelector(".kanban-card")');await click('[aria-label="Packing lists"]');await click('.packing-document-card');await until('!!document.querySelector(".packing-final")');assert(await evaluate('document.querySelector(".packing-final").disabled'));
  assert.equal(board.details["PV TESTE"].envio.packing.invoiceNumero,"PL-QA-002");assert.equal(board.details["PV TESTE"].envio.conferenciaPor,"Victor");
  await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
+ await click('.pl-related summary');await clickText("Invoice deste pedido");await until('!!document.querySelector(".invoice-workspace")');await clickText("Nova invoice");await until('!!document.querySelector(".invoice-fields")');await save();
+ const preparedInvoice=Object.values(board.invoices)[0];assert.equal(preparedInvoice.orderIds[0],"PV TESTE");assert.equal(preparedInvoice.consignee.company,test.shipment.packing.destinatarioNome);assert.equal(preparedInvoice.items.length,1);assert.equal(preparedInvoice.items[0].quantity,"2");assert.equal(preparedInvoice.packagesTotal,"1");
+ await clickText("Abrir packing list de origem");await until('document.querySelector("[data-packing-step=review]")?.getAttribute("aria-current")==="step"');
+ await click('[aria-label="Produção"]');await click('.card-open');await until('!!document.querySelector(".card-dialog")');await click('[data-detail-tab="shipping"]');await clickText("Abrir invoice");await until('!!document.querySelector(".invoice-fields")');assert.equal(Object.keys(board.invoices).length,1);
  await click('[aria-label="Manual de boas práticas"]');await until('!!document.querySelector(".manual-quickstart")');
  writeFileSync(".sites-runtime/manual-inicio-desktop.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await click('[data-manual-start]');await until('!!document.querySelector("#tutorial-overview")');

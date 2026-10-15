@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"18",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"19",updatedAt:"15/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -397,7 +397,7 @@ export const tutorials = [
       {
         "title": "Etapa 2 — Itens e caixas",
         "short": "Confira descrição documental, HS Code, embalagem, lote e validade dos produtos.",
-        "text": "As caixas precisam da conferência física na Expedição. Se faltar essa confirmação, use o atalho para conferir. Para ajustes físicos, volte à montagem; depois pese e confira novamente. Dados documentais não substituem a contagem física."
+        "text": "As caixas precisam da conferência física na Expedição. Se faltar essa confirmação, use o atalho para conferir. Para ajustes físicos, volte à montagem; depois pese e confira novamente. Dados documentais não substituem a contagem física. Se a mesma OP estiver em várias caixas, use Completar dados repetidos para aproveitar apenas os campos documentais vazios. Correções existentes, quantidades, pesos, lotes e validades são preservados; dados divergentes não são propagados."
       },
       {
         "title": "Etapa 3 — Dados do documento",
@@ -440,13 +440,13 @@ export const tutorials = [
     "steps": [
       {
         "title": "Crie ou retome a invoice",
-        "text": "Em Invoices FedEx / DHL, procure uma existente ou escolha o modelo e clique em Nova invoice. Cada documento contém exatamente um pedido.",
-        "short": "Abra Invoices FedEx / DHL e escolha um documento existente ou Nova invoice."
+        "text": "O atalho do pedido abre diretamente sua invoice quando existe apenas uma. Se houver várias, mostra a lista daquele pedido. Nova invoice aproveita o pedido de origem; o menu Invoices abre a lista geral. Cada documento continua contendo um pedido.",
+        "short": "Abra Invoice pelo pedido para retomar a existente. Se não houver, crie Nova invoice."
       },
       {
         "title": "Selecione o pedido e reaproveite dados",
-        "text": "Em Pedidos e envio, escolha o pedido permitido. Aproveitar dados do envio e Aproveitar produtos / caixas reutilizam informações existentes. Em envio agrupado, somente os produtos do pedido escolhido são aproveitados; as caixas compartilhadas não são copiadas automaticamente. Se a origem mudar, abra Revisar atualização, compare Antes e Depois e aplique a atualização. As linhas importadas são substituídas sem duplicar produtos; preços de outra unidade comercial precisam de novo preenchimento.",
-        "short": "Selecione um pedido e aproveite os dados. Se aparecer Revisar atualização, compare as mudanças antes de aplicá-las."
+        "text": "Ao selecionar o pedido, destinatário, referências e produtos disponíveis são aproveitados juntos. Aproveitar dados e produtos completa campos vazios e permite revisar mudanças na origem, preservando preços da mesma unidade e correções manuais. Em envio agrupado, a invoice direta usa os produtos do pedido escolhido: destinatário, AWB e volumes compartilhados não são copiados automaticamente, pois a encomenda direta pode ter outro destino. Se faltar conferência física, use Conferir caixas na expedição para ir diretamente à montagem ou às caixas montadas.",
+        "short": "Selecionar o pedido já aproveita dados e produtos disponíveis. Se aparecer Revisar atualização, compare as mudanças antes de aplicá-las."
       },
       {
         "title": "Confira endereços e referências",

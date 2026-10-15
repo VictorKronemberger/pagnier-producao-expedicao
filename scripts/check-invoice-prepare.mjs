@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import {fixture} from "./packing-fixture.mjs";
+import {emptyInvoice} from "../lib/invoice.mjs";
+import {prepareInvoiceOrder,previewConnectedInvoice,reuseConnectedInvoice,relatedInvoiceIds} from "../lib/invoice-prepare.mjs";
+const {shipment,ops}=fixture(),order={id:"P1",ordens:ops},blank=emptyInvoice("new");let seq=0;const id=()=>"item"+(++seq);
+shipment.rastreio="AWB-TESTE";const before=JSON.stringify({shipment,blank});
+const prepared=prepareInvoiceOrder(blank,order,shipment,id);assert.equal(prepared.consignee.company,shipment.packing.destinatarioNome);assert.equal(prepared.number,shipment.packing.invoiceNumero);assert.equal(prepared.waybill,"AWB-TESTE");assert.equal(prepared.items.length,1);assert.equal(prepared.items[0].quantity,"2");assert.equal(prepared.packagesTotal,"1");assert.equal(JSON.stringify({shipment,blank}),before);
+prepared.consignee.address="Endereço revisado";prepared.items[0].unitValue="7,50";const again=reuseConnectedInvoice(prepared,[order],shipment,id);assert.equal(again.items.length,1);assert.equal(again.consignee.address,"Endereço revisado");assert.equal(again.items[0].unitValue,"7,50");
+shipment.caixas[0].itens[0].unidadesEmbaladas="1";shipment.caixas[0].itens[0].quantidade="5";const plan=previewConnectedInvoice(prepared,[order],shipment,id);assert.equal(prepared.items[0].quantity,"2");assert.equal(plan.next.items[0].quantity,"1");assert.equal(plan.next.items[0].unitValue,"7,50");assert.equal(plan.next.consignee.address,"Endereço revisado");
+const grouped={...shipment,agrupamento:{pedidos:["P1","P2"]}};const separate=prepareInvoiceOrder(emptyInvoice("separate"),order,grouped,id);assert.equal(separate.consignee.company,"");assert.equal(separate.waybill,"");assert.equal(separate.number,"");assert.equal(separate.packagesTotal,"");assert.equal(separate.items[0].quantity,"10");
+assert.throws(()=>prepareInvoiceOrder(prepared,{id:"P2",ordens:[]},shipment,id));assert.deepEqual(relatedInvoiceIds({new:prepared,separate},"P1"),["new","separate"]);
+console.log("OK preparo conectado: pedido importa dados e produtos em uma ação; repetir não duplica; revisão preserva endereço/preço; agrupamento não transfere destinatário/AWB/volumes da encomenda compartilhada.");
