@@ -30,8 +30,8 @@ const imports={"../../../lib/order-release.mjs":await import("../lib/order-relea
  "../../../lib/packing-delete.mjs":deletion,
  "../../../lib/order-visibility.mjs":{visibleOrderState:s=>s},
  "../../../lib/invoice.mjs":{},"../../../lib/shipment-groups.mjs":{},
- "../../../lib/company-scope.mjs":scope,"cloudflare:workers":{env:{DB:db}},
- "../../chatgpt-auth":{getChatGPTUser:async()=>authenticated?{displayName:"Teste"}:null},
+ "../../../lib/company-scope.mjs":scope,"../../../lib/server-env":{env:{DB:db}},
+ "../../employee-auth":{getPanelUser:async()=>authenticated?{displayName:"Teste"}:null},
  "../../../lib/nomus-sync.mjs":{publicSync:s=>({snapshot:s.snapshot})},
  "../../../lib/nomus-store":{readNomus:async()=>({state:{hiddenOrderCodes:{HIDDEN:true},snapshot:{grupos:[{id:"P1"},{id:"P2"},{id:"P3"}]}}})},
  "../../../lib/shipping.mjs":{}

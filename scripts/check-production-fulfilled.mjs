@@ -41,7 +41,7 @@ assert.equal(productionProgress({...op,quantidadeProduzida:"5",quantidade:""}).s
 
 const vm=await import("node:vm"),ts=await import("typescript"),fs=await import("node:fs");
 let authenticated=true,called=0,received;
-const imports={"../../chatgpt-auth":{getChatGPTUser:async()=>authenticated?{}:null},"../../../lib/nomus-store":{pollNomus:async names=>{called++;received=names;return {}},readNomus:async()=>({state:{}}),nomusKey:()=>"test"},"../../../lib/nomus-sync.mjs":{publicSync:()=>({})}};
+const imports={"../../employee-auth":{getPanelUser:async()=>authenticated?{}:null},"../../../lib/nomus-store":{pollNomus:async names=>{called++;received=names;return {}},readNomus:async()=>({state:{}}),nomusKey:()=>"test"},"../../../lib/nomus-sync.mjs":{publicSync:()=>({})}};
 const context={exports:{},require:n=>imports[n],Request,Response,URL};
 vm.runInNewContext(ts.default.transpileModule(fs.readFileSync("app/api/nomus/route.ts","utf8"),{compilerOptions:{module:ts.default.ModuleKind.CommonJS,target:ts.default.ScriptTarget.ES2022}}).outputText,context);
 const post=(body,origin="http://test.local")=>context.exports.POST(new Request("http://test.local/api/nomus",{method:"POST",headers:{origin},body}));

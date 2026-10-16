@@ -1,3 +1,5 @@
+> Versão Vercel + Neon: execute `npm test` para 40 verificações de regras e APIs, incluindo PostgreSQL em memória e transferência de dados. O runner `--browser` usa o Next na porta 5174 e o teste atualizado de login/chat. Os outros scripts de navegador citados abaixo são do painel local legado. Consulte [publicação e migração](VERCEL-NEON.md).
+
 # Operação e testes do painel
 
 Atualizado em 15/10/2026. Manual do site: revisão 19.

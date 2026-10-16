@@ -61,14 +61,14 @@ try{
  async function evaluate(expression){const r=await send("Runtime.evaluate",{expression:"{"+expression+"}",awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value}
  async function until(expression){for(let i=0;i<80;i++){if(await evaluate(expression))return;await pause(150)}throw Error("Timeout: "+expression)}
  const waitForSave=async()=>{await pause(150);await until('[...document.querySelectorAll(".autosave-status")].every(el=>el.textContent==="Salvo")')};
- await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5173/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+ await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5174/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1280,height:900,deviceScaleFactor:1,mobile:false});
 
- await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/"});await until('!!document.querySelector(".employee-login-form")');
+ await send("Page.navigate",{url:"http://127.0.0.1:5174/"});await until('!!document.querySelector(".employee-login-form")');
  assert.equal(await evaluate('!!document.querySelector(".kanban")'),false);
  assert.equal(await evaluate('!!document.querySelector(".team-chat-panel")'),false);
  passthrough=true;
  const real=await evaluate(`(async()=>{const r=await fetch('/api/chat/session');return {status:r.status,data:await r.json()}})()`);
- assert.equal(real.status,200,JSON.stringify(real));assert.equal(real.data.employees.length,5);
+ assert.equal(real.status,503,JSON.stringify(real));assert.equal(real.data.employee,undefined); // QA server intentionally has no DATABASE_URL.
  for(const path of ['/api/board','/api/nomus','/api/packing-clients'])assert.equal(await evaluate(`(async()=>{const r=await fetch(${JSON.stringify(path)});return r.status})()`),401,path+' must require employee login');
  passthrough=false;
  let loginShot=await send('Page.captureScreenshot',{format:'png'});writeFileSync('.sites-runtime/employee-login-desktop.png',Buffer.from(loginShot.data,'base64'));

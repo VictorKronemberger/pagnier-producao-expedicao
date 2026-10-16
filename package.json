@@ -1,17 +1,23 @@
 {
-  "name": "site-creator-vinext-starter",
+  "name": "pagnier-producao-expedicao",
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.13.0"
+    "node": "24.x"
   },
   "scripts": {
-    "install:ci": "node scripts/install-ci.mjs",
-    "dev": "node scripts/run-framework.mjs dev",
-    "build": "node scripts/run-framework.mjs build",
-    "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
+    "dev": "next dev --port 5174",
+    "build": "next build",
+    "start": "next start --port 5174",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "check": "tsc --noEmit",
+    "test": "node scripts/check-system.mjs",
+    "test:postgres": "node scripts/check-postgres.mjs",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-postgres.mjs",
+    "db:export-local": "node scripts/export-local-db.mjs",
+    "db:import-local": "node --env-file-if-exists=.env.local scripts/import-local-db.mjs",
+    "legacy:install:ci": "node scripts/install-ci.mjs",
+    "legacy:db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -26,7 +32,7 @@
     "exceljs": "4.4.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.31.0",
-    "next": "16.3.4",
+    "next": "16.3.8",
     "next-themes": "^0.4.6",
     "pdfmake": "0.3.11",
     "radix-ui": "^1.6.7",
@@ -39,7 +45,8 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "3.6.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "@neondatabase/serverless": "^1.0.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
@@ -61,7 +68,8 @@
     "typescript": "5.9.3",
     "vinext": "1.0.0-beta.5",
     "vite": "8.0.13",
-    "wrangler": "4.92.0"
+    "wrangler": "4.92.0",
+    "@electric-sql/pglite": "^0.3.14"
   },
   "type": "module",
   "overrides": {

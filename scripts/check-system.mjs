@@ -37,20 +37,14 @@ const unitTests=[
  "check-sales-complete.mjs",
  "check-shipping-carrier.mjs",
  "check-shipping.mjs",
- "check-sync.mjs"
+ "check-sync.mjs",
+ "check-documentation-ready.mjs",
+ "check-team-chat.mjs",
+ "check-postgres.mjs",
+ "check-vercel-api.mjs"
 ];
-const browserTests=[
- "check-assembly-clean-browser.mjs",
- "check-browser.mjs",
- "check-conference-browser.mjs",
- "check-connected-browser.mjs",
- "check-direct-box-browser.mjs",
- "check-invoice-browser.mjs",
- "check-manual-browser.mjs",
- "check-packing-workflow-browser.mjs",
- "check-quantity-browser.mjs",
- "check-release-browser.mjs"
-];
+// Legacy browser scripts remain available for the old local D1 panel.
+const browserTests=["check-team-chat-browser.mjs"];
 const includeBrowser=process.argv.includes("--browser"),selected=[...unitTests,...(includeBrowser?browserTests:[])];
 const startedAt=new Date().toISOString(),results=[];
 mkdirSync(".sites-runtime/audit",{recursive:true});

@@ -1,6 +1,6 @@
 import {requestedLotNames} from "./nomus-lots.mjs";
 import {applyCompanyScope} from "./company-scope.mjs";
-import {env} from "cloudflare:workers";
+import {env} from "./server-env";
 import snapshot from "./production-snapshot.json";
 import {initialSync,syncStep,publicSync,nomusGet} from "./nomus-sync.mjs";
 export const nomusKey=()=>((env as unknown as Record<string,string>).NOMUS_API_KEY??"");
@@ -18,8 +18,7 @@ export async function pollNomus(requestedProduction:string[]=[]){
  if(revision===0)claimed=await db.prepare("INSERT INTO production_board(id,payload,revision,updated_at,updated_by) VALUES(?,?,1,?,?) ON CONFLICT(id) DO NOTHING RETURNING revision").bind("nomus",lease,now,"Nomus").first();
  else claimed=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(lease,now,"nomus",revision).first();
  if(!claimed)return publicSync((await readNomus()).state,true);
- const token=(env as unknown as Record<string,string>).NOMUS_PREVIEW_TOKEN;
- const fetcher:typeof fetch=token?async(input,init)=>{const path=String(input).replace("https://pagnier.nomus.com.br/pagnier/rest/","");return fetch("http://127.0.0.1:5173/__nomus-read?path="+encodeURIComponent(path),{method:"GET",headers:{"x-nomus-preview":token},signal:init?.signal})}:fetch;
+ const fetcher:typeof fetch=fetch;
  const boardRow=await db.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();
  const requestedLots=requestedLotNames(boardRow?JSON.parse(boardRow.payload):{});
  const next=await syncStep(state,key,{fetcher,requestedLots,requestedProduction,refreshRecentOrders:true});
@@ -29,7 +28,6 @@ export async function pollNomus(requestedProduction:string[]=[]){
 
 export async function readNomusClient(id:number){
  if(!Number.isInteger(id)||id<1)throw Error("Cliente inválido.");
- const token=(env as unknown as Record<string,string>).NOMUS_PREVIEW_TOKEN;
- const fetcher:typeof fetch=token?async(input,init)=>{const path=String(input).replace("https://pagnier.nomus.com.br/pagnier/rest/","");return fetch("http://127.0.0.1:5173/__nomus-read?path="+encodeURIComponent(path),{method:"GET",headers:{"x-nomus-preview":token},signal:init?.signal})}:fetch;
+ const fetcher:typeof fetch=fetch;
  return nomusGet("clientes/"+id,nomusKey(),fetcher);
 }
