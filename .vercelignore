@@ -1,0 +1,27 @@
+# Secrets and operational data must never be uploaded as source.
+.env*
+backups/
+relatorios/
+outputs/
+work/
+.wrangler/
+.sites-runtime/
+.secrets/
+*.sqlite*
+*.db
+*.dpapi
+*.pem
+*.key
+*.log
+# Generated files and local tooling.
+.git/
+.vercel/
+.next/
+node_modules/
+dist/
+out/
+.vinext/
+.codex/
+.agents/
+.tools/
+*.tsbuildinfo
