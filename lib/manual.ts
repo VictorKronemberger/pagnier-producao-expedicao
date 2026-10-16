@@ -19,7 +19,7 @@ export const manual = [
   {
     "category": "start",
     "title": "Responsáveis e acesso compartilhado",
-    "text": "Responsável pela conferência, pela embalagem e pela revisão identificam funções diferentes. A lista inclui Pedro, Romulo, Hannibal, Victor e Daniel; nomes anteriores são preservados. Esses campos não criam contas nem bloqueiam edição por cargo. Use orientações do supervisor para tarefas e impedimentos."
+    "text": "Responsável pela conferência, pela embalagem e pela revisão identificam funções diferentes. A lista inclui Pedro, Romulo, Hannibal, Victor, Daniel, Cythia, Frans e Bebel; nomes anteriores são preservados. Esses campos não criam contas nem bloqueiam edição por cargo. Use orientações do supervisor para tarefas e impedimentos."
   },
   {
     "category": "production",
