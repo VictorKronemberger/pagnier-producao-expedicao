@@ -1,5 +1,6 @@
 "use client";
-export const staffNames=["Pedro","Romulo","Hannibal","Victor","Daniel"];
+import {staffNames} from "../lib/staff.mjs";
+export {staffNames};
 const colors=[
  {backgroundColor:"#dff3e5",color:"#275c40",borderColor:"#b9d9c4"},
  {backgroundColor:"#e3ecd7",color:"#4a6035",borderColor:"#c3d2ad"},

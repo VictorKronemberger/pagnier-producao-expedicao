@@ -1,0 +1,5 @@
+import {assertChannel,chatSummary,readMessages,sendMessage,ChatError} from "../../../lib/team-chat.mjs";
+import {chatIdentity,chatAllowedOrders,chatBody,chatJson,chatFailure} from "../../../lib/chat-server";
+export const dynamic="force-dynamic";
+export async function GET(request:Request){try{const {db,employee}=await chatIdentity(request),allowed=await chatAllowedOrders(),url=new URL(request.url);const channel=assertChannel(url.searchParams.get("channel")||"general",allowed);const before=Number(url.searchParams.get("before")||0);if(!Number.isSafeInteger(before)||before<0)throw new ChatError("Página inválida.");const threads=await chatSummary(db,employee,allowed);return chatJson({employee,threads,...(url.searchParams.get("summary")==="1"?{}:await readMessages(db,channel,before))})}catch(e){return chatFailure(e)}}
+export async function POST(request:Request){try{const {db,employee}=await chatIdentity(request,true);const input=await chatBody(request),allowed=await chatAllowedOrders();return chatJson({message:await sendMessage(db,employee,input,allowed)},201)}catch(e){return chatFailure(e)}}

@@ -55,3 +55,21 @@ Packing list e manual (revisão 18): fluxo em quatro etapas com retomada pela pr
 O manual apresenta capítulos numerados na sequência da operação, leitura ampliada, posição no guia e botões Anterior/Próximo capítulo no início e no fim. Dúvidas avulsas também oferecem acesso ao capítulo correspondente. A verificação de navegador percorre os 13 capítulos e confirma a navegação no computador e no celular.
 
 Auditoria e redução de retrabalho (manual revisão 19): seleção do pedido aproveita dados e produtos juntos na invoice, com comparação ao atualizar e preservação de campos manuais. Destinatário, AWB e volumes de agrupamentos não são copiados para encomendas diretas. Atalhos retomam a invoice existente, a pendência do packing list e a conferência correta das caixas. Campos documentais repetidos podem ser completados nas linhas vazias da mesma OP sem alterar dados físicos. O manual recebeu nova abertura, atalhos por tarefa, índice lateral na leitura e navegação compacta no celular. A bateria `node scripts/check-system.mjs --browser` reúne 36 verificações de regras/API e 10 cenários de navegador, todos isolados dos dados operacionais. Consulte [operação e testes](docs/OPERACAO-E-TESTES.md).
+
+## Chat interno da equipe
+
+O botão Mensagens abre um painel lateral recolhível. O ícone de conversa em cada cartão abre o histórico daquele pedido. A conversa geral recebe recados da equipe; @ seguido do nome menciona um funcionário. O botão de referência anexa um pedido clicável à mensagem. Conversas com menções e mensagens não lidas aparecem primeiro na seleção de pedidos.
+
+No primeiro acesso ao chat, selecione o nome, escolha Primeiro acesso e crie um PIN de 4 a 8 números. Cada funcionário reutiliza o próprio PIN em outros navegadores. A sessão dura 30 dias; Sair permite trocar de funcionário em computadores compartilhados. Essa identificação interna preserva a autenticação de acesso ao site já existente. As conversas são visíveis à equipe; não há mensagens privadas nesta versão.
+
+Mensagens, contas e leituras são compartilhadas entre acessos ao mesmo servidor/banco D1, em tabelas próprias, sem alterar os dados do quadro. O PIN é armazenado como hash com salt; cookies de sessão são HttpOnly. Atualizações chegam periodicamente, sem som ou abertura automática. O envio pode ser repetido após falha de rede sem duplicar a mensagem.
+
+A migração `drizzle/0001_pink_skreet.sql` cria apenas as tabelas e índices do chat. Em uma instalação local existente, aplique-a uma única vez, depois de gerar a configuração de build:
+
+```powershell
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_pink_skreet.sql
+```
+
+Não reaplique migrações já executadas. O banco de desenvolvimento e bancos hospedados são independentes; enviar código ao GitHub não transfere mensagens, PINs ou sessões. Não inclua esses dados no repositório.
+
+Validação do chat: `node scripts/check-team-chat.mjs` (Node.js 22.13+ com `node:sqlite`); o teste usa somente banco em memória. `node scripts/check-team-chat-browser.mjs` usa o preview local, Edge e dados simulados; faz apenas leitura de diagnóstico na API real e mantém os envios de teste em memória.
