@@ -9,7 +9,7 @@ import {normalizeInvoices} from "../../../lib/invoice.mjs";
 import {validateGroups,shipmentOps} from "../../../lib/shipment-groups.mjs";
 import {scopeBoard,preserveExcludedNotes} from "../../../lib/company-scope.mjs";
 import {env} from "cloudflare:workers";
-import {getChatGPTUser} from "../../chatgpt-auth";
+import {getPanelUser} from "../../employee-auth";
 import {publicSync} from "../../../lib/nomus-sync.mjs";
 import {readNomus} from "../../../lib/nomus-store";
 import {normalizeShipment,type Shipment} from "../../../lib/shipping.mjs";
@@ -18,7 +18,7 @@ export const dynamic="force-dynamic";
 const states=["A programar","Programado","Em acompanhamento","Bloqueado","Concluído","Pronto para envio e documentação","Atendido totalmente e enviado"];
 function json(data:unknown,status=200){return Response.json(data,{status,headers:{"Cache-Control":"no-store"}})}
 export async function GET(){
- if(!await getChatGPTUser())return json({error:"Entre para acessar o painel."},401);
+ if(!await getPanelUser())return json({error:"Entre para acessar o painel."},401);
  if(!env.DB)return json({error:"Banco indisponível."},503);
  try{
  const nomusState=visibleOrderState((await readNomus()).state);const snapshot=publicSync(nomusState,false).snapshot;
@@ -27,7 +27,7 @@ export async function GET(){
  }catch{return json({error:"Não foi possível carregar as prioridades. Tente novamente."},503)}
 }
 export async function PUT(request:Request){
- const user=await getChatGPTUser();if(!user)return json({error:"Entre para salvar."},401);
+ const user=await getPanelUser();if(!user)return json({error:"Entre para salvar."},401);
  const origin=request.headers.get("origin");if(!origin||origin!==new URL(request.url).origin)return json({error:"Origem inválida."},403);
  if(!env.DB)return json({error:"Banco indisponível."},503);
  let data;try{const raw=await request.text();if(new TextEncoder().encode(raw).length>1000000)return json({error:"Conteúdo muito grande."},413);data=JSON.parse(raw)}catch{return json({error:"Dados inválidos."},400)}
@@ -70,7 +70,7 @@ export async function PUT(request:Request){
 }
 
 export async function DELETE(request:Request){
- const user=await getChatGPTUser();if(!user)return json({error:"Entre para excluir um documento."},401);
+ const user=await getPanelUser();if(!user)return json({error:"Entre para excluir um documento."},401);
  const origin=request.headers.get("origin");if(!origin||origin!==new URL(request.url).origin)return json({error:"Origem inválida."},403);
  if(!env.DB)return json({error:"Banco indisponível."},503);
  let data;try{const raw=await request.text();if(new TextEncoder().encode(raw).length>2000)return json({error:"Conteúdo muito grande."},413);data=JSON.parse(raw)}catch{return json({error:"Dados inválidos."},400)}

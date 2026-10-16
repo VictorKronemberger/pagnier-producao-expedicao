@@ -27,6 +27,7 @@ try{
  function send(method,params={}){return new Promise((resolve,reject)=>{const i=++id;pending.set(i,{resolve,reject});socket.send(JSON.stringify({id:i,method,params}))})}
  async function respond(m){
  const url=new URL(m.request.url);
+ if(passthrough){await send("Fetch.continueRequest",{requestId:m.requestId});return}
  let payload,status=200;
  if(url.pathname.startsWith("/api/chat")){
  if(passthrough){await send("Fetch.continueRequest",{requestId:m.requestId});return}
@@ -62,15 +63,24 @@ try{
  const waitForSave=async()=>{await pause(150);await until('[...document.querySelectorAll(".autosave-status")].every(el=>el.textContent==="Salvo")')};
  await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5173/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1280,height:900,deviceScaleFactor:1,mobile:false});
 
- await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/"});await until('!!document.querySelector(".team-chat-launcher")');
+ await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/"});await until('!!document.querySelector(".employee-login-form")');
+ assert.equal(await evaluate('!!document.querySelector(".kanban")'),false);
  assert.equal(await evaluate('!!document.querySelector(".team-chat-panel")'),false);
  passthrough=true;
  const real=await evaluate(`(async()=>{const r=await fetch('/api/chat/session');return {status:r.status,data:await r.json()}})()`);
- assert.equal(real.status,200,JSON.stringify(real));assert.equal(real.data.employees.length,5);passthrough=false;
+ assert.equal(real.status,200,JSON.stringify(real));assert.equal(real.data.employees.length,5);
+ for(const path of ['/api/board','/api/nomus','/api/packing-clients'])assert.equal(await evaluate(`(async()=>{const r=await fetch(${JSON.stringify(path)});return r.status})()`),401,path+' must require employee login');
+ passthrough=false;
+ let loginShot=await send('Page.captureScreenshot',{format:'png'});writeFileSync('.sites-runtime/employee-login-desktop.png',Buffer.from(loginShot.data,'base64'));
+ await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await pause(100);
+ loginShot=await send('Page.captureScreenshot',{format:'png'});writeFileSync('.sites-runtime/employee-login-mobile.png',Buffer.from(loginShot.data,'base64'));
+ await send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
  const fill=async(selector,value,select=false)=>evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(proto,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event(${JSON.stringify(select?'change':'input')},{bubbles:true}));})()`);
- await evaluate(`document.querySelector('.team-chat-launcher').click()`);await until(`!!document.querySelector('.team-chat-login')`);
- await fill('.team-chat-login select','Pedro',true);await evaluate(`document.querySelector('.team-chat-login .text-action').click()`);
- await fill('[aria-label="PIN do chat"]','2846');await fill('[aria-label="Confirmar PIN do chat"]','2846');await evaluate(`document.querySelector('.team-chat-login').requestSubmit()`);await until(`!!document.querySelector('.team-chat-composer')`);
+
+ await fill('.employee-login-form select','Pedro',true);await evaluate(`document.querySelector('.employee-login-form .text-action').click()`);
+ await fill('[aria-label="PIN de acesso"]','2846');await fill('[aria-label="Confirmar PIN de acesso"]','2846');await evaluate(`document.querySelector('.employee-login-form').requestSubmit()`);await until(`!!document.querySelector('.team-chat-launcher')`);await waitForSave();
+ assert.equal(await evaluate(`!!document.querySelector('.team-chat-panel')`),false);
+ await evaluate(`document.querySelector('.team-chat-launcher').click()`);await until(`!!document.querySelector('.team-chat-composer')`);
  await fill('[aria-label="Mensagem para a equipe"]','@Victor, confira este pedido. <script>texto literal</script>');
  await evaluate(`document.querySelector('[aria-label="Referenciar pedido"]').click()`);await until(`!!document.querySelector('.team-chat-reference-picker button')`);await evaluate(`document.querySelector('.team-chat-reference-picker button').click()`);
  await evaluate(`document.querySelector('.team-chat-composer').requestSubmit()`);await until(`!!document.querySelector('.team-chat-error')`);
@@ -78,8 +88,10 @@ try{
  await evaluate(`document.querySelector('.team-chat-composer').requestSubmit()`);await until(`document.querySelector('[aria-label="Mensagem para a equipe"]').value===''`);
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM chat_messages').get().n,1);
  assert.equal(await evaluate(`document.querySelectorAll('.team-chat-message script').length`),0);
- await evaluate(`document.querySelector('[aria-label="Sair do chat"]').click()`);await until(`!!document.querySelector('.team-chat-login')`);
- await fill('.team-chat-login select','Victor',true);await fill('[aria-label="PIN do chat"]','5826');await evaluate(`document.querySelector('.team-chat-login').requestSubmit()`);await until(`document.querySelectorAll('.team-chat-message').length===1`);
+ await evaluate(`document.querySelector('[aria-label="Sair do painel"]').click()`);await until(`!!document.querySelector('.employee-login-form')`);
+ await fill('.employee-login-form select','Victor',true);await fill('[aria-label="PIN de acesso"]','5826');await evaluate(`document.querySelector('.employee-login-form').requestSubmit()`);await until(`!!document.querySelector('.team-chat-launcher b')`);
+ assert.equal(await evaluate(`!!document.querySelector('.team-chat-panel')`),false);assert.equal(await evaluate(`document.title.startsWith('(1)')`),true);
+ await evaluate(`document.querySelector('.team-chat-launcher').click()`);await until(`document.querySelectorAll('.team-chat-message').length===1`);
  assert.equal(await evaluate(`document.querySelector('.team-chat-message.mentioned strong').textContent`),'Pedro');
  await fill('[aria-label="Mensagem para a equipe"]','Já conferi, @Pedro.');await evaluate(`document.querySelector('.team-chat-composer').requestSubmit()`);await until(`document.querySelectorAll('.team-chat-message').length===2`);
  assert.equal(sqlite.prepare('SELECT author FROM chat_messages ORDER BY id DESC LIMIT 1').get().author,'Victor');
@@ -105,5 +117,12 @@ try{
  await evaluate(`document.querySelector('.team-chat-channel>button').click()`);await until(`!!document.querySelector('.team-chat-thread')`);await evaluate(`document.querySelector('.team-chat-thread').click()`);await until(`!!document.querySelector('.team-chat-older')`);
  await evaluate(`document.querySelector('.team-chat-older').click()`);await until(`!document.querySelector('.team-chat-older')`);
  await evaluate(`document.dispatchEvent(new Event('visibilitychange'))`);await pause(700);assert.equal(await evaluate(`!!document.querySelector('.team-chat-older')`),false);
- console.log('OK chat browser: real API/schema smoke, first PIN, identity switch, shared messages, retry deduplication, mentions, references, order action, mobile, unread and persistence.');
+
+ await fill('[aria-label="Mensagem para a equipe"]','Rascunho preservado durante a nova entrada');
+ chatEmployee=null;await evaluate(`document.dispatchEvent(new Event('visibilitychange'))`);await until(`!!document.querySelector('.employee-login-form')`);
+ assert.equal(await evaluate(`document.querySelector('.employee-login-form select').disabled`),true);
+ assert.equal(await evaluate(`!!document.querySelector('[hidden] .kanban')`),true);
+ await fill('[aria-label="PIN de acesso"]','5826');await evaluate(`document.querySelector('.employee-login-form').requestSubmit()`);await until(`!document.querySelector('.employee-login-form')`);
+ assert.equal(await evaluate(`document.querySelector('[aria-label="Mensagem para a equipe"]').value`),'Rascunho preservado durante a nova entrada');
+ console.log('OK site login/chat: protected APIs, first PIN before dashboard, unread/title without opening chat, session expiry and draft preservation, identity switch, shared messages, retry deduplication, mentions, references, order action, mobile, unread and persistence.');
 }finally{socket?.close();browser.kill();sqlite.close()}

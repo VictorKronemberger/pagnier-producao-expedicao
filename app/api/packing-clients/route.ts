@@ -1,11 +1,11 @@
 import {visibleOrderState} from "../../../lib/order-visibility.mjs";
-import {getChatGPTUser} from "../../chatgpt-auth";
+import {getPanelUser} from "../../employee-auth";
 import {readNomus,readNomusClient} from "../../../lib/nomus-store";
 import {clientOptions,clientDocument,clientKey} from "../../../lib/packing-client.mjs";
 export const dynamic="force-dynamic";
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{"Cache-Control":"private, no-store"}});
 export async function GET(request:Request){
- if(!await getChatGPTUser())return json({error:"Entre para acessar os dados documentais."},401);
+ if(!await getPanelUser())return json({error:"Entre para acessar os dados documentais."},401);
  try{
  const state=visibleOrderState((await readNomus()).state),url=new URL(request.url),options=await clientOptions(state);
  const key=url.searchParams.get("key");
