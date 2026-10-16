@@ -703,3 +703,17 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
  .software-shell .kanban-card{transition:none}
  .software-shell .kanban-card:not(.dragging):hover{transform:none}
 }
+
+/* Handoff from checked boxes to document preparation. */
+.documentation-ready{margin:0 24px 18px;padding:18px 20px;background:#f8fbf8;border:1px solid #dce8de;border-radius:12px}
+.documentation-ready>header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.documentation-ready h2{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:650;color:#315940}
+.documentation-ready header p,.documentation-empty{margin:6px 0 0;font-size:12px;color:#6a7e70;line-height:1.6}
+.documentation-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:6px;background:#e5efe6;color:#386347;font-size:11px;font-weight:600;flex-shrink:0}
+.documentation-ready .search{width:240px;min-width:0;background:white}
+.documentation-ready-list{margin-top:14px;display:grid;gap:8px;max-height:360px;overflow:auto;padding:2px}
+.documentation-ready-list article{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;background:white;border:1px solid #e3eae3;border-radius:8px}
+.documentation-ready-list article>div{min-width:0;overflow-wrap:anywhere}
+.documentation-ready-list strong{font-size:12px;color:#365b42}.documentation-ready-list p{font-size:13px;color:#304b39;margin:3px 0;line-height:1.5}
+.documentation-ready-list small{font-size:11px;color:#738174;line-height:1.5}.documentation-ready-list button{flex-shrink:0;font-size:12px}
+@media(max-width:640px){.documentation-ready{margin:0 16px 14px;padding:14px}.documentation-ready>header{align-items:stretch;flex-direction:column;gap:10px}.documentation-ready .search{width:100%}.documentation-ready-list article{align-items:stretch;flex-direction:column;gap:10px}.documentation-ready-list button{align-self:flex-start;min-height:40px}}
