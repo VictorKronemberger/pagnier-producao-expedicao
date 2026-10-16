@@ -672,3 +672,34 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 @media(max-width:1050px){.manual-reading-area.has-chapter{grid-template-columns:180px minmax(0,1fr);gap:20px}.manual-light .manual-reader{padding:26px!important}.manual-hero-copy{padding:32px}.manual-hero-summary{padding:30px 25px}.manual-reading-order li .manual-route-icon{display:none}}
 @media(max-width:760px){.manual-hero{grid-template-columns:1fr;border-radius:18px}.manual-hero-copy{padding:27px 23px}.manual-light .manual-hero .manual-view-title{font-size:31px;letter-spacing:-.8px}.manual-hero-summary{display:none}.manual-light .manual-hero .manual-view-intro{font-size:15px}.manual-hero .button{width:100%;justify-content:space-between;font-size:13px}.manual-light .manual-quickstart{gap:10px;margin-bottom:26px}.manual-light .manual-quickstart button{grid-template-columns:44px 1fr auto;column-gap:13px;row-gap:5px;padding:17px}.manual-light .manual-quickstart button .manual-shortcut-icon{grid-column:1;grid-row:1/3;margin:0;align-self:center}.manual-light .manual-quickstart button strong{grid-column:2;grid-row:1;font-size:16px}.manual-light .manual-quickstart button>span:not(.manual-shortcut-icon){grid-column:2;grid-row:2;font-size:13px}.manual-light .manual-quickstart button>svg{grid-column:3;grid-row:1/3;align-self:center;width:17px}.manual-section-heading h3{font-size:19px}.manual-route-heading{gap:12px}.manual-chapter-count{align-self:start}.manual-reading-order li button{padding:17px 14px;gap:13px}.manual-reading-order li strong{font-size:15px}.manual-reading-order li .manual-route-number{width:35px;height:40px}.manual-reading-area.has-chapter{display:block}.manual-contents{display:none}.manual-light .manual-reader{padding:21px!important;border-radius:15px}.manual-light .manual-reader>header h2{font-size:25px}.manual-chapter-navigation:first-child{grid-template-columns:1fr 1fr;gap:8px}.manual-chapter-navigation:first-child button{padding:11px 10px;min-height:65px;gap:6px}.manual-chapter-navigation:first-child strong{display:none}.manual-chapter-navigation:first-child small{font-size:12px}.manual-chapter-navigation:first-child svg{width:16px}.manual-reading-position{font-size:11px}.manual-light .manual-example{padding:18px}.manual-light .manual-example li{font-size:15px}.manual-browse-categories{padding:4px 14px}}
 @media(prefers-reduced-motion:reduce){.manual-light .manual-quickstart button{transition:none}.manual-light .manual-quickstart button:hover{transform:none}}
+
+/* Card metadata and notices use separate rows with predictable spacing. */
+.software-shell .card-metadata{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;min-width:0}
+.software-shell .card-metadata:empty{display:none}
+.software-shell .card-metadata .carrier-tag,.software-shell .card-metadata .company-tag{display:inline-flex;align-items:center;justify-content:center;margin:0;min-height:26px;max-width:100%;padding:4px 8px;border-radius:6px;font-size:10px;line-height:16px;overflow-wrap:anywhere}
+.software-shell .card-metadata .carrier-tag:has(.carrier-logo){height:26px;min-height:26px;padding:4px 8px}
+.software-shell .card-metadata .carrier-logo{height:14px;width:auto;max-width:68px}
+.software-shell .card-notices{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:10px;min-width:0}
+.software-shell .card-notices:not(:has(> *)){display:none}
+.software-shell .kanban-card .card-notices .release-state,.software-shell .kanban-card .card-notices .release-notice.compact,.software-shell .card-notices .change-badge{margin:0;max-width:100%;font-size:11px;line-height:1.5;border-radius:6px;overflow-wrap:anywhere}
+.software-shell .kanban-card .card-notices .release-state{width:100%;padding:6px 8px}
+.software-shell .kanban-card .card-notices .release-notice.compact{padding:6px 8px}
+.software-shell .card-notices .change-badge{display:flex;justify-content:flex-start;align-items:flex-start;gap:7px;width:100%;padding:6px 8px;border:0;background:#f4f6f3;color:#536b55;text-align:left;white-space:normal}
+.software-shell .card-notices .change-badge svg{flex-shrink:0;margin-top:2px}
+.software-shell .card-notices .change-badge span{min-width:0}
+.software-shell .card-notices .quantity-change{background:#faf6ee;color:#846235}
+.software-shell .card-notices .change-badge:hover{background:#eaf0e7}
+.software-shell .card-notices .quantity-change:hover{background:#f3ecdf}
+.software-shell .card-notices .change-badge:focus-visible{outline:2px solid #56745b;outline-offset:2px}
+
+/* Subtle feedback for interactive cards; respect reduced-motion preferences. */
+.software-shell .kanban-card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+@media(hover:hover) and (pointer:fine){
+ .software-shell .kanban-card:not(.dragging):hover{transform:translateY(-2px);border-color:#9bb5a1;box-shadow:0 5px 14px #24433114}
+ .software-shell .kanban-card:hover .card-open-hint{color:#315f40}
+}
+.software-shell .kanban-card:focus-within{border-color:#9bb5a1;box-shadow:0 0 0 2px #56745b1a}
+@media(prefers-reduced-motion:reduce){
+ .software-shell .kanban-card{transition:none}
+ .software-shell .kanban-card:not(.dragging):hover{transform:none}
+}
