@@ -20,6 +20,12 @@ Este checkout passa a ser a origem da versão Vercel. `painel-producao/` conserv
 
 Credenciais, banco local, backups e dados reais do ERP não fazem parte do Git. `lib/production-snapshot.json` permanece vazio. O banco de produção é independente: atualizar código não transfere dados. Os arquivos legados de Cloudflare/Sites e as migrações SQLite `drizzle/` foram preservados como referência/testes e não fazem parte do build Next.js ativo.
 
+## Tema do painel
+
+O botão de sol/lua no login e no cabeçalho alterna entre modo claro e escuro. Na primeira visita, o tema acompanha a preferência do sistema; a escolha manual fica salva neste navegador e sincroniza entre abas. O tema cobre os formulários, cartões, janelas e chat. A impressão mantém o modo claro e os arquivos PDF/Excel não são alterados.
+
+Validação isolada do tema: após `npm run build`, execute `node scripts/check-theme-browser.mjs` no Windows com Edge instalado. O teste usa dados fictícios e um servidor próprio na porta 5175, sem acesso ao ERP ou banco.
+
 ## Desenvolvimento e validação
 
 ```powershell
