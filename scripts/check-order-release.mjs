@@ -11,7 +11,7 @@ const next=receiveOrders(previous,groups);
 assert.deepEqual(next.sequence,["started","partial","released"]);
 assert.equal(next.details.waiting.nota,"Manter orientação");assert.deepEqual(next.details.waiting.envio,previous.details.waiting.envio);assert.equal(next.details.started.situacao,"Em acompanhamento");assert.equal(receiveOrders(next,groups),next);
 assert(awaitsRelease(waiting));assert(!awaitsRelease(partial));assert(awaitsRelease(group("p","partial",false)));assert(!awaitsRelease(started,previous.details.started));
-for(const situacao of ["Concluído","Pronto para envio e documentação","Atendido totalmente e enviado"]){const board={sequence:[started.id],details:{[started.id]:{situacao,nota:"Manter"}}};assert.equal(receiveOrders(board,[started]),board)}
+for(const situacao of ["Concluído","Pronto para envio e documentação","Pronto para envio","Atendido totalmente e enviado"]){const board={sequence:[started.id],details:{[started.id]:{situacao,nota:"Manter"}}};assert.equal(receiveOrders(board,[started]),board)}
 assert.deepEqual(pendingReleaseItems({itens:[{status:1,item:"00020",produto:"Pendente"},{status:2,produto:"Liberado"}]}).map(i=>i.item),["00020"]);
 assert.throws(()=>assertReleaseTransitions({sequence:[],details:{}},{sequence:[waiting.id],details:{waiting:{situacao:"Programado"}}},[waiting]),/liberação/);
 assert.throws(()=>assertReleaseTransitions(previous,{...previous,details:{...previous.details,waiting:{situacao:"Em acompanhamento"}}},[waiting]),/liberação/);

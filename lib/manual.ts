@@ -42,7 +42,7 @@ export const manual = [
   {
     "category": "production",
     "title": "Etapas do quadro simplificado",
-    "text": "O quadro mostra Aguardando liberação → Na fila → Produzindo → Preparar envio → Enviados. Pedidos anteriormente bloqueados aparecem em Produzindo com o aviso Impedimento registrado; confira a orientação do supervisor e use Retomar produção quando o impedimento estiver resolvido. Pedidos que estavam em Conferir aparecem em Preparar envio. A conferência dos produtos continua dentro do pedido, em Expedição → Conferir produtos. As anotações, caixas e registros anteriores são preservados."
+    "text": "O quadro mostra Aguardando liberação → Na fila → Produzindo → Preparar envio → Pronto para envio → Enviados. Use Pronto para envio para identificar pedidos preparados que aguardam a saída: arraste o cartão ou escolha a etapa em Mover para. Essa etapa não registra o envio; Enviados continua exigindo a conferência e os dados de envio. Pedidos anteriormente bloqueados aparecem em Produzindo com o aviso Impedimento registrado; confira a orientação do supervisor e use Retomar produção quando o impedimento estiver resolvido. Pedidos que estavam em Conferir aparecem em Preparar envio. A conferência dos produtos continua dentro do pedido, em Expedição → Conferir produtos. As anotações, caixas e registros anteriores são preservados."
   },
   {
     "category": "start",

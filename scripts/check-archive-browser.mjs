@@ -52,6 +52,19 @@ try {
  await evaluate('document.querySelector(".filter-toggle").click()');
  assert(await evaluate('!!Array.from(document.querySelectorAll("option")).find(e=>e.textContent==="Desde 01/09/2026")'));
  await evaluate('document.querySelector(".kanban-card").click()');await until('!!document.querySelector(".card-dialog")');
+ const lanes=await evaluate('Array.from(document.querySelectorAll(".kanban-list")).map(e=>e.dataset.stage)');
+ assert.equal(lanes[lanes.indexOf('shipping')+1],'ready');assert.equal(lanes[lanes.indexOf('ready')+1],'sent');
+ assert(await evaluate('document.querySelector(\'[data-stage="ready"]\').textContent.includes("Pronto para envio")'));
+ async function moveStage(value){await evaluate(`(()=>{const s=document.querySelector(".dialog-fields label:first-child select");s.value=${JSON.stringify(value)};s.dispatchEvent(new Event("change",{bubbles:true}))})()`)}
+ await moveStage('ready');
+ for(let i=0;i<100&&board.details['PV TESTE'].situacao!=='Pronto para envio';i++)await pause(100);
+ assert.equal(board.details['PV TESTE'].situacao,'Pronto para envio');assert(!board.details['PV TESTE'].envio);
+ await navigate();await until('!!document.querySelector(\'[data-stage="ready"] .kanban-card\')');
+ await shot('ready-for-shipping');
+ await evaluate('document.querySelector(\'[data-stage="ready"] .kanban-card\').click()');await until('!!document.querySelector(".card-dialog")');
+ await moveStage('queue');
+ for(let i=0;i<100&&board.details['PV TESTE'].situacao!=='Programado';i++)await pause(100);
+ assert.equal(board.details['PV TESTE'].situacao,'Programado');
  await shot('archive-action');
  await evaluate('Array.from(document.querySelectorAll(".dialog-footer button")).find(b=>b.textContent.trim()==="Arquivar pedido").click()');
  await until('!document.querySelector(".kanban-card")&&!document.querySelector(".card-dialog")');
@@ -66,5 +79,5 @@ try {
  for(let i=0;i<100&&board.details['PV TESTE'].arquivado;i++)await pause(100);
  assert.equal(board.details['PV TESTE'].arquivado,false);assert.equal(board.details['PV TESTE'].situacao,'Programado');
  await navigate();await until('!!document.querySelector(".kanban-card")');assert.equal(errors.length,0,errors.join('\n'));
- console.log('OK browser: September OP visible, archive without procedures, saved after reload, archived catalog filter, restore to previous stage. Synthetic data only.');
+ console.log('OK browser: ready-for-shipping column position, move and reload persistence; September OP visible, archive without procedures, saved after reload, archived catalog filter, restore to previous stage. Synthetic data only.');
 }finally{socket?.close();browser.kill();server.kill();}

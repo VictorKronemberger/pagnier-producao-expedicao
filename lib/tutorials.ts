@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"20",updatedAt:"19/10/2026"};
+export const manualEdition = {revision:"21",updatedAt:"19/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -48,7 +48,7 @@ export const tutorials = [
       },
       {
         "title": "Entenda o quadro de produção",
-        "short": "Aguardando liberação → Na fila → Produzindo → Preparar envio → Enviados.",
+        "short": "Aguardando liberação → Na fila → Produzindo → Preparar envio → Pronto para envio → Enviados.",
         "text": "Aguardando liberação reúne os pedidos pendentes no Nomus. Liberados com OP vão para Na fila; pedidos parcialmente liberados mostram os itens pendentes no cartão. Use os atalhos para iniciar e concluir a produção. O menu superior leva a Pedidos de venda, Packing lists, Invoices, Pendências, Caixas e Manual. No celular, deslize o menu."
       },
       {
@@ -175,7 +175,7 @@ export const tutorials = [
       },
       {
         "title": "Atualize a etapa real",
-        "text": "Antes de produzir, confira a coluna Aguardando liberação, à esquerda de Na fila. O pedido entra em Na fila quando há itens liberados e OP gerada. Na liberação parcial, confira no aviso do cartão quais itens continuam pendentes. Use Na fila → Produzindo → Preparar envio. Registre impedimentos nas orientações do supervisor. Os atalhos Iniciar produção e Concluir produção alteram a etapa do painel.",
+        "text": "Antes de produzir, confira a coluna Aguardando liberação, à esquerda de Na fila. O pedido entra em Na fila quando há itens liberados e OP gerada. Na liberação parcial, confira no aviso do cartão quais itens continuam pendentes. Use Na fila → Produzindo → Preparar envio → Pronto para envio. Quando o pedido estiver preparado, arraste o cartão para Pronto para envio ou escolha essa etapa em Mover para. Ele permanece aguardando a saída; a etapa Enviados mantém as validações de conferência e envio. Registre impedimentos nas orientações do supervisor. Os atalhos Iniciar produção e Concluir produção alteram a etapa do painel.",
         "short": "Liberado com OP entra em Na fila. Na liberação parcial, confira os itens pendentes no cartão antes de produzir."
       },
       {

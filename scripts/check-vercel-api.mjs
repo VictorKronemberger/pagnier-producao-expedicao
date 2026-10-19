@@ -130,6 +130,14 @@ try{
  const restored=await (await call('board')).json();assert(!restored.board.details['OLD-PV'].arquivado);assert.equal(restored.board.details['OLD-PV'].nota,'Preservar orientação');assert.equal(restored.board.details['OLD-PV'].situacao,'A programar');
  assert(receiveOrders(restored.board,released).sequence.includes('OLD-PV'));
  console.log('OK archive/restore without OP, shipment or procedures; durable metadata, conflict checks and no automatic requeue.');
+ // The ready stage is durable and does not bypass actual dispatch validation.
+ restored.board.details['OLD-PV'].situacao='Pronto para envio';
+ response=await call('board','PUT',{revision:restored.revision,board:restored.board});assert.equal(response.status,200,await response.text());
+ const ready=await (await call('board')).json();assert.equal(ready.board.details['OLD-PV'].situacao,'Pronto para envio');assert.equal(ready.board.details['OLD-PV'].envio,undefined);
+ ready.board.details['OLD-PV'].situacao='Atendido totalmente e enviado';
+ assert.equal((await call('board','PUT',{revision:ready.revision,board:ready.board})).status,400,'Ready does not bypass dispatch requirements');
+ assert.equal((await (await call('board')).json()).board.details['OLD-PV'].situacao,'Pronto para envio');
+ console.log('OK ready-for-shipping status: saved, reloaded and dispatch validation preserved.');
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');

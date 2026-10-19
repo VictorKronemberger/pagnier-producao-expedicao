@@ -15,7 +15,7 @@ import {readNomus} from "../../../lib/nomus-store";
 import {normalizeShipment,type Shipment} from "../../../lib/shipping.mjs";
 export const dynamic="force-dynamic";
 
-const states=["A programar","Programado","Em acompanhamento","Bloqueado","Concluído","Pronto para envio e documentação","Atendido totalmente e enviado"];
+const states=["A programar","Programado","Em acompanhamento","Bloqueado","Concluído","Pronto para envio e documentação","Pronto para envio","Atendido totalmente e enviado"];
 function json(data:unknown,status=200){return Response.json(data,{status,headers:{"Cache-Control":"no-store"}})}
 export async function GET(){
  if(!await getPanelUser())return json({error:"Entre para acessar o painel."},401);
