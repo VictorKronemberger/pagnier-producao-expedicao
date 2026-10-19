@@ -1,8 +1,23 @@
-# Migrar de Neon para Turso preservando os dados
+# Configurar Turso ou migrar os dados do Neon
 
 O painel suporta Turso **libSQL/SQLite** por `@libsql/client/web`, sem réplica local ou arquivos de banco na Vercel. A seleção é explícita: `DATABASE_PROVIDER=turso`. Sem essa variável, continua usando Neon; uma falha do Turso nunca faz o aplicativo gravar no Neon como alternativa.
 
-A migração foi preparada e testada com dados fictícios. Criar o banco, configurar credenciais, exportar os dados reais e realizar a troca são etapas separadas. O banco atual não é apagado. O diretório `painel-producao/` continua sendo a instalação D1 legada e não deve receber os arquivos de conexão da Vercel.
+Em 19/10/2026, o usuário autorizou a troca do ambiente de produção para um **banco novo**, sem preservar os dados anteriores. O procedimento abaixo também documenta a opção de importar dados, para outras instalações. O banco Neon não foi apagado. O diretório `painel-producao/` continua sendo a instalação D1 legada e não deve receber os arquivos de conexão da Vercel.
+
+## Começar com um banco novo (opção escolhida)
+
+1. Configure `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN` para o banco libSQL escolhido.
+2. Execute `npm run db:migrate:turso`. O comando cria o esquema sem apagar tabelas existentes.
+3. Configure `DATABASE_PROVIDER=turso` no ambiente local e, junto com as duas credenciais, no ambiente **Production** da Vercel. Mantenha a chave `NOMUS_API_KEY` existente.
+4. Aplique a configuração em um novo deployment e confira que `/api/chat/session` responde com sucesso.
+5. Na tela de entrada, selecione seu nome e use **Primeiro acesso? Criar meu PIN**. Os PINs antigos, mensagens e alterações manuais não são transferidos.
+6. Após entrar, aguarde a captura paginada do Nomus. O botão de atualizar antecipa uma etapa; o banco não recebe todos os pedidos de uma só vez.
+
+Para esta opção, não execute os comandos de exportação/importação das seções seguintes. As credenciais ficam no ambiente privado; nenhum dado real do ERP é colocado em `lib/production-snapshot.json`.
+
+## Migração opcional preservando dados
+
+As seções seguintes são para instalações que precisam importar dados existentes antes de mudar de provedor.
 
 ## 1. Preparar o destino
 

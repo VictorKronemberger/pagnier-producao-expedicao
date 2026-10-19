@@ -2,9 +2,11 @@
 
 Versão atual preparada para **Next.js + Vercel, com Turso libSQL ou Neon PostgreSQL**, mantendo pedidos, produção, embalagem, documentação, login por funcionário e chat. O repositório é privado e pertence a `VictorKronemberger/pagnier-producao-expedicao`.
 
-## Banco de dados e migração para Turso
+## Banco de dados: Turso
 
-A migração para Turso está preparada, preservando os dados atuais. Siga o [manual Vercel + Turso](docs/VERCEL-TURSO.md). Crie um banco libSQL, configure `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN`, exporte o Neon e importe no destino vazio antes de selecionar `DATABASE_PROVIDER=turso`. O padrão permanece Neon até a troca explícita. Se o Neon estiver bloqueado por cota, é necessário liberar a leitura para exportar os dados atuais.
+O ambiente de produção usa **Turso libSQL**, com `DATABASE_PROVIDER=turso`, `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN`. Em 19/10/2026, o usuário autorizou começar com um banco novo, sem importar os dados do Neon. Cada funcionário deve selecionar seu nome e criar um novo PIN em **Primeiro acesso**; os dados do Nomus são carregados gradualmente depois da entrada no painel. Mensagens e alterações manuais antigas não são reconstruídas pela captura do ERP.
+
+Siga o [manual Vercel + Turso](docs/VERCEL-TURSO.md). O código mantém compatibilidade com Neon para instalações existentes; configure o provedor explicitamente em cada ambiente. As credenciais são privadas e não ficam no GitHub.
 
 A versão inclui cache validado por revisão para o estado Nomus, respostas menores quando nada mudou, cache dos resumos de chat invalidado por novas mensagens/leituras, paginação por índice e espera progressiva nas falhas das consultas automáticas. Testes em memória: `npm run test:turso` e `npm run test:api:turso`.
 
