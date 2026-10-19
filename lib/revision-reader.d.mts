@@ -1,0 +1,1 @@
+export function createRevisionReader(id:string,options?:{maxLength?:number}):(db:{prepare(sql:string):{bind(...values:unknown[]):{first<T>():Promise<T|null>}}})=>Promise<{revision:number;payload:string}|null>;

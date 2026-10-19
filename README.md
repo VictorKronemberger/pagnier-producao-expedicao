@@ -1,8 +1,14 @@
 # Pagnier — produção e expedição
 
-Versão atual preparada para **Next.js + Vercel + Neon PostgreSQL**, mantendo pedidos, produção, embalagem, documentação, login por funcionário e chat. O repositório é privado e pertence a `VictorKronemberger/pagnier-producao-expedicao`.
+Versão atual preparada para **Next.js + Vercel, com Turso libSQL ou Neon PostgreSQL**, mantendo pedidos, produção, embalagem, documentação, login por funcionário e chat. O repositório é privado e pertence a `VictorKronemberger/pagnier-producao-expedicao`.
 
-## Publicação
+## Banco de dados e migração para Turso
+
+A migração para Turso está preparada, preservando os dados atuais. Siga o [manual Vercel + Turso](docs/VERCEL-TURSO.md). Crie um banco libSQL, configure `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN`, exporte o Neon e importe no destino vazio antes de selecionar `DATABASE_PROVIDER=turso`. O padrão permanece Neon até a troca explícita. Se o Neon estiver bloqueado por cota, é necessário liberar a leitura para exportar os dados atuais.
+
+A versão inclui cache validado por revisão para o estado Nomus, respostas menores quando nada mudou, cache dos resumos de chat invalidado por novas mensagens/leituras, paginação por índice e espera progressiva nas falhas das consultas automáticas. Testes em memória: `npm run test:turso` e `npm run test:api:turso`.
+
+## Publicação com Neon (origem / compatibilidade)
 
 Siga o [manual Vercel + Neon](docs/VERCEL-NEON.md). A entrega prepara o código; não cria serviços, publica o site nem transfere dados automaticamente.
 

@@ -6,11 +6,11 @@ import type {ChatChannel,ChatMessage} from "../lib/team-chat.mjs";
 type Order={id:string;codigo:string;cliente:string};
 type Draft={body:string;reference:string;clientId:string};
 type ChatResponse={employee:string|null;employees:{name:string;registered:boolean}[];threads:ChatChannel[];messages:ChatMessage[];message:ChatMessage;hasOlder:boolean;error?:string};
-async function api(path:string,options:RequestInit={}){const response=await fetch(path,{...options,cache:"no-store",headers:{"Content-Type":"application/json",...options.headers}});const result=await response.json() as ChatResponse;if(!response.ok)throw Object.assign(new Error(result.error||"Não foi possível carregar o chat."),{status:response.status});return result}
+async function api(path:string,options:RequestInit={}){const response=await fetch(path,{...options,cache:"no-store",signal:AbortSignal.timeout(15000),headers:{"Content-Type":"application/json",...options.headers}});const result=await response.json() as ChatResponse;if(!response.ok)throw Object.assign(new Error(result.error||"Não foi possível carregar o chat."),{status:response.status});return result}
 const stamp=(value:string)=>new Date(value).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:"America/Sao_Paulo"});
 export default function TeamChat({open,onOpen,onClose,channel,onChannel,orders,onOpenOrder,onThreads,employee,sessionActive,onSessionExpired}:{employee:string;sessionActive:boolean;onSessionExpired:()=>void;open:boolean;onOpen:()=>void;onClose:()=>void;channel:string;onChannel:(channel:string)=>void;orders:Order[];onOpenOrder:(id:string)=>void;onThreads:(threads:ChatChannel[])=>void}){
  const [threads,setThreads]=useState<ChatChannel[]>([]),[messages,setMessages]=useState<ChatMessage[]>([]),[drafts,setDrafts]=useState<Record<string,Draft>>({}),[error,setError]=useState(""),[busy,setBusy]=useState(false),[loading,setLoading]=useState(false),[hasOlder,setHasOlder]=useState(false),[choosing,setChoosing]=useState(false),[search,setSearch]=useState(""),[referenceOpen,setReferenceOpen]=useState(false),[mentionOpen,setMentionOpen]=useState(false),[newBelow,setNewBelow]=useState(false);
- const initialHistory=useRef(true),lastLoaded=useRef(0);
+ const initialHistory=useRef(true),lastLoaded=useRef(0),refreshing=useRef(new Set<string>()),retry=useRef({failures:0,after:0});
  const area=useRef<HTMLTextAreaElement>(null),scroller=useRef<HTMLDivElement>(null),panel=useRef<HTMLElement>(null),atBottom=useRef(true),active=useRef({open,channel,employee,sessionActive}),lastRead=useRef<Record<string,number>>({}),requestVersion=useRef(0),sending=useRef(false),previousFocus=useRef<HTMLElement|null>(null);
  active.current={open,channel,employee,sessionActive};
  const draft=drafts[channel]??{body:"",reference:"",clientId:""};
@@ -27,13 +27,15 @@ export default function TeamChat({open,onOpen,onClose,channel,onChannel,orders,o
   try{await api("/api/chat/read",{method:"POST",body:JSON.stringify({channel:target,id})});if(active.current.employee!==person)return;lastRead.current[target]=id;setThreads(old=>{const next=old.map(t=>t.channel===target&&t.lastId<=id?{...t,unread:0,mentions:0}:t);return next})}catch{}
  },[]);
  useEffect(()=>{onThreads(threads)},[threads,onThreads]);
- const refresh=useCallback(async()=>{
+ const refresh=useCallback(async(force=false)=>{
   const state=active.current;if(!state.sessionActive||!state.employee||document.visibilityState!=="visible")return;
-  const version=requestVersion.current;
+  const version=requestVersion.current,key=state.employee+":"+version;
+  if(refreshing.current.has(key)||!force&&Date.now()<retry.current.after)return;
+  refreshing.current.add(key);
   try{
    const result=await api("/api/chat?"+(state.open?"channel="+encodeURIComponent(state.channel):"summary=1"));
    if(version!==requestVersion.current||active.current.employee!==state.employee)return;
-   updateThreads(result.threads);setError("");
+   retry.current={failures:0,after:0};updateThreads(result.threads);setError("");
    if(state.open&&active.current.open&&state.channel===active.current.channel){
     setMessages(old=>{const map=new Map(old.map(m=>[m.id,m]));for(const m of result.messages as ChatMessage[])map.set(m.id,m);return [...map.values()].sort((a,b)=>a.id-b.id)});
     if(initialHistory.current){setHasOlder(result.hasOlder);initialHistory.current=false}setLoading(false);
@@ -41,9 +43,9 @@ export default function TeamChat({open,onOpen,onClose,channel,onChannel,orders,o
     if(atBottom.current){requestAnimationFrame(()=>{if(scroller.current)scroller.current.scrollTop=scroller.current.scrollHeight});if(last)void acknowledge(last,state.channel)}else if(last&&last>lastLoaded.current){setNewBelow(true)}
     lastLoaded.current=Math.max(lastLoaded.current,last??0);
    }
-  }catch(e){if(version!==requestVersion.current)return;if((e as {status?:number}).status===401)authLost();setError((e as Error).message);setLoading(false)}
+  }catch(e){if(version!==requestVersion.current)return;if((e as {status?:number}).status===401)authLost();else{retry.current.failures++;retry.current.after=Date.now()+Math.min(300000,15000*2**Math.min(retry.current.failures-1,5))}setError((e as Error).message);setLoading(false)}finally{refreshing.current.delete(key)}
  },[acknowledge,authLost,updateThreads]);
- useEffect(()=>{requestVersion.current++;initialHistory.current=true;lastLoaded.current=0;setMessages([]);setHasOlder(false);atBottom.current=true;setNewBelow(false);setLoading(!!employee&&open);setMentionOpen(false);setReferenceOpen(false);if(employee)void refresh()},[channel,open,employee,sessionActive,refresh]);
+ useEffect(()=>{requestVersion.current++;initialHistory.current=true;lastLoaded.current=0;setMessages([]);setHasOlder(false);atBottom.current=true;setNewBelow(false);setLoading(!!employee&&open);setMentionOpen(false);setReferenceOpen(false);if(employee)void refresh(true)},[channel,open,employee,sessionActive,refresh]);
  useEffect(()=>{const timer=setInterval(()=>void refresh(),open?5000:15000);const visible=()=>{if(document.visibilityState==="visible")void refresh()};document.addEventListener("visibilitychange",visible);return()=>{clearInterval(timer);document.removeEventListener("visibilitychange",visible)}},[refresh,open]);
  function setDraft(patch:Partial<Draft>){setDrafts(old=>({...old,[channel]:{...(old[channel]??{body:"",reference:"",clientId:""}),...patch,clientId:crypto.randomUUID()}}))}
  function choose(next:string){onChannel(next);setChoosing(false);setSearch("");setReferenceOpen(false)}
@@ -58,7 +60,7 @@ export default function TeamChat({open,onOpen,onClose,channel,onChannel,orders,o
  <button className={"team-chat-launcher "+(open?"is-open ":"")+(unread>0?"has-unread":"")} onClick={open?onClose:onOpen} aria-expanded={open} aria-controls="team-chat-panel" title={mentions?"Você foi mencionado em "+mentions+" mensagem(ns)":unread?unread+" mensagem(ns) não lida(s)":"Mensagens da equipe"} aria-label={open?"Recolher mensagens":"Abrir mensagens"}><MessageSquare size={19}/><span>Mensagens</span>{unread>0&&<b>{unread>99?"99+":unread}</b>}{mentions>0&&<AtSign size={14} aria-label="Você foi mencionado"/>}</button>
  {open&&<aside ref={panel} id="team-chat-panel" className="team-chat-panel" role="dialog" aria-label="Chat da equipe" onKeyDown={e=>{if(e.key==="Escape"){e.stopPropagation();onClose()}}}>
  <header className="team-chat-header"><div><strong>Mensagens</strong><small>{employee?"Conectado como "+employee:"Comunicação da equipe"}</small></div><div><button aria-label="Fechar mensagens" onClick={onClose}><X size={19}/></button></div></header>
- {error&&<div className="team-chat-error" role="alert">{error}<button onClick={()=>void refresh()}>Tentar novamente</button></div>}
+ {error&&<div className="team-chat-error" role="alert">{error}<button onClick={()=>void refresh(true)}>Tentar novamente</button></div>}
  <div className="team-chat-channel"><button aria-expanded={choosing} onClick={()=>{setChoosing(!choosing);setReferenceOpen(false);setSearch("")}}>{choosing?<ArrowLeft size={16}/>:<MessageSquare size={16}/>}<span>{choosing?"Escolher conversa":title}</span><ChevronDown size={15}/></button>{currentOrder&&!choosing&&<button className="text-action" onClick={()=>onOpenOrder(currentOrder.id)}>Abrir pedido</button>}</div>
  {choosing?<div className="team-chat-chooser"><label className="team-chat-search"><Search size={15}/><input aria-label="Buscar conversa por pedido" placeholder="Pedido ou cliente" value={search} onChange={e=>setSearch(e.target.value)}/></label><button className="team-chat-thread" onClick={()=>choose("general")}><span><strong>Conversa geral</strong><small>Recados e dúvidas da equipe</small></span>{!!threads.find(t=>t.channel==="general")?.unread&&<b>{threads.find(t=>t.channel==="general")?.unread}</b>}</button><p>Conversas por pedido</p>{foundOrders.map(order=>{const thread=threads.find(t=>t.channel==="order:"+order.id);return <button className="team-chat-thread" key={order.id} onClick={()=>choose("order:"+order.id)}><span><strong>{order.codigo}</strong><small>{order.cliente}</small></span>{!!thread?.mentions&&<AtSign size={14}/>} {!!thread?.unread&&<b>{thread.unread}</b>}</button>})}{!foundOrders.length&&<p>Nenhum pedido encontrado.</p>}{foundOrders.length===60&&<small>Refine a busca para encontrar outros pedidos.</small>}</div>:<>
  <div ref={scroller} className="team-chat-messages" aria-label="Histórico da conversa" onScroll={()=>{const node=scroller.current;if(!node)return;atBottom.current=node.scrollHeight-node.scrollTop-node.clientHeight<45;if(atBottom.current){setNewBelow(false);const last=messages.at(-1);if(last)void acknowledge(last.id,channel)}}}>

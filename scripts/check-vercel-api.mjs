@@ -7,9 +7,14 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import {PGlite} from '@electric-sql/pglite';
 import {createPostgresDatabase} from '../lib/postgres-adapter.mjs';
-const pg=new PGlite();
+import {createClient} from '@libsql/client';
+import {createTursoDatabase} from '../lib/turso-adapter.mjs';
+import {migrateTurso} from './turso-migrations.mjs';
+const turso=process.argv.includes('--turso')?createClient({url:':memory:',intMode:'bigint'}):null;
+const pg=turso?null:new PGlite();
 const sql={query:(text,values)=>({text,values,then:(yes,no)=>pg.query(text,values).then(yes,no)}),transaction:queries=>pg.transaction(async tx=>{const results=[];for(const q of queries)results.push(await tx.query(q.text,q.values));return results})};
-const db=createPostgresDatabase(sql),root=process.cwd(),cache=new Map();let currentHeaders=new Headers();
+const db=turso?createTursoDatabase(turso):createPostgresDatabase(sql);
+const root=process.cwd(),cache=new Map();let currentHeaders=new Headers();
 const testEnv={DB:db,NOMUS_API_KEY:''};
 cache.set(path.resolve('lib/server-env.ts'),{env:testEnv});
 let nomusFetch=()=>{throw Error('Network access forbidden in API test')};
@@ -37,7 +42,7 @@ async function call(route,method='GET',body,options={}){
  return (await load('app/api/'+route+'/route.ts'))[method](request);
 }
 try{
- await pg.exec(readFileSync('migrations/postgres/001_initial.sql','utf8'));
+ if(turso)await migrateTurso(turso);else await pg.exec(readFileSync('migrations/postgres/001_initial.sql','utf8'));
  // A database quota refusal must not be reported as a bad PIN or expose provider details.
  const quotaError=Object.assign(new Error('Server error (HTTP status 402): {"message":"Your account or project has exceeded the quota. Upgrade your plan to increase limits."} PRIVATE_CONNECTION_DETAIL'),{name:'NeonDbError'});
  testEnv.DB={prepare(){throw quotaError}};
@@ -88,6 +93,10 @@ try{
  await saveSync(seed());
  const automatic=await (await call('nomus','POST',{productionOps:[]})).json();assert.equal(automatic.refreshStatus,'cached');assert.equal(captures,0);
  const manual=await (await call('nomus','POST',{productionOps:[],refresh:true})).json();assert.equal(manual.refreshStatus,'updated');assert.notEqual(manual.lastChecked,savedCapture);assert.equal(captures,1);
+ const unchanged=await (await call('nomus','POST',{productionOps:[],knownRevision:manual.nomusRevision})).json();
+ assert.equal(unchanged.unchanged,true);assert.equal(unchanged.snapshot,undefined);assert.equal(unchanged.nomusRevision,manual.nomusRevision);assert.equal(captures,1);
+ assert.equal((await call('nomus','POST',{productionOps:[],knownRevision:-1})).status,400);
+
  assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'cooldown');assert.equal(captures,1);
  await saveSync(seed());
  const entered=new Promise(r=>enteredCapture=r);
@@ -105,6 +114,6 @@ try{
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');
- assert.equal((await pg.query('SELECT COUNT(*) FROM chat_sessions')).rows[0].count,0);
- console.log('OK Vercel APIs: PIN login, origin checks, forged identity rejection, protected routes, revision conflict, PostgreSQL chat and logout. No real database or ERP used.');
-}finally{await pg.close()}
+ assert.equal(await db.prepare('SELECT COUNT(*) AS count FROM chat_sessions').first('count'),0);
+ console.log('OK Vercel APIs: PIN login, origin checks, forged identity rejection, protected routes, revision conflict, chat and logout ('+(turso?'Turso/libSQL':'PostgreSQL')+'). No real database or ERP used.');
+}finally{if(turso)turso.close();else await pg.close()}

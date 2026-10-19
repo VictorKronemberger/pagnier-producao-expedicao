@@ -41,6 +41,7 @@ const unitTests=[
  "check-documentation-ready.mjs",
  "check-team-chat.mjs",
  "check-postgres.mjs",
+ "check-turso.mjs",
  "check-vercel-api.mjs"
 ];
 // Legacy browser scripts remain available for the old local D1 panel.

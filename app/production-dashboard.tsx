@@ -159,24 +159,27 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  const flush=()=>{if(document.visibilityState==="hidden")void saver.current?.flush()};
  window.addEventListener("beforeunload",fn);document.addEventListener("visibilitychange",flush);
  return()=>{window.removeEventListener("beforeunload",fn);document.removeEventListener("visibilitychange",flush)}},[]);
- const productionRequests=useRef<string[]>([]);
+ const productionRequests=useRef<string[]>([]),nomusRevision=useRef<number|undefined>(undefined);
  const requestProduction=useCallback((names:string[])=>{const changed=names.join(",")!==productionRequests.current.join(",");productionRequests.current=names;if(changed&&names.length)window.dispatchEvent(new Event("nomus-production-request"))},[]);
  const ready=!!data;
  useEffect(()=>{
- if(!ready||!sessionActive)return;let stopped=false,busy=false;
+ if(!ready||!sessionActive)return;let stopped=false,busy=false,failures=0,retryAfter=0;
  async function poll(manual=false){
- if(busy||!manual&&document.visibilityState==="hidden")return;
+ if(busy||!manual&&(document.visibilityState==="hidden"||Date.now()<retryAfter))return;
  busy=true;setNomusBusy(true);if(manual)setSyncNotice("");
  try{
- const d:Sync&{snapshot:Snapshot}=await request("/api/nomus",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productionOps:productionRequests.current,...(manual?{refresh:true}:{})})});
+ const d:Partial<Sync>&{snapshot?:Snapshot;nomusRevision?:number}=await request("/api/nomus",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productionOps:productionRequests.current,knownRevision:nomusRevision.current,...(manual?{refresh:true}:{})})});
  if(!stopped){
- setSync(d);setSyncError(d.refreshStatus==="failed"?d.message:"");
- setData(old=>old?{...old,snapshot:d.snapshot}:old);
- const received=receiveOrders(boardRef.current,d.snapshot.grupos);if(received!==boardRef.current){boardRef.current=received;setBoard(received);saver.current?.enqueue(received)}
+ failures=0;retryAfter=0;nomusRevision.current=d.nomusRevision;
+ setSync(old=>({...old,...d}) as Sync);setSyncError(d.refreshStatus==="failed"?d.message||"Consulta indisponível.":"");
+ if(d.snapshot){
+ const snapshot=d.snapshot;setData(old=>old?{...old,snapshot}:old);
+ const received=receiveOrders(boardRef.current,snapshot.grupos);if(received!==boardRef.current){boardRef.current=received;setBoard(received);saver.current?.enqueue(received)}
+ }
  if(manual)setSyncNotice(d.refreshStatus==="busy"?"Já existe uma captura em andamento. Aguarde a próxima atualização.":d.refreshStatus==="cooldown"?"Aguarde alguns segundos antes de tentar novamente; após uma falha, o intervalo é de um minuto.":d.refreshStatus==="unconfigured"?"A conexão com o Nomus não está configurada.":d.refreshStatus==="failed"?"":d.refreshStatus==="updated"?"Etapa capturada. As demais páginas continuam na atualização automática.":"Dados consultados. A captura continua por páginas.");
  else if(d.refreshStatus==="updated")setSyncNotice("");
  }
- }catch(e){if(!stopped){setSyncError(e instanceof Error?e.message:"Consulta ao Nomus indisponível.");setSyncNotice("")}}finally{busy=false;if(!stopped)setNomusBusy(false)}
+ }catch(e){failures++;retryAfter=Date.now()+Math.min(300000,30000*2**Math.min(failures-1,4));if(!stopped){setSyncError(e instanceof Error?e.message:"Consulta ao Nomus indisponível.");setSyncNotice("")}}finally{busy=false;if(!stopped)setNomusBusy(false)}
  }
  refreshNomus.current=poll;
  void poll();const id=setInterval(()=>void poll(),22000);const focus=()=>void poll();window.addEventListener("focus",focus);window.addEventListener("nomus-production-request",focus);

@@ -6,7 +6,7 @@ import path from 'node:path';
 // Dedicated local server and synthetic API responses: no ERP or database access.
 const port=5176, debugPort=9246, base=`http://127.0.0.1:${port}`;
 const dir=path.resolve('.sites-runtime/nomus-qa');mkdirSync(dir,{recursive:true});
-const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port',String(port)],{windowsHide:true,stdio:'ignore',env:{...process.env,DATABASE_URL:'',NOMUS_API_KEY:''}});
+const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port',String(port)],{windowsHide:true,stdio:'ignore',env:{...process.env,DATABASE_PROVIDER:'neon',DATABASE_URL:'',TURSO_DATABASE_URL:'',TURSO_AUTH_TOKEN:'',NOMUS_API_KEY:''}});
 const browser=spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',['--headless','--disable-gpu','--no-first-run',`--remote-debugging-port=${debugPort}`,`--user-data-dir=${path.join(dir,'browser')}`,'about:blank'],{windowsHide:true,stdio:'ignore'});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const order={id:'PV TESTE',codigo:'PV TESTE',cliente:'Cliente de teste',liberacao:'released',vinculo:'linked',criacao:'2026-10-25',ordens:[{id:'OP TESTE',nome:'OP TESTE',produto:'Produto teste 10g',quantidade:'80',unidade:'UNID',criacao:'2026-10-25'}]};
@@ -16,7 +16,7 @@ const snapshot={consultadoEm:'2026-10-25T12:00:00Z',ordensConsultadas:1,grupos:[
 {id:'OP9003',nome:'OP9003',produto:'Interna cancelada',quantidade:'4',unidade:'KG',criacao:'2026-10-25',situacaoNomus:'Cancelada'},
 {id:'OP9004',nome:'OP9004',produto:'Situação não informada',quantidade:'2',unidade:'UNID',criacao:'2026-10-25'}]};
 const board={sequence:['PV TESTE'],details:{'PV TESTE':{responsavel:'Victor',situacao:'Programado',nota:''}}};
-let socket,employee='Victor';const errors=[];let captures=0,lastCapture='2026-10-25T12:00:00.000Z',refreshMode='updated';
+let socket,employee='Victor';const errors=[];let captures=0,lastCapture='2026-10-25T12:00:00.000Z',refreshMode='updated',nomusRevision=1,compactReplies=0,requests=0,transportFailure=false;
 try {
  for(let i=0;i<100;i++){try{if((await fetch(base)).ok)break}catch{}if(i===99)throw Error('QA server did not start');await pause(300)}
  let pages;for(let i=0;i<60;i++){try{pages=await(await fetch(`http://127.0.0.1:${debugPort}/json`)).json();if(pages.some(p=>p.type==='page'))break}catch{}await pause(200)}
@@ -24,17 +24,20 @@ try {
  let id=0;const pending=new Map();
  function send(method,params={}){return new Promise((resolve,reject)=>{const key=++id;pending.set(key,{resolve,reject});socket.send(JSON.stringify({id:key,method,params}))})}
  async function respond(m){
-  const u=new URL(m.request.url);let payload={};
+  const u=new URL(m.request.url);let payload={},responseCode=200;
   if(u.pathname==='/api/chat/session')payload={employee,employees:[{name:'Victor',registered:true}]};
   else if(u.pathname==='/api/board')payload={snapshot,board,revision:0,updatedAt:null,updatedBy:null};
   else if(u.pathname==='/api/nomus'){
- const input=m.request.postData?JSON.parse(m.request.postData):{};
+ const input=m.request.postData?JSON.parse(m.request.postData):{};requests++;
  if(input.refresh){captures++;await pause(500);if(refreshMode==='updated')lastCapture='2026-10-25T12:01:22.000Z';}
- payload={snapshot,changes:{},configured:refreshMode!=='unconfigured',lastChecked:lastCapture,partial:refreshMode==='failed',message:'Falha simulada na consulta',page:1,pedidosCoberturaCompleta:true,pedidosIdentificados:1,refreshStatus:input.refresh?refreshMode:'cached'};
+ if(input.refresh&&['updated','failed'].includes(refreshMode))nomusRevision++;
+ payload={nomusRevision,snapshot,changes:{},configured:refreshMode!=='unconfigured',lastChecked:lastCapture,partial:refreshMode==='failed',message:'Falha simulada na consulta',page:1,pedidosCoberturaCompleta:true,pedidosIdentificados:1,refreshStatus:input.refresh?refreshMode:'cached'};
+ if(input.knownRevision===nomusRevision){delete payload.snapshot;delete payload.changes;payload.unchanged=true;compactReplies++}
+ if(transportFailure){responseCode=503;payload={error:'Banco indisponível no teste'}}
  }
   else if(u.pathname==='/api/chat')payload={employee,threads:[],messages:[],hasMore:false};
   else if(u.pathname==='/api/packing-clients')payload={clientes:[],porPedido:{}};
-  await send('Fetch.fulfillRequest',{requestId:m.requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'application/json'}],body:Buffer.from(JSON.stringify(payload)).toString('base64')});
+  await send('Fetch.fulfillRequest',{requestId:m.requestId,responseCode,responseHeaders:[{name:'Content-Type',value:'application/json'}],body:Buffer.from(JSON.stringify(payload)).toString('base64')});
  }
  socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.id){const p=pending.get(m.id);pending.delete(m.id);if(m.error)p?.reject(Error(m.error.message));else p?.resolve(m.result)}else if(m.method==='Fetch.requestPaused')void respond(m.params).catch(e=>errors.push(e.message));else if(m.method==='Runtime.exceptionThrown')errors.push(JSON.stringify(m.params.exceptionDetails));else if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')errors.push(m.params.args.map(a=>a.value||a.description).join(' '))};
  async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value}
@@ -73,6 +76,8 @@ try {
  assert.equal(await evaluate('document.querySelector(".nomus-capture details").open'),false);
  await shot('capture-error-compact');
  refreshMode='cooldown';await evaluate('document.querySelector(".nomus-refresh").click()');await until('document.querySelector(".nomus-capture-notice")?.textContent.includes("Aguarde alguns segundos")');
+ assert(compactReplies>0,'browser sends the known revision and accepts responses without snapshot');
+ assert(await evaluate('!!document.querySelector(".kanban-card")'),'unchanged response preserves orders');
  await evaluate(`document.querySelector('.app-navigation button[aria-label="Pendências"]').click()`);await until('!!document.querySelector(".cancelled-category")');
  assert.equal(await evaluate('document.querySelector(".pending-category h3 b").textContent'),'2');
  assert.equal(await evaluate('document.querySelector(".cancelled-category h3 b").textContent'),'2');
@@ -92,8 +97,15 @@ try {
  assert(await evaluate('(()=>{const r=document.querySelector(".nomus-capture details>div").getBoundingClientRect();return r.left>=0&&r.right<=innerWidth})()'),'detail popup stays within mobile viewport in other workspaces');
  await evaluate('document.body.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true}))');
  assert.equal(await evaluate('document.querySelector(".nomus-capture details").open'),false);
+ transportFailure=true;await evaluate('document.querySelector(".nomus-refresh").click()');
+ await until('document.querySelector(".nomus-capture-notice")?.textContent.includes("Banco indisponível no teste")');
+ const afterFailure=requests;
+ await evaluate('for(let i=0;i<5;i++)window.dispatchEvent(new Event("focus"))');await pause(300);
+ assert.equal(requests,afterFailure,'background attempts respect outage backoff');
+ transportFailure=false;refreshMode='updated';await evaluate('document.querySelector(".nomus-refresh").click()');
+ await until('!document.querySelector(".nomus-refresh").disabled');assert.equal(requests,afterFailure+1,'manual refresh remains available during backoff');
  refreshMode='unconfigured';await evaluate('document.querySelector(".nomus-refresh").click()');await until('document.querySelector(".nomus-capture-notice")?.textContent.includes("não está configurada")');
  assert.equal(await evaluate('document.querySelector(".nomus-refresh").disabled'),true);
  assert.equal(errors.length,0,errors.join('\n'));
- console.log('PASS Nomus UI: capture date/time, immediate refresh, duplicate prevention, failure preservation, cooldown, separate cancellations, pending counts, search, dark mode and mobile.');
+ console.log('PASS Nomus UI: revision-only responses, preserved snapshot, outage backoff, manual retry, capture date/time, immediate refresh, duplicate prevention, failure preservation, cooldown, separate cancellations, pending counts, search, dark mode and mobile.');
 } finally {socket?.close();browser.kill();server.kill();}

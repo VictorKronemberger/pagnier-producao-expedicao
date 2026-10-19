@@ -13,15 +13,22 @@
     "check": "tsc --noEmit",
     "test": "node scripts/check-system.mjs",
     "test:postgres": "node scripts/check-postgres.mjs",
-    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-postgres.mjs",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-database.mjs",
     "db:export-local": "node scripts/export-local-db.mjs",
     "db:import-local": "node --env-file-if-exists=.env.local scripts/import-local-db.mjs",
     "legacy:install:ci": "node scripts/install-ci.mjs",
-    "legacy:db:generate": "drizzle-kit generate"
+    "legacy:db:generate": "drizzle-kit generate",
+    "db:migrate:turso": "node --env-file-if-exists=.env.local scripts/migrate-turso.mjs",
+    "db:export-neon": "node --env-file-if-exists=.env.local scripts/export-neon-db.mjs",
+    "db:import-turso": "node --env-file-if-exists=.env.local scripts/import-turso-db.mjs",
+    "test:turso": "node scripts/check-turso.mjs",
+    "test:api:turso": "node scripts/check-vercel-api.mjs --turso"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.7.1",
+    "@libsql/client": "0.18.0",
+    "@neondatabase/serverless": "^1.0.0",
     "@shadcn/react": "^0.3.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -45,12 +52,12 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "3.6.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.76",
-    "@neondatabase/serverless": "^1.0.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
     "@cloudflare/workers-types": "4.20260515.1",
+    "@electric-sql/pglite": "^0.3.14",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
@@ -68,8 +75,7 @@
     "typescript": "5.9.3",
     "vinext": "1.0.0-beta.5",
     "vite": "8.0.13",
-    "wrangler": "4.92.0",
-    "@electric-sql/pglite": "^0.3.14"
+    "wrangler": "4.92.0"
   },
   "type": "module",
   "overrides": {

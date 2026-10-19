@@ -8,8 +8,8 @@ export async function GET(){if(!await getPanelUser())return json({error:"Entre p
 export async function POST(request:Request){
  if(!await getPanelUser())return json({error:"Entre para atualizar."},401);
  if(request.headers.get("origin")!==new URL(request.url).origin)return json({error:"Origem inválida."},403);
- let requestedProduction:string[]=[],manualRefresh=false;
+ let requestedProduction:string[]=[],manualRefresh=false,knownRevision:number|undefined;
  const body=await request.text();
- if(body){try{const value=JSON.parse(body);if(typeof value?.refresh!=="undefined"&&typeof value.refresh!=="boolean")return json({error:"Atualização inválida."},400);manualRefresh=value?.refresh===true;if(!Array.isArray(value.productionOps)||value.productionOps.length>20||value.productionOps.some((n:unknown)=>typeof n!=="string"||!/^OP[0-9]{1,12}$/.test(n)))return json({error:"Lista de OPs inválida."},400);requestedProduction=value.productionOps}catch{return json({error:"Consulta inválida."},400)}}
- try{return json(await pollNomus(requestedProduction,manualRefresh))}catch{return json({error:"Consulta indisponível. Dados anteriores preservados."},503)}
+ if(body){try{const value=JSON.parse(body);if(typeof value?.refresh!=="undefined"&&typeof value.refresh!=="boolean")return json({error:"Atualização inválida."},400);manualRefresh=value?.refresh===true;if(value.knownRevision!==undefined&&(!Number.isSafeInteger(value.knownRevision)||value.knownRevision<0))return json({error:"Revisão inválida."},400);knownRevision=value.knownRevision;if(!Array.isArray(value.productionOps)||value.productionOps.length>20||value.productionOps.some((n:unknown)=>typeof n!=="string"||!/^OP[0-9]{1,12}$/.test(n)))return json({error:"Lista de OPs inválida."},400);requestedProduction=value.productionOps}catch{return json({error:"Consulta inválida."},400)}}
+ try{return json(await pollNomus(requestedProduction,manualRefresh,knownRevision))}catch{return json({error:"Consulta indisponível. Dados anteriores preservados."},503)}
 }
