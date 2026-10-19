@@ -67,3 +67,11 @@ assert.deepEqual(expandedPaths,[opsPath(1)]);
 assert.equal(expanded.opsScopeStart,'2026-09-01');assert(expanded.bootstrapCompletedAt);
 assert.match(decodeURIComponent(expandedPaths[0]),/dataHoraCriacao>=2026-09-01T00:00:00/);
 console.log('OK expanded September scope reloads OPs without repeating saved order pagination.');
+
+const legacyCompleted={...initialSync(empty),opsScopeStart:'2026-10-01',bootstrapCompletedAt:serverTime,ordersComplete:true,opsComplete:true,partial:false,turn:1};
+const automaticExpansion=await syncStep(legacyCompleted,'fixture',{now:serverTime,fetcher:async()=>Response.json(Array.from({length:50},(_,i)=>({nome:'EXCLUDED'+i,idEmpresa:2})))});
+assert(!automaticExpansion.bootstrapCompletedAt);assert.equal(automaticExpansion.opsComplete,false);assert.equal(automaticExpansion.pages.ops,2);
+const remainingPaths=[];
+await bootstrapNomus({...automaticExpansion,bootstrapCompletedAt:serverTime},'fixture',{fetcher:async url=>{remainingPaths.push(url.split('/rest/')[1]);return Response.json([])}});
+assert.deepEqual(remainingPaths,[opsPath(2)]);
+console.log('OK automatic scope expansion invalidates old completion; bootstrap resumes partial scopes even with a legacy marker.');
