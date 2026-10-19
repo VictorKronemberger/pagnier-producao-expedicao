@@ -46,7 +46,7 @@ assert.equal(expiredPath,'clientes?pagina=1');assert(expired.catalogNextAt.clien
 console.log('OK persistent catalog cache and daily revalidation.');
 
 // Hydration failure also saves cooldown; resume only fetches the missing detail.
-let hydrationSaved;const needsName=initialSync(empty);needsName.ordersComplete=true;needsName.opsComplete=true;
+let hydrationSaved;const needsName=initialSync(empty);needsName.ordersComplete=true;needsName.opsComplete=true;needsName.bootstrapCompletedAt=serverTime;
 needsName.orders[1]={code:'PV',companyId:1,clientId:9,createdDate:'2026-10-19',items:[]};
 await assert.rejects(()=>bootstrapNomus(needsName,'fixture',{now:()=>serverTime,checkpoint:async s=>hydrationSaved=structuredClone(s),fetcher:async()=>new Response('',{status:429,headers:{'Retry-After':'120'}})}));
 assert.equal(hydrationSaved.retryAt,Date.parse(serverTime)+120000);assert.equal(hydrationSaved.partial,true);assert(!hydrationSaved.bootstrapCompletedAt);
