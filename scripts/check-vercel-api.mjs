@@ -75,8 +75,8 @@ try{
  response=await call('board','PUT',{revision:0,board});assert.equal(response.status,200,await response.text());
  assert.equal((await call('board','PUT',{revision:0,board})).status,409,'stale revisions rejected');
  assert.equal((await call('board','PUT',{revision:1,board},{headers:{origin:'https://foreign.test'}})).status,403);
- response=await call('chat','POST',{channel:'general',body:'@Cythia confira o pedido',clientId:'vercel-api-test-1'});assert.equal(response.status,201);
- const message=(await response.json()).message;assert.deepEqual(message.mentions,['Cythia']);assert.equal(typeof message.id,'number');
+ response=await call('chat','POST',{channel:'general',body:'@Cyntia confira o pedido',clientId:'vercel-api-test-1'});assert.equal(response.status,201);
+ const message=(await response.json()).message;assert.deepEqual(message.mentions,['Cyntia']);assert.equal(typeof message.id,'number');
  assert.equal((await call('chat/read','POST',{channel:'general',id:message.id})).status,200);
  assert.equal((await call('chat','POST',{channel:'order:missing',body:'teste',clientId:'vercel-api-test-2'})).status,404);
  const summary=await (await call('chat')).json();assert.equal(summary.messages.length,1);assert.equal(summary.threads[0].lastId,message.id);
