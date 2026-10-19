@@ -28,7 +28,7 @@ Validação isolada do tema: após `npm run build`, execute `node scripts/check-
 
 ## Captura do Nomus e ordens canceladas
 
-O quadro “Última captura do Nomus” mostra data e hora de Brasília da última etapa bem-sucedida em todas as áreas. “Atualizar Nomus” antecipa a próxima consulta GET, sem aguardar o intervalo automático de 22 segundos. A integração continua por páginas: uma captura não confirma que toda a base foi revisada. Chamadas simultâneas compartilham um bloqueio; cliques manuais têm intervalo de 10 segundos e falhas mantêm a espera de um minuto. Os dados e o horário confirmado são preservados em falhas.
+O indicador compacto “Última captura” mostra a data e hora da última etapa bem-sucedida em todas as áreas, com a data completa e o fuso de Brasília na ajuda. “Atualizar” antecipa a próxima consulta GET, sem aguardar o intervalo automático de 22 segundos. A integração continua por páginas: uma captura não confirma que toda a base foi revisada. Chamadas simultâneas compartilham um bloqueio; cliques manuais têm intervalo de 10 segundos e falhas mantêm a espera de um minuto. Os dados e o horário confirmado são preservados em falhas.
 
 Em Pendências, “Ordens canceladas” reúne as OPs cujo status no Nomus é explicitamente `Cancelada`, com os pedidos vinculados quando conhecidos. Elas ficam fora da contagem de correções de vínculo e da lista de produção interna; o status ausente não é tratado como cancelamento. Status já registrados são recuperados do histórico local, e novas canceladas aparecem conforme a captura percorre as páginas. Busca e filtros de data se aplicam também a essa seção.
 

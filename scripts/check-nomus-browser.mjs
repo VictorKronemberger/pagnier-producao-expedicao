@@ -48,6 +48,10 @@ try {
  await navigate();await until('!!document.querySelector(".nomus-capture time")');
  assert.equal(await evaluate('document.querySelector(".nomus-capture time").dateTime'),lastCapture);
  assert.match(await evaluate('document.querySelector(".nomus-capture time").textContent'),/09:00:00/);
+ assert(await evaluate('(()=>{const el=document.querySelector(".nomus-capture"),r=el.getBoundingClientRect(),toolbar=document.querySelector(".workspace-toolbar");return getComputedStyle(el).display==="flex"&&r.height<=40&&r.x===parseFloat(getComputedStyle(toolbar).paddingLeft)})()'),'capture styles loaded: compact row aligned with toolbar');
+ await shot('capture-compact-desktop');
+ await evaluate('document.querySelector(".theme-toggle").click()');await shot('capture-compact-alternate-theme');
+ await evaluate('document.querySelector(".theme-toggle").click()');
  await evaluate('document.querySelector(".nomus-refresh").click();document.querySelector(".nomus-refresh").click()');
  await until('document.querySelector(".nomus-refresh").disabled');
  await until('!document.querySelector(".nomus-refresh").disabled');
