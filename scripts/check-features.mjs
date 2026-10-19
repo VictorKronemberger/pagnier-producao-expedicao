@@ -28,3 +28,10 @@ assert(!matchesCreation({criacao:"2026-10-26"},"range","2026-10-21","2026-10-25"
 assert(isInternal({unidade:"KG"}));assert(isInternal({produto:"Mistura 1kg"}));assert(!isInternal({produto:"SKG123",unidade:"UNID"}));
 assert.equal(groupInternal([{produto:"P",nome:"OP2",criacao:"2026-10-25"},{produto:"P",nome:"OP1",criacao:"2026-10-21"}])[0].orders[0].nome,"OP1");
 console.log('OK: autosave, recuperação, conflito, intervalo inclusivo e produção interna.');
+let archiveWrites=[];
+const archiveSaver=createAutosave({delay:5,onState:()=>{},onSaved:()=>{},read:async()=>({board:b(''),revision:0}),write:async(board,revision)=>{archiveWrites.push(structuredClone(board));return {revision:revision+1}}});
+archiveSaver.reset(b(''),0);const archived=b('');archived.details.PV.arquivado=true;archiveSaver.enqueue(archived);await archiveSaver.flush();
+assert.equal(archiveWrites.length,1);assert.equal(archiveWrites[0].details.PV.arquivado,true);
+const restored=b('');restored.details.PV.arquivado=false;archiveSaver.enqueue(restored);await archiveSaver.flush();
+assert.equal(archiveWrites.length,2);assert.equal(archiveWrites[1].details.PV.arquivado,false);archiveSaver.dispose();
+console.log('OK archive-only and restore-only changes trigger durable autosave.');

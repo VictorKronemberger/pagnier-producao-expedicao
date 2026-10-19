@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {receiveOrders} from '../lib/intake.mjs';
 import {initialSync} from '../lib/nomus-sync.mjs';
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
@@ -111,6 +112,24 @@ try{
  assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'updated');
  testEnv.NOMUS_API_KEY='';
  console.log('OK Nomus refresh: immediate GET, unchanged timestamp on failure, one request across concurrent tabs, cooldown, expired lease recovery and authenticated same-origin access.');
+ // Archiving is independent of physical completion and survives a fresh board read.
+ const archiveSeed=seed();
+ archiveSeed.orders={1:{code:'OLD-PV',companyId:1,clientId:9,createdDate:'2026-09-01',items:[{productId:7,quantity:'2',status:1}]}};
+ await saveSync(archiveSeed);
+ const loaded=await (await call('board')).json(),archiveBoard={...loaded.board,details:{...loaded.board.details,'OLD-PV':{responsavel:'',nota:'Preservar orientação',situacao:'A programar',arquivado:true}}};
+ const readsBeforeArchive=captures;
+ response=await call('board','PUT',{revision:loaded.revision,board:archiveBoard});assert.equal(response.status,200,await response.text());
+ const archived=await (await call('board')).json();assert.equal(archived.board.details['OLD-PV'].arquivado,true);assert.equal(archived.board.details['OLD-PV'].situacao,'A programar');assert.equal(archived.board.details['OLD-PV'].envio,undefined);assert.equal(captures,readsBeforeArchive);
+ assert.equal((await call('board','PUT',{revision:loaded.revision,board:archiveBoard})).status,409);
+ const released=[{id:'OLD-PV',codigo:'OLD-PV',liberacao:'released',ordens:[{id:'OP1'}]}];
+ assert.deepEqual(receiveOrders(archived.board,released),archived.board,'Nomus refresh must not requeue an archived order');
+ const invalid=structuredClone(archived.board);invalid.details['OLD-PV'].arquivado='yes';
+ assert.equal((await call('board','PUT',{revision:archived.revision,board:invalid})).status,400);
+ archived.board.details['OLD-PV'].arquivado=false;
+ response=await call('board','PUT',{revision:archived.revision,board:archived.board});assert.equal(response.status,200,await response.text());
+ const restored=await (await call('board')).json();assert(!restored.board.details['OLD-PV'].arquivado);assert.equal(restored.board.details['OLD-PV'].nota,'Preservar orientação');assert.equal(restored.board.details['OLD-PV'].situacao,'A programar');
+ assert(receiveOrders(restored.board,released).sequence.includes('OLD-PV'));
+ console.log('OK archive/restore without OP, shipment or procedures; durable metadata, conflict checks and no automatic requeue.');
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');

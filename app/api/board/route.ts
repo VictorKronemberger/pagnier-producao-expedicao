@@ -35,6 +35,7 @@ export async function PUT(request:Request){
  const available=[...new Map([...snapshot.grupos,...(snapshot.pedidos??[])].map((g:any)=>[g.id,g])).values()] as any[];
  const groups=operationalGroups(snapshot,data?.board??{details:{}});
  const allowed=new Set<string>(groups.map((g:any)=>g.id));
+ const detailIds=new Set<string>(available.map((g:any)=>g.id));
  const {revision}=data??{};let board=data?.board;if(board&&Array.isArray(board.sequence)&&board.details&&typeof board.details==="object"&&!Array.isArray(board.details))board=scopeBoard(board,excludedCodes);
  if(!Number.isInteger(revision)||revision<0||!board||!Array.isArray(board.sequence)||board.sequence.length>allowed.size||new Set(board.sequence).size!==board.sequence.length||board.sequence.some((id:unknown)=>typeof id!=="string"||!allowed.has(id))||!board.details||typeof board.details!=="object"||Array.isArray(board.details))return json({error:"Fila inválida."},400);
  try{assertReleaseTransitions(previous,board,groups)}catch(e){return json({error:e instanceof Error?e.message:"Confira a liberação do pedido."},400)}
@@ -42,9 +43,10 @@ export async function PUT(request:Request){
  let invoices;try{invoices=normalizeInvoices(board.invoices??scopeBoard({...previous,sequence:previous.sequence??[]},excludedCodes).invoices??{},[...snapshot.grupos,...(snapshot.pedidos??[])].map((p:any)=>p.id))}catch(e){return json({error:e instanceof Error?e.message:"Invoice inválida."},400)}
  try{assertNoInvoiceRemoval(scopeBoard({...previous,sequence:previous.sequence??[]},excludedCodes).invoices,invoices)}catch(e){return json({error:e instanceof Error?e.message:"Exclusão de invoice inválida."},400)}
  let boxModels;try{boxModels=normalizeBoxModels(board.boxModels??previous.boxModels??[])}catch(e){return json({error:e instanceof Error?e.message:"Modelo inválido."},400)}
- const details:Record<string,{responsavel:string;responsavelConferencia:string;nota:string;situacao:string;etiqueta:string;conferidas:string[];expedicao:string[];vistoNomus:string;empresa:string;atendimentoEstoque?:boolean;envio?:Shipment}>={};
+ const details:Record<string,{responsavel:string;responsavelConferencia:string;nota:string;situacao:string;etiqueta:string;conferidas:string[];expedicao:string[];vistoNomus:string;empresa:string;arquivado?:boolean;atendimentoEstoque?:boolean;envio?:Shipment}>={};
  for(const [id,d] of Object.entries(board.details) as [string,any][]){
- if(!allowed.has(id)||!d||typeof d.responsavel!=="string"||d.responsavel.length>100||typeof d.nota!=="string"||d.nota.length>1500||!states.includes(d.situacao))return json({error:"Revise responsável, observação e situação."},400);
+ if(!detailIds.has(id)||!d||typeof d.responsavel!=="string"||d.responsavel.length>100||typeof d.nota!=="string"||d.nota.length>1500||!states.includes(d.situacao))return json({error:"Revise responsável, observação e situação."},400);
+ if(d.arquivado!==undefined&&typeof d.arquivado!=="boolean")return json({error:"Arquivamento inválido."},400);
  if(d.atendimentoEstoque!==undefined&&typeof d.atendimentoEstoque!=="boolean")return json({error:"Tipo de atendimento inválido."},400);
  if(d.atendimentoEstoque&&!previous.details[id]?.atendimentoEstoque){const reason=stockEligibility(available.find(g=>g.id===id));if(reason)return json({error:reason},400)}
  if(previous.details[id]?.atendimentoEstoque&&!d.atendimentoEstoque)return json({error:"Mantenha o atendimento de estoque para preservar o trabalho deste pedido."},400);
@@ -52,11 +54,11 @@ export async function PUT(request:Request){
  const empresa=d.empresa??"";if(!["","Maya","Sacred Connection","Four visions","Katukina","Haux Haux","Nayaku"].includes(empresa))return json({error:"Empresa inválida."},400);
  const etiqueta=d.etiqueta??"";const conferidas=d.conferidas??[];const expedicao=d.expedicao??[];
  const vistoNomus=d.vistoNomus??"";if(typeof vistoNomus!=="string"||vistoNomus.length>30||(vistoNomus&&!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(vistoNomus)))return json({error:"Confirmação de leitura inválida."},400);
- const opIds=new Set([...groups.find((g:any)=>g.id===id)!.ordens.map((o:any)=>o.id),...(previous.details[id]?.conferidas??[]),...(previous.details[id]?.expedicao??[])]);
+ const opIds=new Set([...(groups.find((g:any)=>g.id===id)?.ordens??[]).map((o:any)=>o.id),...(previous.details[id]?.conferidas??[]),...(previous.details[id]?.expedicao??[])]);
  if(!["","Urgente","Atenção","Normal"].includes(etiqueta)||!Array.isArray(conferidas)||new Set(conferidas).size!==conferidas.length||conferidas.some((v:unknown)=>typeof v!=="string"||!opIds.has(v)))return json({error:"Etiqueta ou checklist inválida."},400);
  if(!Array.isArray(expedicao)||new Set(expedicao).size!==expedicao.length||expedicao.some((v:unknown)=>typeof v!=="string"||!opIds.has(v)))return json({error:"Conferência da expedição inválida."},400);
  let envio:Shipment|undefined;try{envio=d.envio===undefined?previous.details[id]?.envio:normalizeShipment(d.envio,shipmentOps(d.envio,id,groups),previous.details[id]?.envio)}catch(e){return json({error:e instanceof Error?e.message:"Dados de envio inválidos."},400)}
- details[id]={...(d.atendimentoEstoque?{atendimentoEstoque:true}:{}),responsavel:d.responsavel.trim(),responsavelConferencia:responsavelConferencia.trim(),nota:d.nota.trim(),situacao:d.situacao,etiqueta,conferidas,expedicao,vistoNomus,empresa,envio};
+ details[id]={...(d.arquivado?{arquivado:true}:{}),...(d.atendimentoEstoque?{atendimentoEstoque:true}:{}),responsavel:d.responsavel.trim(),responsavelConferencia:responsavelConferencia.trim(),nota:d.nota.trim(),situacao:d.situacao,etiqueta,conferidas,expedicao,vistoNomus,empresa,envio};
  }
  try{assertDispatchTransitions(previous,{...board,details,invoices},groups)}catch(e){return json({error:e instanceof Error?e.message:"Conclua a conferência antes do envio."},400)}
  const payload=JSON.stringify(preserveExcludedNotes(previous,{sequence:board.sequence,details,invoices,boxModels},excludedCodes));const now=new Date().toISOString();

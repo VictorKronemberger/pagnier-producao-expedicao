@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"19",updatedAt:"15/10/2026"};
+export const manualEdition = {revision:"20",updatedAt:"19/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -136,7 +136,7 @@ export const tutorials = [
       },
       {
         "title": "Confira o recorte de datas",
-        "text": "Pedidos sem OP entram no catálogo a partir de 01/10/2026. No quadro, o filtro considera a criação das OPs. Pedidos com OP vinculada são preservados; mudar o filtro não altera o conteúdo dos envios.",
+        "text": "Pedidos sem OP entram no catálogo a partir de 01/09/2026. No quadro, o filtro considera a criação das OPs. Pedidos com OP vinculada são preservados; mudar o filtro não altera o conteúdo dos envios.",
         "short": "Se o pedido não aparecer, confira os filtros de data."
       },
       {
@@ -180,13 +180,18 @@ export const tutorials = [
       },
       {
         "title": "Confira as mudanças do Nomus",
-        "text": "Abra Novidades neste pedido para comparar Campo, Antes e Agora. Marcar como visto confirma a leitura; não altera os dados do Nomus.",
+        "text": "Abra Novidades neste pedido para comparar Produto, Quantidade e Unidade das OPs nas colunas Antes e Agora. Marcar como visto confirma a leitura; não altera os dados do Nomus.",
         "short": "Abra Novidades neste pedido para ver o que mudou."
       },
       {
         "title": "Revise diferenças de quantidade",
         "text": "Se a OP passou de 100 para 80 no Nomus, o painel compara a quantidade atual com a primeira captura disponível. Confira a diferença e ajuste a preparação do envio ao que realmente existe.",
         "short": "Compare a quantidade atual da OP com a anterior antes de preparar o envio."
+      },
+      {
+        "title": "Arquive pedidos antigos",
+        "short": "Abra o pedido e clique em Arquivar pedido. Para recuperar, use Pedidos de venda → Arquivados → Restaurar pedido.",
+        "text": "Use Arquivar pedido no rodapé do cartão ou nos detalhes em Pedidos de venda para retirar um pedido antigo do quadro, mesmo sem iniciar produção, conferir, embalar ou emitir documentos. Aguarde Salvo. O arquivamento fica salvo para a equipe e não marca o pedido como enviado nem altera o Nomus. Dados e documentos existentes são preservados. Para retomar o trabalho, escolha Arquivados no filtro Exibir pedidos de Pedidos de venda e clique em Restaurar pedido; o pedido mantém sua etapa anterior e as regras normais do fluxo."
       }
     ],
     "done": "Os produtos estão disponíveis para conferência e as diferenças foram verificadas.",
@@ -196,7 +201,7 @@ export const tutorials = [
     "code": "POP-03",
     "owner": "Supervisor e equipe de produção",
     "objective": "Disponibilizar os produtos previstos e identificar diferenças de quantidade.",
-    "records": "Prioridade, etapa, responsável e orientações no cartão; quantidades da OP e histórico consultado.",
+    "records": "Prioridade, etapa, responsável e orientações no cartão; quantidades da OP e histórico consultado. O arquivamento fica registrado no pedido e pode ser revertido pelo catálogo.",
     "deviation": "Em caso de impedimento, registre a orientação no pedido. Para cartões com impedimento anterior, revise as notas e use Retomar produção. Ajuste a quantidade da OP no Nomus conforme a rotina real e confira a atualização antes de embalar."
   },
   {
@@ -582,6 +587,11 @@ export const tutorials = [
         "title": "Recupere o salvamento",
         "text": "Se aparecer Não salvo, mantenha a tela aberta e use Tentar novamente. Se outra sessão mudou o quadro, preserve suas edições e recarregue para conferir a versão compartilhada antes de continuar.",
         "short": "Se aparecer Não salvo, mantenha a tela aberta e tente novamente. Em conflito, preserve suas edições antes de recarregar."
+      },
+      {
+        "title": "Confira a última captura",
+        "short": "Consulte o horário da captura e use Atualizar quando precisar antecipar a consulta.",
+        "text": "O horário ao lado do indicador do Nomus mostra a última etapa capturada. Atualizar antecipa uma etapa paginada; uma captura em andamento é compartilhada pela equipe. Dados já carregados permanecem salvos. Falhas preservam a captura anterior e espaçam as tentativas. A carga inicial concluída é reutilizada; consultas periódicas continuam necessárias para identificar alterações. OPs canceladas aparecem em Pendências, na lista de canceladas, e não contam como pendências de vínculo."
       }
     ],
     "done": "A pendência foi corrigida na origem ou você identificou o que ainda depende de consulta ou salvamento.",

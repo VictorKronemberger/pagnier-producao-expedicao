@@ -1,11 +1,54 @@
 export const manual = [
- {"category": "documents", "title": "Como evitar repetir dados entre caixas e documentos", "text": "Abra a documentação pelo pedido para retomar o registro existente. O packing list abre a próxima pendência; a invoice existente abre diretamente quando só há uma para o pedido. Ao criar ou selecionar um pedido na invoice, os dados disponíveis e os produtos são aproveitados juntos. Use Aproveitar dados e produtos para completar vazios e revisar alterações da origem. Em Itens e caixas do packing list, Completar dados repetidos aproveita campos documentais vazios da mesma OP em outras caixas, preservando dados já preenchidos. Envios agrupados exigem confirmar o destinatário e o AWB da invoice direta, pois eles podem ser diferentes do envio compartilhado."},
-  {"category": "documents", "title": "Como baixar o packing list em Excel", "text": "Abra Packing lists → envio existente → Revisar e baixar → Baixar Excel editável. Aguarde Salvo. As caixas precisam estar conferidas fisicamente. A planilha contém Packing list, Produtos, Caixas e Guia e pendências. Dados documentais incompletos são sinalizados na planilha e não impedem a cópia editável. O PDF final exige resolver as pendências e confirmar a revisão. Alterações no Excel não voltam ao painel; atualize também o sistema se precisar gerar aqui um PDF com os mesmos dados. Nenhum download registra o despacho."},
-  {"category":"documents","title":"Packing list: fluxo e continuidade entre funcionários","text":"A lista separa A preparar, Prontos para revisão e Despachados. Pesquise pelo pedido, cliente ou invoice. Ao abrir um envio existente, o painel retoma a primeira pendência dos dados salvos. Siga 1. Pedidos e destinatário → 2. Itens e caixas → 3. Dados do documento → 4. Revisar e baixar. A próxima ação e os nomes da conferência das caixas e da revisão documental ajudam outro funcionário a continuar. Consulte as explicações nos ícones de ajuda. Confirme ou descarte seleções de pedidos antes de sair; aguarde Salvo para encerrar o trabalho. Etapas preenchidas não significam PDF emitido. Quem finalizar deve revisar o documento e marcar a confirmação final. Mudanças físicas exigem nova conferência das caixas. Excluir um rascunho preserva os volumes, o destinatário e os dados do envio."},
-  {"category":"expedition","title":"Quantidade atendida pela produção","text":"Em Conferir produtos, Atendido pela produção mostra a quantidade produzida na última operação do roteiro da OP no Nomus, sem somar etapas intermediárias. Na OP continua mostrando a quantidade programada atual e Em Caixas 40 continua mostrando o conteúdo das caixas. Falta embalar mantém o saldo da OP menos o conteúdo das Caixas 40. Produção pendente indica zero na última operação; Produção parcial indica quantidade menor que a OP e mostra quanto falta produzir; Produção concluída indica quantidade igual ou maior que a OP. Consultando Nomus indica dados ainda não consultados; Sem confirmação indica que a consulta não confirmou um valor, sem afirmar que a produção está pendente. Zero só aparece quando informado pelo Nomus. Os dados são consultados em lotes para os produtos da página visível, enquanto o painel estiver aberto. Em Detalhes, confira o horário da consulta e a operação utilizada. Essa coluna não confirma baixa de estoque nem o atendimento comercial do pedido. Pedidos separados do estoque não exibem essa coluna."},
-  {"category":"expedition","title":"Caixa 40 automática para 250 g, 500 g e 1 kg","text":"Quando todos os itens do envio têm peso explícito de 250 g, 500 g ou 1 kg na descrição, a montagem abre diretamente em Montar Caixa 40 e não permite criar caixas menores. A verificação inclui itens do pedido ainda sem OP e todos os pedidos agrupados. Outros tamanhos, pesos desconhecidos ou descrições ambíguas mantêm a escolha de modalidade. Caixas menores já registradas são preservadas para revisão; novos produtos vão direto para a Caixa 40. Consulte o ícone de ajuda ao lado da modalidade para ver essa regra."},
-  {"category":"production","title":"Etapas do quadro simplificado","text":"O quadro mostra Aguardando liberação → Na fila → Produzindo → Preparar envio → Enviados. Pedidos anteriormente bloqueados aparecem em Produzindo com o aviso Impedimento registrado; confira a orientação do supervisor e use Retomar produção quando o impedimento estiver resolvido. Pedidos que estavam em Conferir aparecem em Preparar envio. A conferência dos produtos continua dentro do pedido, em Expedição → Conferir produtos. As anotações, caixas e registros anteriores são preservados."},
-  {"category":"start","title":"Menu superior do sistema","text":"A barra superior reúne Produção, Pedidos de venda, Packing lists, Invoices, Pendências, Caixas e Manual. No celular, deslize o menu na horizontal para acessar as demais opções. No computador, o tipo de produção, a busca e os filtros compartilham a mesma faixa abaixo do título. No celular, os controles se ajustam à largura da tela. Caixas abre os modelos reutilizáveis; a montagem continua dentro de cada envio."},
+  {
+    "category": "production",
+    "title": "Como arquivar um pedido antigo sem concluir as etapas",
+    "text": "Abra o cartão do pedido e clique em Arquivar pedido no rodapé. O mesmo botão está nos detalhes de Pedidos de venda. Não é preciso produzir, conferir, embalar, emitir documentos ou registrar despacho. Aguarde Salvo. O pedido sai do quadro de trabalho, mas seus dados continuam no catálogo e as consultas do Nomus não o recolocam automaticamente. Arquivar não registra envio nem encerra nada no Nomus. Em Pedidos de venda, selecione Arquivados no filtro Exibir pedidos e use Restaurar pedido para devolver o pedido ao fluxo na etapa que já estava salva. O arquivamento é compartilhado com a equipe."
+  },
+  {
+    "category": "start",
+    "title": "Período dos pedidos e das OPs",
+    "text": "O painel considera OPs criadas desde 01/09/2026, incluindo o primeiro dia de setembro. Pedidos sem OP também entram no catálogo a partir dessa data. Pedidos antigos com OP vinculada são preservados. Medicina Sagrada permanece excluída. Para restringir a consulta na tela, abra Filtros e escolha Intervalo de datas. O filtro não apaga dados nem altera envios."
+  },
+  {
+    "category": "support",
+    "title": "Última captura, atualização e dados já carregados",
+    "text": "Consulte o horário no indicador do Nomus. Atualizar antecipa uma etapa da consulta; os demais dados são carregados por páginas. A carga inicial fica salva no Turso e não precisa ser refeita ao entrar no site. Consultas periódicas verificam alterações, sem duplicar pedidos. Em caso de falha, a última captura confirmada é preservada. O histórico das OPs mostra Produto, Quantidade e Unidade. OPs canceladas podem ser consultadas em Pendências e não contam como pendências de vínculo."
+  },
+  {
+    "category": "documents",
+    "title": "Como evitar repetir dados entre caixas e documentos",
+    "text": "Abra a documentação pelo pedido para retomar o registro existente. O packing list abre a próxima pendência; a invoice existente abre diretamente quando só há uma para o pedido. Ao criar ou selecionar um pedido na invoice, os dados disponíveis e os produtos são aproveitados juntos. Use Aproveitar dados e produtos para completar vazios e revisar alterações da origem. Em Itens e caixas do packing list, Completar dados repetidos aproveita campos documentais vazios da mesma OP em outras caixas, preservando dados já preenchidos. Envios agrupados exigem confirmar o destinatário e o AWB da invoice direta, pois eles podem ser diferentes do envio compartilhado."
+  },
+  {
+    "category": "documents",
+    "title": "Como baixar o packing list em Excel",
+    "text": "Abra Packing lists → envio existente → Revisar e baixar → Baixar Excel editável. Aguarde Salvo. As caixas precisam estar conferidas fisicamente. A planilha contém Packing list, Produtos, Caixas e Guia e pendências. Dados documentais incompletos são sinalizados na planilha e não impedem a cópia editável. O PDF final exige resolver as pendências e confirmar a revisão. Alterações no Excel não voltam ao painel; atualize também o sistema se precisar gerar aqui um PDF com os mesmos dados. Nenhum download registra o despacho."
+  },
+  {
+    "category": "documents",
+    "title": "Packing list: fluxo e continuidade entre funcionários",
+    "text": "A lista separa A preparar, Prontos para revisão e Despachados. Pesquise pelo pedido, cliente ou invoice. Ao abrir um envio existente, o painel retoma a primeira pendência dos dados salvos. Siga 1. Pedidos e destinatário → 2. Itens e caixas → 3. Dados do documento → 4. Revisar e baixar. A próxima ação e os nomes da conferência das caixas e da revisão documental ajudam outro funcionário a continuar. Consulte as explicações nos ícones de ajuda. Confirme ou descarte seleções de pedidos antes de sair; aguarde Salvo para encerrar o trabalho. Etapas preenchidas não significam PDF emitido. Quem finalizar deve revisar o documento e marcar a confirmação final. Mudanças físicas exigem nova conferência das caixas. Excluir um rascunho preserva os volumes, o destinatário e os dados do envio."
+  },
+  {
+    "category": "expedition",
+    "title": "Quantidade atendida pela produção",
+    "text": "Em Conferir produtos, Atendido pela produção mostra a quantidade produzida na última operação do roteiro da OP no Nomus, sem somar etapas intermediárias. Na OP continua mostrando a quantidade programada atual e Em Caixas 40 continua mostrando o conteúdo das caixas. Falta embalar mantém o saldo da OP menos o conteúdo das Caixas 40. Produção pendente indica zero na última operação; Produção parcial indica quantidade menor que a OP e mostra quanto falta produzir; Produção concluída indica quantidade igual ou maior que a OP. Consultando Nomus indica dados ainda não consultados; Sem confirmação indica que a consulta não confirmou um valor, sem afirmar que a produção está pendente. Zero só aparece quando informado pelo Nomus. Os dados são consultados em lotes para os produtos da página visível, enquanto o painel estiver aberto. Em Detalhes, confira o horário da consulta e a operação utilizada. Essa coluna não confirma baixa de estoque nem o atendimento comercial do pedido. Pedidos separados do estoque não exibem essa coluna."
+  },
+  {
+    "category": "expedition",
+    "title": "Caixa 40 automática para 250 g, 500 g e 1 kg",
+    "text": "Quando todos os itens do envio têm peso explícito de 250 g, 500 g ou 1 kg na descrição, a montagem abre diretamente em Montar Caixa 40 e não permite criar caixas menores. A verificação inclui itens do pedido ainda sem OP e todos os pedidos agrupados. Outros tamanhos, pesos desconhecidos ou descrições ambíguas mantêm a escolha de modalidade. Caixas menores já registradas são preservadas para revisão; novos produtos vão direto para a Caixa 40. Consulte o ícone de ajuda ao lado da modalidade para ver essa regra."
+  },
+  {
+    "category": "production",
+    "title": "Etapas do quadro simplificado",
+    "text": "O quadro mostra Aguardando liberação → Na fila → Produzindo → Preparar envio → Enviados. Pedidos anteriormente bloqueados aparecem em Produzindo com o aviso Impedimento registrado; confira a orientação do supervisor e use Retomar produção quando o impedimento estiver resolvido. Pedidos que estavam em Conferir aparecem em Preparar envio. A conferência dos produtos continua dentro do pedido, em Expedição → Conferir produtos. As anotações, caixas e registros anteriores são preservados."
+  },
+  {
+    "category": "start",
+    "title": "Menu superior do sistema",
+    "text": "A barra superior reúne Produção, Pedidos de venda, Packing lists, Invoices, Pendências, Caixas e Manual. No celular, deslize o menu na horizontal para acessar as demais opções. No computador, o tipo de produção, a busca e os filtros compartilham a mesma faixa abaixo do título. No celular, os controles se ajustam à largura da tela. Caixas abre os modelos reutilizáveis; a montagem continua dentro de cada envio."
+  },
   {
     "category": "production",
     "title": "Aguardando liberação e Na fila",
@@ -14,7 +57,7 @@ export const manual = [
   {
     "category": "start",
     "title": "Busca, filtros e atalhos",
-    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pelo número do pedido de venda, cliente, OP ou produto. Para PD 012345, a busca aceita 12345, 012345, PD012345 ou PV 12345; zeros à esquerda, espaços e o prefixo PD/PV não impedem encontrar o número. A mesma busca funciona em Pedidos de venda e respeita os filtros ativos do quadro. Remova um filtro pelo X sem perder os demais. A data ao lado do número no cartão, no cabeçalho do pedido e em Pedidos de venda é a criação do pedido no Nomus. Sem data indica que ela ainda não está disponível; a data da OP não é usada em seu lugar. O intervalo permitido começa em 01/10/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio. Em Filtros → Envio, escolha FedEx, DHL, Outras, A definir ou Múltiplas. Remover o filtro volta a exibir os demais pedidos."
+    "text": "Use / ou Ctrl/Cmd + K para focar a busca. F abre os filtros quando você não está digitando. Busque pelo número do pedido de venda, cliente, OP ou produto. Para PD 012345, a busca aceita 12345, 012345, PD012345 ou PV 12345; zeros à esquerda, espaços e o prefixo PD/PV não impedem encontrar o número. A mesma busca funciona em Pedidos de venda e respeita os filtros ativos do quadro. Remova um filtro pelo X sem perder os demais. A data ao lado do número no cartão, no cabeçalho do pedido e em Pedidos de venda é a criação do pedido no Nomus. Sem data indica que ela ainda não está disponível; a data da OP não é usada em seu lugar. O intervalo permitido começa em 01/09/2026; Sem data separa OPs sem criação confirmada. O filtro não reduz as caixas ou itens já salvos no envio. Em Filtros → Envio, escolha FedEx, DHL, Outras, A definir ou Múltiplas. Remover o filtro volta a exibir os demais pedidos."
   },
   {
     "category": "start",

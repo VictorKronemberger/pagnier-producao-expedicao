@@ -8,7 +8,7 @@ const state=await bootstrapNomus(initialSync(empty),'fixture',{checkpoint:async(
  if(path==='pedidos?pagina=1')return Response.json([
   {id:1,idEmpresa:1,codigoPedido:'PV1',idPessoaCliente:9,dataCriacao:'15/10/2026',itensPedido:[{idProduto:8,quantidade:2,status:2}]},
   {id:2,idEmpresa:2,codigoPedido:'PV2',idPessoaCliente:10,dataCriacao:'15/10/2026',itensPedido:[]},
-  {id:3,idEmpresa:1,codigoPedido:'OLD',idPessoaCliente:11,dataCriacao:'01/09/2026',itensPedido:[]}
+  {id:3,idEmpresa:1,codigoPedido:'OLD',idPessoaCliente:11,dataCriacao:'01/08/2026',itensPedido:[]}
  ]);
  if(path===opsPath(1))return Response.json([{id:20,nome:'OP20',idEmpresa:1,idProduto:7,descricaoProduto:'Produto teste',unidadeMedida:'UNID',qtde:2,status:'Cancelada',dataHoraCriacao:'15/10/2026',itensPedido:[{idPedido:1,nomeCliente:'Cliente teste'}]}]);
  if(path==='produtos/8')return Response.json({descricao:'Segundo produto',siglaUnidadeMedida:'KG'});
@@ -58,3 +58,12 @@ let interruptedRefresh;
 await assert.rejects(()=>bootstrapNomus(state,'fixture',{refresh:true,checkpoint:async next=>interruptedRefresh=next,fetcher:async()=>new Response('',{status:503})}));
 assert(!interruptedRefresh.bootstrapCompletedAt);assert.equal(interruptedRefresh.ordersComplete,false);
 console.log('OK failed explicit refresh cannot reuse a stale completion marker.');
+
+// Expanding the date scope invalidates only the OP completion marker, retaining saved orders.
+const priorScope={...state,opsScopeStart:'2026-10-01',pages:{...state.pages,ops:4}};
+const expandedPaths=[];
+const expanded=await bootstrapNomus(priorScope,'fixture',{fetcher:async url=>{expandedPaths.push(url.split('/rest/')[1]);return Response.json([])}});
+assert.deepEqual(expandedPaths,[opsPath(1)]);
+assert.equal(expanded.opsScopeStart,'2026-09-01');assert(expanded.bootstrapCompletedAt);
+assert.match(decodeURIComponent(expandedPaths[0]),/dataHoraCriacao>=2026-09-01T00:00:00/);
+console.log('OK expanded September scope reloads OPs without repeating saved order pagination.');

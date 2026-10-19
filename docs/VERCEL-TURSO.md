@@ -21,7 +21,7 @@ Para esta opção, não execute os comandos de exportação/importação das se�
 npm run db:capture-nomus
 ```
 
-As OPs são consultadas com `query=dataHoraCriacao>=2026-10-01T00:00:00`, correspondente ao recorte do painel, com paginação até uma página curta. Erro HTTP 400 não é tratado como fim da lista.
+As OPs são consultadas com `query=dataHoraCriacao>=2026-09-01T00:00:00`, correspondente ao recorte do painel, com paginação até uma página curta. Erro HTTP 400 não é tratado como fim da lista.
 
 O operador usa apenas GET no ERP, respeita o recorte de datas/empresa e mantém cancelamentos. Cada etapa fica salva no Turso; a reserva usa o relógio do banco para funcionar mesmo se o computador estiver adiantado ou atrasado. A revisão impede sobrescrever outra captura. Há uma pausa entre consultas e a execução para em falhas da API, preservando o progresso.
 
