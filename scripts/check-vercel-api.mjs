@@ -38,6 +38,21 @@ async function call(route,method='GET',body,options={}){
 }
 try{
  await pg.exec(readFileSync('migrations/postgres/001_initial.sql','utf8'));
+ // A database quota refusal must not be reported as a bad PIN or expose provider details.
+ const quotaError=Object.assign(new Error('Server error (HTTP status 402): {"message":"Your account or project has exceeded the quota. Upgrade your plan to increase limits."} PRIVATE_CONNECTION_DETAIL'),{name:'NeonDbError'});
+ testEnv.DB={prepare(){throw quotaError}};
+ for(const method of ['GET','POST']){
+  const failed=await call('chat/session',method,method==='POST'?{name:'Victor',pin:'5826'}:undefined);
+  assert.equal(failed.status,503);
+  assert.equal(failed.headers.get('set-cookie'),null);
+  const body=await failed.json();assert.equal(body.code,'DATABASE_QUOTA_EXCEEDED');assert.match(body.error,/limite de uso/);assert.doesNotMatch(JSON.stringify(body),/PRIVATE_CONNECTION_DETAIL|5826|Upgrade your plan/);
+ }
+ testEnv.DB={prepare(){throw new Error('PRIVATE_CONNECTION_DETAIL')}};
+ const unavailable=await call('chat/session');assert.equal(unavailable.status,503);
+ const unavailableBody=await unavailable.json();assert.equal(unavailableBody.code,'SERVICE_UNAVAILABLE');assert.doesNotMatch(unavailableBody.error,/PRIVATE_CONNECTION_DETAIL|mensagens/);
+ testEnv.DB=db;
+ assert.equal((await call('chat/session')).status,200,'session recovers once database is available');
+
  for(const [route,methods] of [['board',['GET','PUT','DELETE']],['nomus',['GET','POST']],['packing-clients',['GET']],['chat',['GET','POST']],['chat/read',['POST']]]){
   for(const method of methods){
    const response=await call(route,method,method==='GET'?undefined:{},{anonymous:true,headers:{'oai-authenticated-user-id':'forged','oai-authenticated-user-email':'forged@example.test'}});

@@ -4,7 +4,15 @@ import {readNomus} from "./nomus-store";
 import {visibleOrderState} from "./order-visibility.mjs";
 import {publicSync} from "./nomus-sync.mjs";
 export function chatJson(data:unknown,status=200,headers:Record<string,string>={}){return Response.json(data,{status,headers:{"Cache-Control":"no-store",...headers}})}
-export function chatFailure(error:unknown){return chatJson({error:error instanceof ChatError?error.message:"Não foi possível acessar as mensagens. Tente novamente."},error instanceof ChatError?error.status:503)}
+export function chatFailure(error:unknown){
+ if(error instanceof ChatError)return chatJson({error:error.message},error.status);
+ // Match the provider's quota refusal, but never expose its raw error or connection details.
+ const quota=typeof error==="object"&&error!==null&&"name" in error&&error.name==="NeonDbError"&&"message" in error&&/exceeded the quota/i.test(String(error.message));
+ return chatJson(quota?{
+  error:"O banco de dados atingiu o limite de uso. O responsável pelo painel precisa liberar o serviço no Neon para permitir o acesso.",
+  code:"DATABASE_QUOTA_EXCEEDED"
+ }:{error:"O serviço do painel está indisponível. Tente novamente em instantes.",code:"SERVICE_UNAVAILABLE"},503);
+}
 export function chatToken(request:Request){const cookies=request.headers.get("cookie")?.split(";").map(s=>s.trim())??[];return cookies.find(s=>s.startsWith("pagnier_employee="))?.slice(17)||cookies.find(s=>s.startsWith("pagnier_chat="))?.slice(13)||""}
 export function chatCookie(request:Request,token:string){return `pagnier_employee=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${token?30*86400:0}${new URL(request.url).protocol==="https:"?"; Secure":""}`}
 export function sessionResponse(request:Request,data:unknown,token:string){const response=chatJson(data);response.headers.append("Set-Cookie",chatCookie(request,token));response.headers.append("Set-Cookie","pagnier_chat=; Path=/api/chat; HttpOnly; SameSite=Strict; Max-Age=0");return response}

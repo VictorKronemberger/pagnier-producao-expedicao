@@ -118,6 +118,7 @@ Acompanhe requisições/CPU na Vercel e armazenamento/consumo no Neon. Os planos
 | Sintoma | Verificação |
 | --- | --- |
 | Build tenta usar Vinext/Cloudflare | Branch ou configuração antiga. Confirme o `package.json` atualizado e `npm run build`. |
+| Banco informa limite de uso / Neon HTTP 402 | Verifique a cota bloqueada no console Neon. A conta/projeto precisa voltar a aceitar conexões; trocar o PIN ou fazer redeploy não libera a cota. O login continua protegido e o botão Tentar novamente verifica a recuperação. |
 | Login informa indisponibilidade | Confira `DATABASE_URL`, conectividade do Neon e execução de `npm run db:migrate`. |
 | Quadro vazio | Banco novo sem importação; confira a chave Nomus e aguarde a coleta paginada. |
 | PIN não funciona após migrar | Confira se `chat_employees` foi importada. Sessões antigas não funcionam na nova instalação. |

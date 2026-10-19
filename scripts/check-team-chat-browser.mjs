@@ -1,7 +1,7 @@
 import {chatTestDatabase} from "../scripts/chat-test-db.mjs";
 import {loginChat,sessionEmployee,sendMessage,chatSummary,readMessages,markRead} from "../lib/team-chat.mjs";
 import {staffNames} from "../lib/staff.mjs";
-const {db:chatDb,sqlite}=chatTestDatabase();let chatEmployee=null,loseResponse=true,passthrough=false;
+const {db:chatDb,sqlite}=chatTestDatabase();let chatEmployee=null,loseResponse=true,passthrough=false,sessionUnavailable=true,sessionChecks=0;
 const chatAllowed=new Set(["PV TESTE","PV SEM OP"]);
 await loginChat(chatDb,{name:"Victor",pin:"5826",register:true});
 import {deleteDraftPacking} from "../lib/packing-delete.mjs";
@@ -34,6 +34,8 @@ try{
  try{
  const input=m.request.postData?JSON.parse(m.request.postData):{};
  if(url.pathname==="/api/chat/session"){
+ sessionChecks++;
+ if(sessionUnavailable){await pause(250);throw Object.assign(new Error('O banco de dados atingiu o limite de uso. O responsável pelo painel precisa liberar o serviço no Neon para permitir o acesso.'),{status:503})}
  if(m.request.method==="POST"){const result=await loginChat(chatDb,input);chatEmployee=result.name;payload={employee:chatEmployee}}
  else if(m.request.method==="DELETE"){chatEmployee=null;payload={ok:true}}
  else payload={employee:chatEmployee,employees:staffNames.map(name=>({name,registered:!!sqlite.prepare("SELECT name FROM chat_employees WHERE name=?").get(name)}))};
@@ -76,6 +78,17 @@ try{
  loginShot=await send('Page.captureScreenshot',{format:'png'});writeFileSync('.sites-runtime/employee-login-mobile.png',Buffer.from(loginShot.data,'base64'));
  await send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
  const fill=async(selector,value,select=false)=>evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(proto,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event(${JSON.stringify(select?'change':'input')},{bubbles:true}));})()`);
+
+ // The outage stays visible when selecting a name; unknown accounts cannot register.
+ await fill('.employee-login-form select','Victor',true);
+ assert.match(await evaluate('document.querySelector(".employee-login-error").textContent'),/limite de uso/);
+ assert.equal(await evaluate('!!document.querySelector(".employee-login-form .text-action")'),false);
+ assert.equal(await evaluate('document.querySelector(".employee-login-form .primary").disabled'),true);
+ sessionUnavailable=false;const beforeRetry=sessionChecks;
+ await evaluate('document.querySelector(".employee-login-error button").click();document.querySelector(".employee-login-error button").click()');
+ await until('!document.querySelector(".employee-login-error")');
+ assert.equal(sessionChecks,beforeRetry+1,'retry cannot create concurrent requests');
+ assert.equal(await evaluate('!!document.querySelector(".employee-login-form .text-action")'),false,'registered employees cannot recreate their PIN');
 
  await fill('.employee-login-form select','Pedro',true);await evaluate(`document.querySelector('.employee-login-form .text-action').click()`);
  await fill('[aria-label="PIN de acesso"]','2846');await fill('[aria-label="Confirmar PIN de acesso"]','2846');await evaluate(`document.querySelector('.employee-login-form').requestSubmit()`);await until(`!!document.querySelector('.team-chat-launcher')`);await waitForSave();
@@ -122,7 +135,14 @@ try{
  chatEmployee=null;await evaluate(`document.dispatchEvent(new Event('visibilitychange'))`);await until(`!!document.querySelector('.employee-login-form')`);
  assert.equal(await evaluate(`document.querySelector('.employee-login-form select').disabled`),true);
  assert.equal(await evaluate(`!!document.querySelector('[hidden] .kanban')`),true);
+ sessionUnavailable=true;
+ await fill('[aria-label="PIN de acesso"]','5826');await evaluate(`document.querySelector('.employee-login-form').requestSubmit()`);
+ await until('document.querySelector(".employee-login-error")?.textContent.includes("limite de uso")');
+ assert.equal(await evaluate(`document.querySelector('[aria-label="Mensagem para a equipe"]').value`),'Rascunho preservado durante a nova entrada');
+ sessionUnavailable=false;await evaluate('document.querySelector(".employee-login-error button").click()');await until('!document.querySelector(".employee-login-error")');
+ assert.equal(await evaluate('document.querySelector(".employee-login-form select").value'),'Victor','recovery preserves locked employee and mounted dashboard');
+ assert.equal(await evaluate('document.querySelector(".employee-login-form select").disabled'),true);
  await fill('[aria-label="PIN de acesso"]','5826');await evaluate(`document.querySelector('.employee-login-form').requestSubmit()`);await until(`!document.querySelector('.employee-login-form')`);
  assert.equal(await evaluate(`document.querySelector('[aria-label="Mensagem para a equipe"]').value`),'Rascunho preservado durante a nova entrada');
- console.log('OK site login/chat: protected APIs, first PIN before dashboard, unread/title without opening chat, session expiry and draft preservation, identity switch, shared messages, retry deduplication, mentions, references, order action, mobile, unread and persistence.');
+ console.log('OK site login/chat: quota outage, blocked registration, single retry, recovery with preserved draft, protected APIs, first PIN before dashboard, unread/title without opening chat, session expiry and draft preservation, identity switch, shared messages, retry deduplication, mentions, references, order action, mobile, unread and persistence.');
 }finally{socket?.close();browser.kill();sqlite.close()}
