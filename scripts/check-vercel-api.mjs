@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {initialSync} from '../lib/nomus-sync.mjs';
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -9,7 +10,9 @@ import {createPostgresDatabase} from '../lib/postgres-adapter.mjs';
 const pg=new PGlite();
 const sql={query:(text,values)=>({text,values,then:(yes,no)=>pg.query(text,values).then(yes,no)}),transaction:queries=>pg.transaction(async tx=>{const results=[];for(const q of queries)results.push(await tx.query(q.text,q.values));return results})};
 const db=createPostgresDatabase(sql),root=process.cwd(),cache=new Map();let currentHeaders=new Headers();
-cache.set(path.resolve('lib/server-env.ts'),{env:{DB:db,NOMUS_API_KEY:''}});
+const testEnv={DB:db,NOMUS_API_KEY:''};
+cache.set(path.resolve('lib/server-env.ts'),{env:testEnv});
+let nomusFetch=()=>{throw Error('Network access forbidden in API test')};
 async function load(file){
  file=path.resolve(file);if(cache.has(file))return cache.get(file);
  if(file.endsWith('.mjs'))return import(pathToFileURL(file).href);
@@ -23,7 +26,7 @@ async function load(file){
   imports[name]=await load(dependency);
  }
  const exports={};
- vm.runInNewContext(source,{exports,require:name=>imports[name],Response,Request,Headers,URL,TextEncoder,Date,console,fetch:()=>{throw Error('Network access forbidden in API test')}},{filename:file});
+ vm.runInNewContext(source,{exports,require:name=>imports[name],Response,Request,Headers,URL,TextEncoder,Date,console,fetch:(...args)=>nomusFetch(...args)},{filename:file});
  cache.set(file,exports);return exports;
 }
 const origin='https://panel.test';let cookie='';
@@ -56,6 +59,34 @@ try{
  assert.equal((await call('chat/read','POST',{channel:'general',id:message.id})).status,200);
  assert.equal((await call('chat','POST',{channel:'order:missing',body:'teste',clientId:'vercel-api-test-2'})).status,404);
  const summary=await (await call('chat')).json();assert.equal(summary.messages.length,1);assert.equal(summary.threads[0].lastId,message.id);
+
+ // Manual refresh: bypass only the normal timer, never a shared lease or retry backoff.
+ assert.equal((await call('nomus','POST',{productionOps:[],refresh:'yes'})).status,400);
+ assert.equal((await call('nomus','POST',{productionOps:[],refresh:true},{headers:{origin:'https://foreign.test'}})).status,403);
+ assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'unconfigured');
+ testEnv.NOMUS_API_KEY='test-only';
+ let captures=0,finishCapture,enteredCapture;
+ nomusFetch=async(_url,options)=>{captures++;assert.equal(options.method,'GET');return Response.json([])};
+ const savedCapture='2026-10-01T12:00:00.000Z';
+ const seed=()=>({...initialSync({grupos:[],semVinculo:[],pedidos:[]}),lastChecked:savedCapture,nextAt:Date.now()+22000});
+ async function saveSync(state){await db.prepare('INSERT INTO production_board(id,payload,revision,updated_at,updated_by) VALUES(?,?,1,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,revision=production_board.revision+1').bind('nomus',JSON.stringify(state),savedCapture,'Test').run()}
+ await saveSync(seed());
+ const automatic=await (await call('nomus','POST',{productionOps:[]})).json();assert.equal(automatic.refreshStatus,'cached');assert.equal(captures,0);
+ const manual=await (await call('nomus','POST',{productionOps:[],refresh:true})).json();assert.equal(manual.refreshStatus,'updated');assert.notEqual(manual.lastChecked,savedCapture);assert.equal(captures,1);
+ assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'cooldown');assert.equal(captures,1);
+ await saveSync(seed());
+ const entered=new Promise(r=>enteredCapture=r);
+ nomusFetch=async(_url,options)=>{captures++;assert.equal(options.method,'GET');enteredCapture();return new Promise(r=>finishCapture=()=>r(Response.json([])))};
+ const running=call('nomus','POST',{productionOps:[],refresh:true});await entered;
+ const concurrent=await (await call('nomus','POST',{productionOps:[],refresh:true})).json();assert.equal(concurrent.refreshStatus,'busy');assert.equal(captures,2);
+ finishCapture();assert.equal((await (await running).json()).refreshStatus,'updated');
+ await saveSync(seed());nomusFetch=async()=>{captures++;return new Response('',{status:503})};
+ const failed=await (await call('nomus','POST',{productionOps:[],refresh:true})).json();assert.equal(failed.refreshStatus,'failed');assert.equal(failed.lastChecked,savedCapture);assert.deepEqual(failed.snapshot.grupos,[]);
+ assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'cooldown');assert.equal(captures,3);
+ const expiredLease={...seed(),leaseUntil:Date.now()-1,nextAt:Date.now()-1};await saveSync(expiredLease);nomusFetch=async()=>Response.json([]);
+ assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'updated');
+ testEnv.NOMUS_API_KEY='';
+ console.log('OK Nomus refresh: immediate GET, unchanged timestamp on failure, one request across concurrent tabs, cooldown, expired lease recovery and authenticated same-origin access.');
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');
