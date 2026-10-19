@@ -20,6 +20,7 @@ const unitTests=[
  "check-invoice-prepare.mjs",
  "check-invoice.mjs",
  "check-nomus-changes.mjs",
+ "check-nomus-bootstrap.mjs",
  "check-order-release.mjs",
  "check-order-visibility.mjs",
  "check-packing-assistant.mjs",

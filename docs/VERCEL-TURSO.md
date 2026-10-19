@@ -11,9 +11,23 @@ Em 19/10/2026, o usuário autorizou a troca do ambiente de produção para um **
 3. Configure `DATABASE_PROVIDER=turso` no ambiente local e, junto com as duas credenciais, no ambiente **Production** da Vercel. Mantenha a chave `NOMUS_API_KEY` existente.
 4. Aplique a configuração em um novo deployment e confira que `/api/chat/session` responde com sucesso.
 5. Na tela de entrada, selecione seu nome e use **Primeiro acesso? Criar meu PIN**. Os PINs antigos, mensagens e alterações manuais não são transferidos.
-6. Após entrar, aguarde a captura paginada do Nomus. O botão de atualizar antecipa uma etapa; o banco não recebe todos os pedidos de uma só vez.
+6. Execute `npm run db:capture-nomus` para completar a carga inicial antes de usar o painel. O comando retoma páginas salvas e busca os nomes necessários aos pedidos visíveis. O botão de atualizar do site antecipa apenas uma etapa.
 
 Para esta opção, não execute os comandos de exportação/importação das seções seguintes. As credenciais ficam no ambiente privado; nenhum dado real do ERP é colocado em `lib/production-snapshot.json`.
+
+## Carga inicial do Nomus
+
+```powershell
+npm run db:capture-nomus
+```
+
+As OPs são consultadas com `query=dataHoraCriacao>=2026-10-01T00:00:00`, correspondente ao recorte do painel, com paginação até uma página curta. Erro HTTP 400 não é tratado como fim da lista.
+
+O operador usa apenas GET no ERP, respeita o recorte de datas/empresa e mantém cancelamentos. Cada etapa fica salva no Turso; a reserva usa o relógio do banco para funcionar mesmo se o computador estiver adiantado ou atrasado. A revisão impede sobrescrever outra captura. Há uma pausa entre consultas e a execução para em falhas da API, preservando o progresso.
+
+O comando retoma pedidos e OPs da página pendente, sem repetir etapas já concluídas. Depois da conclusão registrada, repeti-lo reutiliza o cache sem chamadas ao Nomus. Uma nova varredura completa exige `npm run db:capture-nomus -- --refresh`. O backup anterior fica em `backups/`, ignorado pelo Git; credenciais e dados do ERP não entram no código.
+
+Os nomes de clientes e produtos carregados são reutilizados; os catálogos completos são revalidados a cada 24 horas, e detalhes ausentes de pedidos visíveis podem ser consultados antes disso. As consultas periódicas do site continuam necessárias para detectar mudanças no Nomus. Os registros são atualizados por identificador, sem criar cópias. A carga inicial não restaura anotações, mensagens ou PINs do banco antigo.
 
 ## Migração opcional preservando dados
 
@@ -112,3 +126,5 @@ npm run check
 Os testes usam libSQL e PostgreSQL em memória. Cobrem transferência entre os motores, PINs, lockout, sessões, chat, índices, rollback, destino ocupado, concorrência, autenticação e captura Nomus simulada. Os testes de navegador exigem Edge e APIs interceptadas, conforme `docs/OPERACAO-E-TESTES.md`.
 
 Referências: [SDK libSQL/Turso](https://docs.turso.tech/sdk/ts/reference), [configuração TypeScript](https://docs.turso.tech/sdk/ts/quickstart).
+
+Filtro por campos e datas: [documentação oficial Nomus](https://www.nomus.com.br/blog-industrial/erp-com-api-de-integracao/).

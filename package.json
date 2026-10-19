@@ -22,7 +22,8 @@
     "db:export-neon": "node --env-file-if-exists=.env.local scripts/export-neon-db.mjs",
     "db:import-turso": "node --env-file-if-exists=.env.local scripts/import-turso-db.mjs",
     "test:turso": "node scripts/check-turso.mjs",
-    "test:api:turso": "node scripts/check-vercel-api.mjs --turso"
+    "test:api:turso": "node scripts/check-vercel-api.mjs --turso",
+    "db:capture-nomus": "node --env-file-if-exists=.env.local scripts/capture-nomus.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
