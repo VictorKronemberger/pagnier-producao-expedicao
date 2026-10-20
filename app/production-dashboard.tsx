@@ -58,7 +58,7 @@ type Detail={arquivo?:ArchiveRecord;arquivado?:boolean;atendimentoEstoque?:boole
 type Board={boxModels?:BoxModel[];invoices?:Record<string,Invoice>;sequence:string[];details:Record<string,Detail>};
 type Snapshot={consultadoEm:string;ordensConsultadas:number;grupos:Group[];semVinculo:OP[];pedidos?:Group[]};
 type Data={snapshot:Snapshot;board:Board;revision:number;updatedAt:string|null;updatedBy:string|null};
-type Sync={refreshStatus?:"unconfigured"|"busy"|"cooldown"|"cached"|"failed"|"updated";changes:Record<string,{at:string;items:string[];events?:ChangeEvent[]}>;configured:boolean;lastChecked:string|null;lastCycle:string|null;partial:boolean;message:string;page:number;paginaPedidos?:number;pedidosConsultados?:number;pedidosCoberturaCompleta?:boolean;pedidosIdentificados?:number};
+type Sync={pedidoVarredura?:{page:number;checked:number;pending:number;lastCompleted?:string|null};refreshStatus?:"unconfigured"|"busy"|"cooldown"|"cached"|"failed"|"updated";changes:Record<string,{at:string;items:string[];events?:ChangeEvent[]}>;configured:boolean;lastChecked:string|null;lastCycle:string|null;partial:boolean;message:string;page:number;paginaPedidos?:number;pedidosConsultados?:number;pedidosCoberturaCompleta?:boolean;pedidosIdentificados?:number};
 type Stage="backlog"|"queue"|"doing"|"blocked"|"done"|"shipping"|"ready"|"sent";
 const columns:{id:Stage;title:string;color:string;status:string}[]=[
 {id:"backlog",title:"Aguardando liberação",color:"#c69b52",status:"A programar"},
@@ -282,7 +282,7 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  const csv="\uFEFF"+rows.map(r=>r.map(x=>'"'+String(x).replace(/^[=+@-]/,"'"+String(x)[0]).replaceAll('"','""')+'"').join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="quadro-producao.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
  }
  const showCaptureInStrip=!["invoices","packing","help","sales","archived"].includes(tab);
- const nomusCapture=<NomusCapture lastChecked={sync?.lastChecked} configured={sync?.configured} busy={nomusBusy} disabled={!data||!sessionActive} error={syncError} notice={syncNotice} partial={sync?.partial} onRefresh={()=>void refreshNomus.current(true)}/>;
+ const nomusCapture=<NomusCapture scan={sync?.pedidoVarredura} lastChecked={sync?.lastChecked} configured={sync?.configured} busy={nomusBusy} disabled={!data||!sessionActive} error={syncError} notice={syncNotice} partial={sync?.partial} onRefresh={()=>void refreshNomus.current(true)}/>;
  const saveIndicator=<span title={liveNotice||"Salvamento das alterações do painel"} className={"autosave-status "+(error&&dirty||liveError?"failed":"")} role="status" aria-live="polite">{saving?<LoaderCircle size={15} className="spin"/>:error&&dirty||liveError?<AlertCircle size={15}/>:<Check size={15}/>}<span>{saveText}</span></span>;
  function openCard(id:string){if(Date.now()-lastDragEnd.current<300)return;setSelected(id);setDetailTab("overview");setChangeOpen(false)}
  function nextLabel(id:string){const g=groups.find(g=>g.id===id);if(g&&(awaitsRelease(g,board.details[id])||!canQueue(g)&&!hasStarted(board.details[id])))return "Ver pedido";return ({backlog:"Ver pedido",queue:"Iniciar produção",doing:"Concluir produção",blocked:"Ver o impedimento",done:"Conferir pedido",shipping:"Preparar envio",ready:"Ver envio",sent:"Ver rastreio"})[stage(board,id)]}

@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react";
 import { RefreshCw } from "lucide-react";
 import styles from "./nomus-capture.module.css";
 
-const help = "Horário de Brasília da última etapa concluída. A consulta é feita por páginas; atualizar antecipa a próxima etapa.";
+const help = "Horário de Brasília da última etapa concluída. A consulta é feita por páginas; atualizar antecipa a próxima rodada de consultas.";
 const compactTime = new Intl.DateTimeFormat("pt-BR", {timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit"});
 type Props = {
+  scan?: {page:number;checked:number;pending:number;lastCompleted?:string|null};
   lastChecked?: string | null;
   configured?: boolean;
   partial?: boolean;
@@ -17,7 +18,7 @@ type Props = {
   onRefresh: () => void;
 };
 
-export default function NomusCapture({lastChecked, configured, partial, busy, disabled, error, notice, onRefresh}: Props) {
+export default function NomusCapture({scan,lastChecked, configured, partial, busy, disabled, error, notice, onRefresh}: Props) {
   const details = useRef<HTMLDetailsElement>(null);
   const fullDate = lastChecked ? new Date(lastChecked).toLocaleString("pt-BR", {timeZone: "America/Sao_Paulo"}) + " (Brasília)" : "Nenhuma captura confirmada";
   const status = error ? "Consulta indisponível" : configured === false ? "Nomus não conectado" : partial ? "Base parcial" : configured ? "Nomus conectado" : "Verificando conexão";
@@ -39,6 +40,7 @@ export default function NomusCapture({lastChecked, configured, partial, busy, di
           <strong>Última captura do Nomus</strong>
           <p>{fullDate}</p>
           <small>{status}. {help}</small>
+          {scan&&<p className="nomus-scan-progress">Conferência de PDs: próxima página {scan.page} · {scan.pending} aguardando verificação.{scan.lastCompleted&&<> Última varredura completa: {compactTime.format(new Date(scan.lastCompleted))}.</>}</p>}
           {(error || notice) && <p className={"nomus-capture-notice " + (error ? "is-error " + styles.error : "")}>{error ? error + " A última captura confirmada foi preservada." : notice}</p>}
         </div>
       </details>

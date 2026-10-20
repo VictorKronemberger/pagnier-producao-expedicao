@@ -33,7 +33,7 @@ try {
  const input=m.request.postData?JSON.parse(m.request.postData):{};requests++;selectedRequest=input.orderCode;
  if(input.refresh){captures++;await pause(500);if(refreshMode==='updated')lastCapture='2026-10-25T12:01:22.000Z';}
  if(input.refresh&&['updated','failed'].includes(refreshMode))nomusRevision++;
- payload={nomusRevision,snapshot,changes:{},configured:refreshMode!=='unconfigured',lastChecked:lastCapture,partial:refreshMode==='failed',message:'Falha simulada na consulta',page:1,pedidosCoberturaCompleta:true,pedidosIdentificados:1,refreshStatus:input.refresh?refreshMode:'cached'};
+ payload={pedidoVarredura:{page:8,checked:350,pending:2,lastCompleted:"2026-10-25T11:45:00.000Z"},nomusRevision,snapshot,changes:{},configured:refreshMode!=='unconfigured',lastChecked:lastCapture,partial:refreshMode==='failed',message:'Falha simulada na consulta',page:1,pedidosCoberturaCompleta:true,pedidosIdentificados:1,refreshStatus:input.refresh?refreshMode:'cached'};
  if(input.knownRevision===nomusRevision){delete payload.snapshot;delete payload.changes;payload.unchanged=true;compactReplies++}
  if(transportFailure){responseCode=503;payload={error:'Banco indisponível no teste'}}
  }
@@ -53,6 +53,7 @@ try {
  await navigate();await until('!!document.querySelector(".nomus-capture time")');
  assert.equal(await evaluate('document.querySelector(".nomus-capture time").dateTime'),lastCapture);
  assert.match(await evaluate('document.querySelector(".nomus-capture time").textContent'),/09:00/);
+ assert.match(await evaluate('document.querySelector(".nomus-scan-progress").textContent'),/próxima página 8 · 2 aguardando verificação/);
  await shot('capture-tiny-desktop');
  assert(await evaluate('(()=>{const el=document.querySelector(".nomus-capture"),r=el.getBoundingClientRect();return getComputedStyle(el).display==="flex"&&r.height<=24&&r.width<=90&&el.parentElement.classList.contains("data-strip")})()'),'capture reuses status row with no separate panel');
  const boardTop=await evaluate('document.querySelector(".kanban").getBoundingClientRect().top');

@@ -125,6 +125,19 @@ try{
  nomusFetch=async(url,options)=>{focusedPath=url;assert.equal(options.method,'GET');return Response.json({id:7,idEmpresa:1,codigoPedido:'PV SELECTED',idPessoaCliente:9,itensPedido:[{idProduto:8,quantidade:'4',status:4}]})};
  const focusedReply=await (await call('nomus','POST',{productionOps:[],orderCode:'PV SELECTED',refresh:true})).json();
  assert(focusedPath.endsWith('pedidos/7'));assert.equal(focusedReply.snapshot.pedidos[0].itens[0].status,4);assert(focusedReply.snapshot.pedidos[0].pedidoConsultadoEm);assert.equal(focusedReply.paginaPedidos,22);
+ // Each page checkpoint retains the same shared lease; another browser cannot
+ // multiply the accelerated batch or make its completed first page disappear.
+ await saveSync(seed());let enteredSecond,finishSecond;const secondEntered=new Promise(r=>enteredSecond=r);let batchCalls=0;
+ nomusFetch=async(url,options)=>{
+  assert.equal(options.method,'GET');batchCalls++;
+  if(url.endsWith('pedidos?pagina=1'))return Response.json(Array.from({length:50},(_,i)=>({id:100+i,codigoPedido:'PD QA '+i,idEmpresa:1,idPessoaCliente:9,itensPedido:[]})));
+  assert(url.endsWith('pedidos?pagina=2'));enteredSecond();return new Promise(r=>finishSecond=()=>r(Response.json([])));
+ };
+ const batchRunning=call('nomus','POST',{productionOps:[],refresh:true});await secondEntered;
+ const progressRow=await db.prepare('SELECT payload FROM production_board WHERE id=?').bind('nomus').first();const progress=JSON.parse(progressRow.payload);assert.equal(progress.pages.orders,2);assert.equal(progress.orderScan.nextPage,2);assert(progress.leaseUntil>Date.now());
+ assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'busy');assert.equal(batchCalls,2);
+ finishSecond();const batchResponse=await batchRunning;assert.equal(batchResponse.status,200,await batchResponse.clone().text());const batchView=await batchResponse.json();assert.equal(batchView.refreshStatus,'updated');assert.equal(batchView.pedidoVarredura.page,1);assert(batchView.pedidoVarredura.lastCompleted);
+ console.log('OK paginated batch API: page checkpoint, protected shared lease, sequential requests and visible completion progress.');
  testEnv.NOMUS_API_KEY='';
  console.log('OK Nomus refresh: immediate GET, unchanged timestamp on failure, one request across concurrent tabs, cooldown, expired lease recovery and authenticated same-origin access.');
  // Archiving is independent of physical completion and survives a fresh board read.
