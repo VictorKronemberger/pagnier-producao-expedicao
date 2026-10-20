@@ -59,7 +59,7 @@ try{
  testEnv.DB=db;
  assert.equal((await call('chat/session')).status,200,'session recovers once database is available');
 
- for(const [route,methods] of [['board',['GET','PUT','DELETE']],['nomus',['GET','POST']],['packing-clients',['GET']],['chat',['GET','POST']],['chat/read',['POST']]]){
+ for(const [route,methods] of [['board',['GET','PUT','POST','DELETE']],['nomus',['GET','POST']],['packing-clients',['GET']],['chat',['GET','POST']],['chat/read',['POST']]]){
   for(const method of methods){
    const response=await call(route,method,method==='GET'?undefined:{},{anonymous:true,headers:{'oai-authenticated-user-id':'forged','oai-authenticated-user-email':'forged@example.test'}});
    assert.equal(response.status,401,route+' '+method+' must reject anonymous/forged identity');
@@ -153,6 +153,18 @@ try{
  assert.equal((await call('board','PUT',{revision:ready.revision,board:ready.board})).status,400,'Ready does not bypass dispatch requirements');
  assert.equal((await (await call('board')).json()).board.details['OLD-PV'].situacao,'Pronto para envio');
  console.log('OK ready-for-shipping status: saved, reloaded and dispatch validation preserved.');
+ const archiveInput={action:'archive',orderId:'OLD-PV',revision:ready.revision,archived:true,reason:'nomus_deleted',note:'Confirmado no ERP'};
+ assert.equal((await call('board','POST',archiveInput)).status,400,'deleted reason requires explicit confirmation');
+ assert.equal((await call('board','POST',{...archiveInput,confirmedDeleted:true},{headers:{origin:'https://foreign.test'}})).status,403);
+ response=await call('board','POST',{...archiveInput,confirmedDeleted:true,por:'Forged actor'});assert.equal(response.status,200,await response.clone().text());
+ const archiveResult=await response.json();assert.equal(archiveResult.board.details['OLD-PV'].arquivo.por,'Victor');assert.equal(archiveResult.board.details['OLD-PV'].arquivo.motivo,'nomus_deleted');assert(archiveResult.board.details['OLD-PV'].arquivo.em);
+ assert.equal(archiveResult.board.details['OLD-PV'].nota,'Preservar orientação');assert.equal(archiveResult.board.details['OLD-PV'].situacao,'Pronto para envio');
+ assert.equal((await call('board','POST',{...archiveInput,confirmedDeleted:true})).status,409,'stale archive cannot overwrite another session');
+ const modified=structuredClone(archiveResult.board);modified.details['OLD-PV'].nota='Nota posterior';delete modified.details['OLD-PV'].arquivo;
+ response=await call('board','PUT',{board:modified,revision:archiveResult.revision});assert.equal(response.status,200,await response.text());
+ const preserved=await (await call('board')).json();assert.equal(preserved.board.details['OLD-PV'].arquivo.por,'Victor','normal autosave cannot erase archive metadata');
+ response=await call('board','POST',{action:'archive',orderId:'OLD-PV',revision:preserved.revision,archived:false});assert.equal(response.status,200,await response.clone().text());const unarchived=await response.json();assert(!unarchived.board.details['OLD-PV'].arquivado);assert.equal(unarchived.board.details['OLD-PV'].arquivo.restauradoPor,'Victor');assert.equal(unarchived.board.details['OLD-PV'].nota,'Nota posterior');
+ console.log('OK archive API: confirmation, server actor/time, preserved notes, restore, revision/origin/auth guards and metadata survives autosave.');
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');

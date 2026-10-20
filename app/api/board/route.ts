@@ -1,3 +1,4 @@
+import {changeArchive} from "../../../lib/order-archive.mjs";
 import {assertReleaseTransitions} from "../../../lib/order-release.mjs";
 import {operationalGroups,stockEligibility} from "../../../lib/stock-orders.mjs";
 import {assertDispatchTransitions} from "../../../lib/dispatch.mjs";
@@ -50,7 +51,7 @@ export async function PUT(request:Request){
  let invoices;try{invoices=normalizeInvoices(board.invoices??scopeBoard({...previous,sequence:previous.sequence??[]},excludedCodes).invoices??{},[...snapshot.grupos,...(snapshot.pedidos??[])].map((p:any)=>p.id))}catch(e){return json({error:e instanceof Error?e.message:"Invoice inválida."},400)}
  try{assertNoInvoiceRemoval(scopeBoard({...previous,sequence:previous.sequence??[]},excludedCodes).invoices,invoices)}catch(e){return json({error:e instanceof Error?e.message:"Exclusão de invoice inválida."},400)}
  let boxModels;try{boxModels=normalizeBoxModels(board.boxModels??previous.boxModels??[])}catch(e){return json({error:e instanceof Error?e.message:"Modelo inválido."},400)}
- const details:Record<string,{responsavel:string;responsavelConferencia:string;nota:string;situacao:string;etiqueta:string;conferidas:string[];expedicao:string[];vistoNomus:string;empresa:string;arquivado?:boolean;atendimentoEstoque?:boolean;envio?:Shipment}>={};
+ const details:Record<string,{responsavel:string;responsavelConferencia:string;nota:string;situacao:string;etiqueta:string;conferidas:string[];expedicao:string[];vistoNomus:string;empresa:string;arquivo?:any;arquivado?:boolean;atendimentoEstoque?:boolean;envio?:Shipment}>={};
  for(const [id,d] of Object.entries(board.details) as [string,any][]){
  if(!detailIds.has(id)||!d||typeof d.responsavel!=="string"||d.responsavel.length>100||typeof d.nota!=="string"||d.nota.length>1500||!states.includes(d.situacao))return json({error:"Revise responsável, observação e situação."},400);
  if(d.arquivado!==undefined&&typeof d.arquivado!=="boolean")return json({error:"Arquivamento inválido."},400);
@@ -65,7 +66,7 @@ export async function PUT(request:Request){
  if(!["","Urgente","Atenção","Normal"].includes(etiqueta)||!Array.isArray(conferidas)||new Set(conferidas).size!==conferidas.length||conferidas.some((v:unknown)=>typeof v!=="string"||!opIds.has(v)))return json({error:"Etiqueta ou checklist inválida."},400);
  if(!Array.isArray(expedicao)||new Set(expedicao).size!==expedicao.length||expedicao.some((v:unknown)=>typeof v!=="string"||!opIds.has(v)))return json({error:"Conferência da expedição inválida."},400);
  let envio:Shipment|undefined;try{envio=d.envio===undefined?previous.details[id]?.envio:normalizeShipment(d.envio,shipmentOps(d.envio,id,groups),previous.details[id]?.envio)}catch(e){return json({error:e instanceof Error?e.message:"Dados de envio inválidos."},400)}
- details[id]={...(d.arquivado?{arquivado:true}:{}),...(d.atendimentoEstoque?{atendimentoEstoque:true}:{}),responsavel:d.responsavel.trim(),responsavelConferencia:responsavelConferencia.trim(),nota:d.nota.trim(),situacao:d.situacao,etiqueta,conferidas,expedicao,vistoNomus,empresa,envio};
+ details[id]={...(previous.details[id]?.arquivo?{arquivo:previous.details[id].arquivo}:{}),...(d.arquivado?{arquivado:true}:{}),...(d.atendimentoEstoque?{atendimentoEstoque:true}:{}),responsavel:d.responsavel.trim(),responsavelConferencia:responsavelConferencia.trim(),nota:d.nota.trim(),situacao:d.situacao,etiqueta,conferidas,expedicao,vistoNomus,empresa,envio};
  }
  try{assertDispatchTransitions(previous,{...board,details,invoices},groups)}catch(e){return json({error:e instanceof Error?e.message:"Conclua a conferência antes do envio."},400)}
  const payload=JSON.stringify(preserveExcludedNotes(previous,{sequence:board.sequence,details,invoices,boxModels},excludedCodes));const now=new Date().toISOString();
@@ -105,4 +106,27 @@ export async function DELETE(request:Request){
  if(!result)return json({error:"Outra sessão alterou o quadro. Recarregue antes de tentar excluir."},409);
  return json({board:scopeBoard(next,state.hiddenOrderCodes),revision:data.revision+1,updatedAt:now,updatedBy:user.displayName});
  }catch{return json({error:"Não foi possível confirmar a exclusão. Recarregue a lista para conferir antes de tentar novamente."},503)}
+}
+
+// Archive/restore only: never delete ERP records, shipping data or invoices.
+export async function POST(request:Request){
+ const user=await getPanelUser();if(!user)return json({error:"Entre para organizar os pedidos."},401);
+ const origin=request.headers.get("origin");if(!origin||origin!==new URL(request.url).origin)return json({error:"Origem inválida."},403);
+ if(!env.DB)return json({error:"Banco indisponível."},503);
+ let input;try{const raw=await request.text();if(new TextEncoder().encode(raw).length>4000)return json({error:"Conteúdo muito grande."},413);input=JSON.parse(raw)}catch{return json({error:"Dados inválidos."},400)}
+ if(input?.action!=="archive"||typeof input.orderId!=="string"||!Number.isSafeInteger(input.revision)||input.revision<0)return json({error:"Pedido inválido."},400);
+ try{
+ const state=visibleOrderState((await readNomus()).state),snapshot=publicSync(state,false).snapshot;
+ const saved=await env.DB.prepare("SELECT payload, revision FROM production_board WHERE id=?").bind("main").first<{payload:string;revision:number}>();
+ if((saved?.revision??0)!==input.revision)return json({error:"Outra pessoa alterou o quadro. Confira os dados atualizados e tente novamente."},409);
+ const previous=saved?JSON.parse(saved.payload):{sequence:[],details:{}},visible=scopeBoard(previous,state.hiddenOrderCodes);
+ const order=[...snapshot.grupos,...(snapshot.pedidos??[])].find((p:any)=>p.id===input.orderId);
+ if(!order)return json({error:"Pedido indisponível ou fora do recorte permitido."},400);
+ let next;const now=new Date().toISOString();
+ try{next=changeArchive(visible,order,input,user.displayName,now)}catch(e){return json({error:e instanceof Error?e.message:"Arquivamento inválido."},400)}
+ const payload=JSON.stringify(preserveExcludedNotes(previous,next,state.hiddenOrderCodes));
+ const result=saved?await env.DB.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=?,updated_by=? WHERE id=? AND revision=? RETURNING revision").bind(payload,now,user.displayName,"main",input.revision).first():await env.DB.prepare("INSERT INTO production_board (id,payload,revision,updated_at,updated_by) VALUES (?,?,1,?,?) ON CONFLICT(id) DO NOTHING RETURNING revision").bind("main",payload,now,user.displayName).first();
+ if(!result)return json({error:"Outra pessoa alterou o quadro. Confira os dados antes de confirmar."},409);
+ return json({board:next,revision:input.revision+1,updatedAt:now,updatedBy:user.displayName});
+ }catch{return json({error:"Não foi possível confirmar a operação. Recarregue o quadro para conferir antes de tentar novamente."},503)}
 }

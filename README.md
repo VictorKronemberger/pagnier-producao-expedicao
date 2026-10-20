@@ -44,6 +44,18 @@ O cabeçalho reúne os controles na mesma linha em telas largas e mantém os fil
 
 Validação isolada do tema: após `npm run build`, execute `node scripts/check-theme-browser.mjs` no Windows com Edge instalado. O teste usa dados fictícios e um servidor próprio na porta 5175, sem acesso ao ERP ou banco.
 
+## Arquivamento de pedidos
+
+A área **Arquivados** reúne os pedidos retirados da fila, com busca, motivo, data e funcionário responsável. Em Pedidos de venda e no detalhe do pedido, a ação fica em **Outras ações → Arquivar pedido…** e abre uma confirmação com foco inicial em Cancelar. O motivo **Pedido excluído no Nomus** exige marcar que a exclusão foi conferida no ERP. Produção, etapa, notas, caixas, agrupamentos, packing lists e invoices são preservados. Restaurar pede confirmação, devolve o pedido aos ativos e não recria registros no Nomus. Arquivamentos anteriores continuam visíveis mesmo sem data/motivo registrados.
+
+O servidor grava o responsável e o horário a partir da sessão e confere a revisão do quadro. O endpoint `POST /api/board` organiza somente o painel. O estado arquivado e os metadados aparecem nas outras sessões pelo mecanismo de sincronização compartilhada.
+
+A [documentação de pedidos do Nomus](https://atendimento.nomus.com.br/hc/pt-br/articles/35195264156187-Pedido) descreve consulta individual e paginação, mas não define uma resposta que comprove exclusão. Ausência após uma varredura completa e falhas na consulta individual geram **Aguardando confirmação**, sem apagar ou arquivar automaticamente. O catálogo permite filtrar esses pedidos. Uma resposta válida posterior remove o aviso. Exclusão confirmada pelo funcionário fica identificada no arquivo, com alerta de revisão quando há produção ou documentos vinculados.
+
+Validação isolada: `node scripts/check-order-archive.mjs`, `npm run test:api:turso` e, após o build, `node scripts/check-order-archive-browser.mjs` (Windows/Edge, porta 5178, duas sessões e dados fictícios).
+
+**Carregamento** é uma opção da transportadora do envio, na aba Geral e na conferência da Expedição, com categoria própria no filtro do quadro. A escolha é compartilhada entre pedidos agrupados. Os modelos documentais de invoice continuam sendo FedEx e DHL.
+
 ## Atendimento comercial e produção
 
 A aba Geral destaca o resumo da produção usando o mesmo cálculo da coluna Produzido na Expedição. Só confirma conclusão quando todas as OPs do pedido têm quantidade produzida igual ou maior que a prevista. A situação comercial fica recolhida em Ver situação do pedido no Nomus, com aparência neutra; apenas itens aguardando liberação mantêm o aviso amarelo. Um item Liberado pode ter a produção concluída; a quantidade produzida vem da última operação da OP e é exibida em Conferir produtos. O aviso mostra o horário da consulta do próprio pedido. Abrir um pedido prioriza sua consulta GET direta quando ela tem mais de cinco minutos; a atualização manual consulta o pedido aberto, respeitando bloqueios e intervalos existentes.

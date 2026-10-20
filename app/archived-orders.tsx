@@ -1,0 +1,20 @@
+"use client";
+import {useState} from "react";
+import {Archive,ArchiveRestore,Search,FileText} from "lucide-react";
+import {archiveOrders,archiveReasons} from "../lib/order-archive.mjs";
+import {matchesOrderSearch} from "../lib/order-search.mjs";
+import {shipmentOwner} from "../lib/shipment-groups.mjs";
+export default function ArchivedOrders({snapshot,board,disabled,onRestore,onOpen,onPacking,onInvoice}:{snapshot:any;board:any;disabled:boolean;onRestore:(id:string)=>void;onOpen:(id:string)=>void;onPacking:(id:string)=>void;onInvoice:(id:string)=>void}){
+ const [search,setSearch]=useState(""),[reason,setReason]=useState("all");
+ const all=archiveOrders(snapshot,board),orders=all.filter(order=>matchesOrderSearch(order,search)&&(reason==="all"||(order.arquivo?.motivo??"manual")===reason)).sort((a,b)=>(b.arquivo?.em??"").localeCompare(a.arquivo?.em??"")||a.codigo.localeCompare(b.codigo,"pt-BR",{numeric:true}));
+ const format=(value:string)=>new Date(value).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",dateStyle:"short",timeStyle:"short"});
+ return <section className="archived-orders" aria-label="Pedidos arquivados"><header><Archive size={23}/><div><h2>Histórico de pedidos arquivados</h2><p>Arquivos compartilhados da equipe. Consulte os registros ou restaure um pedido para os ativos.</p></div><span>{all.length} {all.length===1?"arquivado":"arquivados"}</span></header>
+ <div className="archive-tools"><label className="search"><Search size={17}/><input type="search" aria-label="Buscar arquivados" placeholder="Pedido, cliente, OP ou produto" value={search} onChange={e=>setSearch(e.target.value)}/></label><select aria-label="Filtrar motivo do arquivamento" value={reason} onChange={e=>setReason(e.target.value)}><option value="all">Todos os motivos</option><option value="manual">Retirados da fila</option><option value="nomus_deleted">Excluídos no Nomus</option></select></div>
+ <div className="archive-list">{orders.map(order=>{const detail=board.details[order.id],record=detail.arquivo,shipment=board.details[shipmentOwner(board,order.id)]?.envio,invoices=Object.values(board.invoices??{}).filter((v:any)=>v.orderIds.includes(order.id));return <article key={order.id} data-archived-order={order.id}><header><div><strong>{order.codigo}</strong><h3>{order.cliente||"Cliente não identificado"}</h3></div><span className="archive-reason">{archiveReasons[record?.motivo??"manual"]}</span></header><p className="archive-meta">{record?.em?format(record.em)+" · "+record.por:"Arquivamento anterior · data e responsável não registrados"}</p>
+ {record?.motivo==="nomus_deleted"&&<p className="archive-warning">Exclusão confirmada por {record.por}. {order.ordens.length||shipment||invoices.length?"Há produção ou documentos vinculados: revise esses registros antes de continuar o envio.":"Histórico do pedido preservado."}</p>}
+ {record?.observacao&&<p>{record.observacao}</p>}
+ <div className="archive-history"><span>{order.ordens.length} OP(s)</span><span>{shipment?.caixas?.length??0} caixa(s)</span><span>{invoices.length} invoice(s)</span><span>Etapa: {detail.situacao}</span></div>
+ <footer><button className="button ghost" onClick={()=>onOpen(order.id)}><FileText size={15}/>Consultar histórico</button>{shipment&&!shipment.packingExcluido&&<button className="text-action" onClick={()=>onPacking(order.id)}>Packing list</button>}{invoices.length>0&&<button className="text-action" onClick={()=>onInvoice(order.id)}>Invoices</button>}<button className="button" disabled={disabled} onClick={()=>onRestore(order.id)}><ArchiveRestore size={15}/>Restaurar…</button></footer></article>})}</div>
+ {!orders.length&&<p className="sales-empty">{all.length?"Nenhum arquivado corresponde à busca e ao motivo selecionado.":"Nenhum pedido arquivado. Os pedidos retirados da fila aparecerão aqui."}</p>}
+ </section>
+}

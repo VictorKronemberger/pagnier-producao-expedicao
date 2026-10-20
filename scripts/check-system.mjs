@@ -23,6 +23,7 @@ const unitTests=[
  "check-nomus-changes.mjs",
  "check-nomus-bootstrap.mjs",
  "check-order-release.mjs",
+ "check-order-archive.mjs",
  "check-order-visibility.mjs",
  "check-packing-assistant.mjs",
  "check-packing-delete.mjs",
