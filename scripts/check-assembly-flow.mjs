@@ -1,7 +1,7 @@
 import {finishOuterBox,reopenOuterBox} from "../lib/ready-boxes.mjs";
 import assert from "node:assert/strict";
 import {emptyShipment,newItem,newBox,normalizeShipment,assemblyBoxes} from "../lib/shipping.mjs";
-import {startSmallBox,finishSmallBox,placeSmallBox,unpackSmallBox,recoverLooseItems,updateBoxContents} from "../lib/assembly-flow.mjs";
+import {duplicateSmallBox,startSmallBox,finishSmallBox,placeSmallBox,unpackSmallBox,recoverLooseItems,updateBoxContents} from "../lib/assembly-flow.mjs";
 import {packingBalance,suggestPackingQuantity} from "../lib/packing-assistant.mjs";
 import {productFieldsForOP,updatePackingItem,fillProductWeights} from "../lib/packing-reuse.mjs";
 import {inspectBoxReview,confirmBoxReview} from "../lib/box-review.mjs";
@@ -42,3 +42,31 @@ const docEdit=updateBoxContents(direct,"direct",direct.caixas[0].itens.map(i=>({
 const changed=updateBoxContents(direct,"direct",direct.caixas[0].itens.map((i,n)=>n===0?updatePackingItem(i,{unidadesEmbaladas:"3"}):i));assert.equal(changed.caixas[0].pesoBrutoKg,"");assert.equal(changed.caixas[0].taraKg,"");assert(!inspectBoxReview(changed,directOps).reviewed);
 let mixed=startSmallBox(reopenOuterBox(direct,"direct"),"grouped");mixed.caixasEmMontagem[0].itens=[{...roundtrip.caixasEmMontagem[0].itens[0],caixaInternaId:"grouped"}];mixed=finishSmallBox(mixed,"grouped",ops);mixed=placeSmallBox(mixed,"grouped","direct",ops);mixed=normalizeShipment(mixed,[...directOps,...ops]);assert.equal(mixed.caixas[0].itens.length,3);assert.equal(inspectPacking(mixed,[...directOps,...ops]).totalNet,3100n);assert(packingBalance(mixed,[...directOps,...ops]).every(i=>i.remaining==="0"));
 console.log("OK embalagem opcional: 250 g e 1 kg diretos, conversão, persistência, mistura com embalagem agrupada, volume único e nova pesagem após alterações.");
+
+// Multiplication uses independent identities and rejects the entire batch on excess.
+const copyOps=[{...op,quantidade:"100"}];
+const source=finishSmallBox(roundtrip,"small1",copyOps),before=structuredClone(source);
+const multiplied=duplicateSmallBox(source,"small1",9,copyOps);
+assert.equal(multiplied.caixasEmMontagem.length,10);
+assert.equal(packingBalance(multiplied,copyOps)[0].remaining,"0");
+assert.deepEqual(source,before);
+const copiedBoxes=multiplied.caixasEmMontagem;
+assert.equal(new Set(copiedBoxes.map(b=>b.id)).size,10);
+assert.equal(new Set(copiedBoxes.map(b=>b.codigo.toLowerCase())).size,10);
+assert.equal(new Set(copiedBoxes.flatMap(b=>b.itens.map(i=>i.id))).size,10);
+for(const b of copiedBoxes){assert.equal(b.pronta,true);assert.equal(b.itens[0].caixaInternaId,b.id);assert.equal(b.itens[0].quantidade,"10");assert.equal(b.itens[0].pesoUnitarioKg,source.caixasEmMontagem[0].itens[0].pesoUnitarioKg)}
+assert.deepEqual(normalizeShipment(JSON.parse(JSON.stringify(multiplied)),copyOps),multiplied);
+copiedBoxes[1].itens[0].quantidade="1";assert.equal(source.caixasEmMontagem[0].itens[0].quantidade,"10");
+assert.throws(()=>duplicateSmallBox(source,"small1",10,copyOps),/excede/);
+for(const invalid of [0,-1,1.5,NaN,Infinity,100])assert.throws(()=>duplicateSmallBox(source,"small1",invalid,copyOps),/cópias/);
+assert.throws(()=>duplicateSmallBox(source,"missing",1,copyOps),/Selecione/);
+assert.throws(()=>duplicateSmallBox(startSmallBox(emptyShipment(),"empty"),"empty",1,copyOps),/Adicione/);
+const maxed=duplicateSmallBox(source,"small1",99,[{...op,quantidade:"1000"}]);
+assert.throws(()=>duplicateSmallBox(maxed,"small1",1,[{...op,quantidade:"2000"}]),/100 embalagens/);
+const draftCopy=duplicateSmallBox(roundtrip,"small1",1,copyOps);assert.equal(draftCopy.caixasEmMontagem[1].pronta,false);
+const repeated=duplicateSmallBox(duplicateSmallBox(source,"small1",1,copyOps),"small1",1,copyOps);
+assert.equal(new Set(repeated.caixasEmMontagem.map(b=>b.codigo)).size,3);
+const placed=placeSmallBox({...repeated,caixas:[newBox([],"container")]},repeated.caixasEmMontagem[1].id,"container",copyOps);
+assert.equal(placed.caixas[0].itens[0].caixaInternaId,repeated.caixasEmMontagem[1].id);
+assert.equal(packingBalance(placed,copyOps)[0].packed,"30");
+console.log("OK multiplicação: cópias independentes, persistência, saldo, limite, identificação e distribuição.");
