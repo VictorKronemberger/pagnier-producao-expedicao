@@ -2,7 +2,7 @@ export const manual = [
   {
     "category": "production",
     "title": "Como arquivar um pedido antigo sem concluir as etapas",
-    "text": "Abra o cartão do pedido e clique em Arquivar pedido no rodapé. O mesmo botão está nos detalhes de Pedidos de venda. Não é preciso produzir, conferir, embalar, emitir documentos ou registrar despacho. Aguarde Salvo. O pedido sai do quadro de trabalho, mas seus dados continuam no catálogo e as consultas do Nomus não o recolocam automaticamente. Arquivar não registra envio nem encerra nada no Nomus. Em Pedidos de venda, selecione Arquivados no filtro Exibir pedidos e use Restaurar pedido para devolver o pedido ao fluxo na etapa que já estava salva. O arquivamento é compartilhado com a equipe."
+    "text": "Para arquivar manualmente, abra Outras ações no cartão ou em Pedidos de venda e confirme Arquivar pedido. A tela Arquivados reúne o histórico da equipe e permite restaurar um pedido. PDs que desaparecem do Nomus são verificados automaticamente: o painel percorre duas vezes todas as páginas e repete a consulta individual. Se continuarem ausentes, são arquivados com o motivo Não localizado no Nomus. Falhas de conexão, listas incompletas e pedidos apenas cancelados ou atendidos não provocam arquivamento automático. A verificação ocorre enquanto o painel estiver aberto e pode levar mais de um ciclo de consulta. Notas, produção, caixas, packing lists e invoices são preservados. Restaurar é uma decisão manual e não recria o pedido no Nomus. A mesma ausência já verificada não desfaz essa restauração."
   },
   {
     "category": "start",

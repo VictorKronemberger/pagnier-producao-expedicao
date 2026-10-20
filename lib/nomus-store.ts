@@ -1,3 +1,4 @@
+import {reconcileNomusArchives} from "./nomus-archive-store.mjs";
 import {createRevisionReader} from "./revision-reader.mjs";
 import {requestedLotNames} from "./nomus-lots.mjs";
 import {applyCompanyScope} from "./company-scope.mjs";
@@ -19,6 +20,7 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
   {unchanged:true,nomusRevision:currentRevision,refreshStatus:status,configured:!!key,lastChecked:current.lastChecked,message:key?current.message:"Conexão com o Nomus não configurada."}:
   {...publicSync(current,!!key),nomusRevision:currentRevision,refreshStatus:status};
  if(!key)return reply(state,revision,"unconfigured");
+ await reconcileNomusArchives(db,state,revision);
  if(stamp<(state.leaseUntil??0))return reply(state,revision,"busy");
  if(stamp<(state.retryAt??0)||manualRefresh&&stamp<(state.manualNextAt??0))return reply(state,revision,"cooldown");
  if(!manualRefresh&&stamp<state.nextAt)return reply(state,revision,"cached");
@@ -34,7 +36,7 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
  delete next.leaseUntil;
  if(manualRefresh)next.manualNextAt=Date.now()+10000;
  const saved=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(JSON.stringify(next),now,"nomus",revision+1).first<{revision:number}>();
- if(saved)return reply(next,saved.revision,next.retryAt?"failed":"updated");
+ if(saved){await reconcileNomusArchives(db,next,saved.revision);return reply(next,saved.revision,next.retryAt?"failed":"updated")}
  const latest=await readNomus();return reply(latest.state,latest.revision,"busy");
 }
 

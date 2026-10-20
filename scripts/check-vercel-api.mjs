@@ -165,6 +165,23 @@ try{
  const preserved=await (await call('board')).json();assert.equal(preserved.board.details['OLD-PV'].arquivo.por,'Victor','normal autosave cannot erase archive metadata');
  response=await call('board','POST',{action:'archive',orderId:'OLD-PV',revision:preserved.revision,archived:false});assert.equal(response.status,200,await response.clone().text());const unarchived=await response.json();assert(!unarchived.board.details['OLD-PV'].arquivado);assert.equal(unarchived.board.details['OLD-PV'].arquivo.restauradoPor,'Victor');assert.equal(unarchived.board.details['OLD-PV'].nota,'Nota posterior');
  console.log('OK archive API: confirmation, server actor/time, preserved notes, restore, revision/origin/auth guards and metadata survives autosave.');
+ // Server-side automatic archives recover after a committed ERP sync, including
+ // cached polls, and increment the shared board revision for every other session.
+ const automaticState=seed(),missingCode='PD 900001',confirmedAt=new Date(Date.now()-60000).toISOString();
+ automaticState.orders={11:{code:missingCode,companyId:1,clientId:9,createdDate:'2026-10-01',items:[{productId:7,quantity:'2',status:2}]} };
+ automaticState.orderAbsences={11:{code:missingCode,scans:2,detailMisses:2,status:400,firstMissingAt:confirmedAt,lastScanAt:confirmedAt,confirmedAt}};
+ automaticState.clients={9:'Cliente sintético'};
+ await saveSync(automaticState);testEnv.NOMUS_API_KEY='test-only';
+ const autoBase=await (await call('board')).json(),beforeAutoCaptures=captures;
+ response=await call('nomus','POST',{productionOps:[]});assert.equal(response.status,200,await response.clone().text());assert.equal((await response.json()).refreshStatus,'cached');assert.equal(captures,beforeAutoCaptures,'no extra ERP calls while reconciling durable evidence');
+ const autoResult=await (await call('board','GET',undefined,{query:'?boardOnly=1&revision='+autoBase.revision})).json();
+ assert.equal(autoResult.revision,autoBase.revision+1);assert(autoResult.board.details[missingCode].arquivado);assert.equal(autoResult.board.details[missingCode].arquivo.por,'Nomus · automático');assert.equal(autoResult.board.details[missingCode].arquivo.nomusId,11);
+ assert.equal((await call('board','PUT',{revision:autoBase.revision,board:autoBase.board})).status,409,'old browser cannot undo an automatic archive');
+ await call('nomus','POST',{productionOps:[]});assert.equal((await (await call('board')).json()).revision,autoResult.revision,'reconciliation is idempotent');
+ response=await call('board','POST',{action:'archive',orderId:missingCode,revision:autoResult.revision,archived:false});assert.equal(response.status,200,await response.clone().text());
+ await call('nomus','POST',{productionOps:[]});const intentionallyRestored=await (await call('board')).json();assert(!intentionallyRestored.board.details[missingCode].arquivado,'same evidence respects explicit restoration');
+ testEnv.NOMUS_API_KEY='';
+ console.log('OK automatic archive API: cached-poll recovery, shared revision, metadata, stale-edit rejection, idempotence and intentional restore.');
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');
