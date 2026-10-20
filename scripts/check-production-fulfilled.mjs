@@ -49,3 +49,10 @@ assert.equal((await post(JSON.stringify({productionOps:["OP123"]}))).status,200)
 const before=called;assert.equal((await post(JSON.stringify({productionOps:["OP123;unsafe"]}))).status,400);assert.equal((await post("{}","http://other.local")).status,403);
 authenticated=false;assert.equal((await post("{}")).status,401);assert.equal(called,before);
 console.log("OK API: autenticação, origem e limite/formato das OPs conferidos.");
+
+const {productionSummary}=await import("../lib/production-progress.mjs");
+assert.deepEqual(productionSummary([]),{total:0,complete:0,unconfirmed:0,state:"unknown"});
+assert.equal(productionSummary([{...op,quantidadeProduzida:"80"},{...op,quantidadeProduzida:"90"}]).state,"complete");
+for(const quantidadeProduzida of [null,"0","40"]){const result=productionSummary([{...op,quantidadeProduzida:"80"},{...op,quantidadeProduzida}]);assert.equal(result.state,"incomplete");assert.equal(result.complete,1);assert.equal(result.unconfirmed,quantidadeProduzida===null?1:0)}
+assert.equal(productionSummary([{...op,quantidade:"",quantidadeProduzida:"80"}]).state,"unknown");
+console.log("OK production overview: same per-OP rule as conference, no total across different units, unknown and partial cannot report completion.");

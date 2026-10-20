@@ -56,7 +56,7 @@ try{
  assert(await evaluate('document.querySelector(".carrier-fields select").disabled'));
  assert(await evaluate('document.querySelector(".card-dialog .release-notice").textContent.includes("Produto pendente QA")'));await click('.close');
  await evaluate('[...document.querySelectorAll(".kanban-card")].find(e=>e.textContent.includes("09002")).querySelector(".release-notice summary").click()');
- assert(await evaluate('[...document.querySelectorAll(".release-notice[open]")].some(e=>e.innerText.includes("Produto pendente QA")&&e.innerText.includes("00030")&&e.innerText.includes("atendimento comercial não confirmado"))'));
+ assert(await evaluate('[...document.querySelectorAll(".release-notice[open]")].some(e=>e.innerText.includes("Produto pendente QA")&&e.innerText.includes("00030"))'));
  await input('.search input',"9001");assert.equal(await laneCount("backlog"),"1");assert.equal(await laneCount("queue"),"0");
  await input('.search input',"9002");assert.equal(await laneCount("backlog"),"0");assert.equal(await laneCount("queue"),"1");await click('.search-clear');
  assert(await evaluate('Math.abs(document.querySelector(".production-view-switch").getBoundingClientRect().top-document.querySelector(".board-tools").getBoundingClientRect().top)<10'));
