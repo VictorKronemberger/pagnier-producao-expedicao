@@ -802,3 +802,11 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 .software-shell .data-strip>.text-action{font-size:11px;padding:2px 4px}
 
 .carrier-tag.carrier-carregamento{background:light-dark(#eaf0f5,var(--night-blue-soft));color:light-dark(#375d7b,var(--night-blue));border-color:light-dark(#ccdce9,var(--night-border))}
+
+/* Small box multiplication: controls share a baseline and wrap on narrow screens. */
+.box-multiplier{margin:0 0 24px;padding:16px;border:1px solid light-dark(#dce5da,var(--night-border));border-radius:10px;background:light-dark(#f5f8f2,var(--night-raised))}
+.box-multiplier-heading{display:flex;gap:10px;align-items:flex-start;color:light-dark(#315e48,var(--night-text))}
+.box-multiplier-heading>svg{flex-shrink:0;margin-top:2px}.box-multiplier-heading strong{font-size:13px;font-weight:600}.box-multiplier-heading p{font-size:12px;line-height:1.5;margin:4px 0 0;color:light-dark(#647563,var(--night-muted))}
+.box-multiplier-controls{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-top:14px}.box-multiplier-controls label{width:140px;flex:0 0 140px}.box-multiplier-controls input,.box-multiplier-controls .button{height:42px}.box-multiplier-controls .button{justify-content:center;gap:8px;white-space:normal}
+.box-multiplier .box-copy-hint{font-size:12px;line-height:1.6;color:light-dark(#647563,var(--night-muted));margin:10px 0 0}.box-copy-success{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.5;color:light-dark(#256348,var(--night-text));margin:10px 0 0}
+@media(max-width:480px){.box-multiplier{padding:12px}.box-multiplier-controls{display:grid;grid-template-columns:minmax(0,1fr)}.box-multiplier-controls label{width:auto}.box-multiplier-controls .button{width:100%}}

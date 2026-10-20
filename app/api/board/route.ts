@@ -18,7 +18,7 @@ export const dynamic="force-dynamic";
 
 const states=["A programar","Programado","Em acompanhamento","Bloqueado","Concluído","Pronto para envio e documentação","Pronto para envio","Atendido totalmente e enviado"];
 function json(data:unknown,status=200){return Response.json(data,{status,headers:{"Cache-Control":"no-store"}})}
-export async function GET(request?:Request){
+export async function GET(request:Request){
  if(!await getPanelUser())return json({error:"Entre para acessar o painel."},401);
  if(!env.DB)return json({error:"Banco indisponível."},503);
  try{

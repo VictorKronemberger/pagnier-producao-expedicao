@@ -1,7 +1,7 @@
 import {finishOuterBox,reopenOuterBox} from "../lib/ready-boxes.mjs";
 import assert from "node:assert/strict";
 import {emptyShipment,newItem,newBox,normalizeShipment,assemblyBoxes} from "../lib/shipping.mjs";
-import {duplicateSmallBox,startSmallBox,finishSmallBox,placeSmallBox,unpackSmallBox,recoverLooseItems,updateBoxContents} from "../lib/assembly-flow.mjs";
+import {smallBoxCopyCapacity,duplicateSmallBox,startSmallBox,finishSmallBox,placeSmallBox,unpackSmallBox,recoverLooseItems,updateBoxContents} from "../lib/assembly-flow.mjs";
 import {packingBalance,suggestPackingQuantity} from "../lib/packing-assistant.mjs";
 import {productFieldsForOP,updatePackingItem,fillProductWeights} from "../lib/packing-reuse.mjs";
 import {inspectBoxReview,confirmBoxReview} from "../lib/box-review.mjs";
@@ -70,3 +70,15 @@ const placed=placeSmallBox({...repeated,caixas:[newBox([],"container")]},repeate
 assert.equal(placed.caixas[0].itens[0].caixaInternaId,repeated.caixasEmMontagem[1].id);
 assert.equal(packingBalance(placed,copyOps)[0].packed,"30");
 console.log("OK multiplicação: cópias independentes, persistência, saldo, limite, identificação e distribuição.");
+
+assert.equal(smallBoxCopyCapacity(source,"small1",copyOps).max,9);
+assert.equal(smallBoxCopyCapacity(source,"small1",ops).max,0,"zero balance disables multiplication");
+assert.equal(smallBoxCopyCapacity(source,"small1",[{...op,quantidade:"15"}]).max,0,"partial box balance is insufficient");
+assert.equal(smallBoxCopyCapacity(source,"small1",[{...op,quantidade:""}]).max,0,"unknown target needs confirmation");
+assert.throws(()=>duplicateSmallBox(source,"small1",1,[{...op,quantidade:""}]),/Confirme/);
+const sameOP=structuredClone(source);sameOP.caixasEmMontagem[0].itens.push({...sameOP.caixasEmMontagem[0].itens[0],id:"second-line"});
+assert.equal(smallBoxCopyCapacity(sameOP,"small1",copyOps).max,4,"sum repeated OP lines per box");
+const mixedCopy=structuredClone(source);mixedCopy.caixasEmMontagem[0].itens.push({...newItem("kg-line"),opId:"kg",produto:"Produto 28g",unidade:"KG",quantidade:"0,504",caixaInternaId:"small1"});
+assert.equal(smallBoxCopyCapacity(mixedCopy,"small1",[...copyOps,{id:"kg",nome:"OP KG",produto:"Produto 28g",unidade:"KG",quantidade:"1,512"}]).max,2,"most constrained product limits copies, with decimal precision");
+assert.equal(smallBoxCopyCapacity(maxed,"small1",[{...op,quantidade:"2000"}]).max,0,"staging limit disables multiplication");
+console.log("OK copy capacity: zero/partial/unknown balance, repeated OP, multiple products and decimal quantities.");

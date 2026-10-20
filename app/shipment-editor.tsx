@@ -5,7 +5,7 @@ import {isMounted,finishOuterBox,reopenOuterBox} from "../lib/ready-boxes.mjs";
 import ContextHelp from "./context-help";
 import ImportantField,{FillingGuide} from "./important-field";
 import SectionAction from "./section-action";
-import {duplicateSmallBox,startSmallBox,finishSmallBox,smallBoxIssue,placeSmallBox,unpackSmallBox,updateBoxContents} from "../lib/assembly-flow.mjs";
+import {smallBoxCopyCapacity,duplicateSmallBox,startSmallBox,finishSmallBox,smallBoxIssue,placeSmallBox,unpackSmallBox,updateBoxContents} from "../lib/assembly-flow.mjs";
 import {assemblyMode,ASSEMBLY_MODES,selectAssemblyMode,type AssemblyMode} from "../lib/assembly-mode.mjs";
 import {boxFromModel,type BoxModel} from "../lib/box-models.mjs";
 import {packingBalance,suggestPackingQuantity} from "../lib/packing-assistant.mjs";
@@ -14,11 +14,11 @@ import {inspectPacking,weightText} from "../lib/packing-list.mjs";
 import {updatePackingItem,productFieldsForOP,fillProductWeights,fillProductLots,needsPackContent,contentPerPack} from "../lib/packing-reuse.mjs";
 import {productUnitWeight} from "../lib/product-weight.mjs";
 import {useEffect,useRef,useState} from "react";
-import {Package,Plus,Trash2,Truck,Scale,Ruler,ArrowRight,Check} from "lucide-react";
+import {Package,Plus,Trash2,Truck,Scale,Ruler,ArrowRight,Check,Copy} from "lucide-react";
 import {emptyShipment,assertPackingCapacity,assemblyBoxes,newItem,isDecimalDraft,MODES,type Shipment,type ShippingBox,type ShippingItem,decimal,type ShippingOP} from "../lib/shipping.mjs";
 export default function ShipmentEditor({value,ops,products,onChange,disabled=false,mode="boxes",models=[],initialBoxId="",assemblyStep:controlledStep,onAssemblyStepChange}:{initialBoxId?:string;assemblyStep?:"small"|"outer"|"measure";onAssemblyStepChange?:(step:"small"|"outer"|"measure")=>void;models?:BoxModel[];mode?:"boxes"|"documents";value?:Shipment;ops:ShippingOP[];products?:string[];onChange:(value:Shipment)=>void;disabled?:boolean}){
  const ref=useRef<Shipment>(value??emptyShipment());ref.current=value??emptyShipment();
- const [copyCount,setCopyCount]=useState("1");
+ const [copyDraft,setCopyDraft]=useState({id:"",count:"1",notice:""});
  const [modelId,setModelId]=useState(""),[suggestionNotice,setSuggestionNotice]=useState("");
  const [localStep,setLocalStep]=useState<"small"|"outer"|"measure">("outer"),[chosenSmall,setChosenSmall]=useState<Record<string,string>>({}),[assemblyError,setAssemblyError]=useState("");
  const allProducts=products??ops.map(o=>o.produto),directOnly=mode==="boxes"&&directBoxOnly(allProducts);
@@ -40,7 +40,10 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  function chooseMode(next:AssemblyMode){if(directOnly)return;try{commit(selectAssemblyMode(ref.current,next));setChangingMode(false);goAssembly(next==="direct"?"outer":"small");setAssemblyError("")}catch(e){setAssemblyError(e instanceof Error?e.message:"Revise a modalidade.")}}
  function createOuter(){const box={...boxFromModel(ref.current.caixas,crypto.randomUUID(),selectedModel),montada:false};patch({caixas:[...ref.current.caixas,box]});setActiveOuterId(box.id)}
  function createInner(){if(directOnly)return;const id=crypto.randomUUID();changeAssembly(()=>startSmallBox(ref.current,id));setActiveSmallId(id)}
- function multiplyInner(){if(disabled||directOnly||!smallId)return;try{const count=Number(copyCount);commit(duplicateSmallBox(ref.current,smallId,count,ops));setAssemblyError("");setSuggestionNotice(count+" cópia(s) criada(s) com os mesmos produtos e quantidades. A caixa original foi mantida.")}catch(e){setAssemblyError(e instanceof Error?e.message:"Não foi possível multiplicar a caixa.")}}
+ const copyCount=copyDraft.id===smallId?copyDraft.count:"1",copyNotice=copyDraft.id===smallId?copyDraft.notice:"";
+ function setCopyCount(count:string){setCopyDraft({id:smallId??"",count,notice:""})}
+ function setCopyNotice(notice:string){setCopyDraft({id:smallId??"",count:copyCount,notice})}
+ function multiplyInner(){if(disabled||directOnly||!smallId)return;try{const count=Number(copyCount);commit(duplicateSmallBox(ref.current,smallId,count,ops));setAssemblyError("");setCopyNotice(count===1?"1 cópia criada. A caixa original foi mantida.":count+" cópias criadas. A caixa original foi mantida.")}catch(e){setAssemblyError(e instanceof Error?e.message:"Não foi possível multiplicar a caixa.")}}
  const selectedModel=models.find(m=>m.id===modelId);
  function applySuggestion(boxId:string,itemId:string){const suggestion=suggestPackingQuantity(ref.current,ops,boxId,itemId);if(!suggestion.quantity){setSuggestionNotice(suggestion.reason);return}itemPatch(boxId,itemId,{quantidade:suggestion.quantity});setSuggestionNotice("Sugestão aplicada. Confira o encaixe físico e pese a caixa pronta.")}
 
@@ -88,10 +91,14 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  <div className="assembly-task-header"><div><h4>Organizar caixas menores</h4><p>Monte e confira cada uma antes de distribuir nas Caixas 40.</p></div><button type="button" className="button primary" disabled={directOnly||(s.caixasEmMontagem?.length??0)>=100} onClick={createInner}><Plus size={16}/>Nova caixa menor</button></div>
  {!s.caixasEmMontagem?.length?<p className="packing-empty">Nenhuma caixa menor em preparo. Crie uma para adicionar os produtos.</p>:<div className="box-workspace">
  <nav className="box-selector" aria-label="Selecionar caixa menor">{s.caixasEmMontagem.map(b=><button type="button" key={b.id} aria-pressed={smallId===b.id} onClick={()=>setActiveSmallId(b.id)}><Package size={17}/><span><strong>{b.codigo}</strong><small>{b.itens.length} {b.itens.length===1?"item":"itens"} · {b.pronta?"Pronta":"Em montagem"}</small></span>{smallId===b.id&&<Check size={16}/>}</button>)}</nav>
- {chosenInner&&(()=>{const b=assemblyBoxes(s).find(v=>v.id===chosenInner.id)!;const issue=smallBoxIssue(chosenInner,ops);return <section className="box-focus" aria-label={"Caixa menor "+chosenInner.codigo} key={chosenInner.id}>
+ {chosenInner&&(()=>{const b=assemblyBoxes(s).find(v=>v.id===chosenInner.id)!;const issue=smallBoxIssue(chosenInner,ops),capacity=smallBoxCopyCapacity(s,chosenInner.id,ops),count=Number(copyCount),validCount=Number.isInteger(count)&&count>=1&&count<=capacity.max;return <section className="box-focus" aria-label={"Caixa menor "+chosenInner.codigo} key={chosenInner.id}>
  <header><div><small>CAIXA MENOR SELECIONADA</small><h4>{chosenInner.codigo}</h4></div><span className="box-state">{chosenInner.pronta?"Pronta":"Em montagem"}</span></header>
- <div className="flow-actions"><label>Cópias adicionais<input aria-label="Cópias adicionais da caixa menor" type="number" min="1" max={Math.max(0,100-(s.caixasEmMontagem?.length??0))} step="1" value={copyCount} onChange={e=>setCopyCount(e.target.value)}/></label><button type="button" className="button" disabled={directOnly||!!issue||!Number.isInteger(Number(copyCount))||Number(copyCount)<1||Number(copyCount)>100-(s.caixasEmMontagem?.length??0)} onClick={multiplyInner}><Plus size={15}/>Multiplicar caixa</button></div>
- <p className="check-help">Cria cópias com os mesmos produtos, quantidades e dados da caixa selecionada. A original é mantida; cada cópia pode ser editada separadamente.</p>
+ <section className="box-multiplier" aria-label="Multiplicar caixa selecionada">
+ <div className="box-multiplier-heading"><Copy size={18}/><div><strong>Criar caixas iguais</strong><p>Repete os produtos e as quantidades desta caixa.</p></div></div>
+ <div className="box-multiplier-controls"><label>Cópias adicionais<input aria-label="Cópias adicionais da caixa menor" aria-describedby="box-copy-hint" type="number" min="1" max={Math.max(1,capacity.max)} step="1" disabled={directOnly||capacity.max===0} value={copyCount} onChange={e=>{setCopyCount(e.target.value)}}/></label><button type="button" className="button primary" disabled={directOnly||!validCount} onClick={multiplyInner}><Copy size={16}/>Multiplicar caixa</button></div>
+ <p className="box-copy-hint" id="box-copy-hint">{directOnly?"Este envio usa produtos diretamente nas Caixas 40.":capacity.reason||(!validCount?"Informe de 1 a "+capacity.max+" cópias adicionais.":"1 original + "+count+(count===1?" cópia = ":" cópias = ")+(count+1)+" caixas iguais. Disponível para até "+capacity.max+(capacity.max===1?" cópia.":" cópias."))}</p>
+ {copyNotice&&<p className="box-copy-success" role="status"><Check size={15}/>{copyNotice}</p>}
+ </section>
  <fieldset disabled={chosenInner.pronta} className="shipment-form">
  <label className="box-name-field">Identificação<input aria-label={"Identificação de "+chosenInner.codigo} value={chosenInner.codigo} maxLength={50} onChange={e=>boxPatch(chosenInner.id,{codigo:e.target.value})}/></label>
  {chosenInner.itens.map((item,i)=>renderItem(b,item,i))}
