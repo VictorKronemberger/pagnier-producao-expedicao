@@ -46,7 +46,7 @@ Validação isolada do tema: após `npm run build`, execute `node scripts/check-
 
 ## Arquivamento de pedidos
 
-A área **Arquivados** reúne os pedidos retirados da fila, com busca, motivo, data e funcionário responsável. Em Pedidos de venda e no detalhe do pedido, a ação fica em **Outras ações → Arquivar pedido…** e abre uma confirmação com foco inicial em Cancelar. O motivo **Pedido excluído no Nomus** exige marcar que a exclusão foi conferida no ERP. Produção, etapa, notas, caixas, agrupamentos, packing lists e invoices são preservados. Restaurar pede confirmação, devolve o pedido aos ativos e não recria registros no Nomus. Arquivamentos anteriores continuam visíveis mesmo sem data/motivo registrados.
+A área **Arquivados** reúne os pedidos retirados da fila, com busca, motivo, data e funcionário responsável. Em Pedidos de venda e no detalhe do pedido, a ação fica em **Outras ações → motivo do arquivamento** e abre uma confirmação com foco inicial em Cancelar. O motivo **Pedido excluído no Nomus** exige marcar que a exclusão foi conferida no ERP. Produção, etapa, notas, caixas, agrupamentos, packing lists e invoices são preservados. Restaurar pede confirmação, devolve o pedido aos ativos e não recria registros no Nomus. Arquivamentos anteriores continuam visíveis mesmo sem data/motivo registrados.
 
 O servidor grava o responsável e o horário a partir da sessão e confere a revisão do quadro. O endpoint `POST /api/board` organiza somente o painel. O estado arquivado e os metadados aparecem nas outras sessões pelo mecanismo de sincronização compartilhada.
 
@@ -126,6 +126,6 @@ Na versão Vercel, `npm run db:migrate` prepara todas as tabelas PostgreSQL. Nã
 
 Validação do chat: `node scripts/check-team-chat.mjs` (Node.js 22.13+ com `node:sqlite`); o teste usa somente banco em memória. `node scripts/check-team-chat-browser.mjs` usa o preview local, Edge e dados simulados; faz apenas leitura de diagnóstico na API real e mantém os envios de teste em memória.
 
-O arquivamento é decidido pelo usuário em **Outras ações → Arquivar pedido**. O diálogo permite escolher retirado da fila, excluído no Nomus, cancelado, duplicado ou outro motivo (com observação obrigatória), e exige confirmação. O servidor registra data e responsável; o histórico e os documentos são preservados e podem ser consultados em **Arquivados**, com filtro por motivo e restauração. Registros anteriores, inclusive automáticos, permanecem no histórico.
+O arquivamento é decidido pelo usuário em **Outras ações → motivo do arquivamento**. O diálogo permite escolher retirado da fila, excluído no Nomus, cancelado, duplicado ou outro motivo (com observação obrigatória), e exige confirmação. O servidor registra data e responsável; o histórico e os documentos são preservados e podem ser consultados em **Arquivados**, com filtro por motivo e restauração. Registros anteriores, inclusive automáticos, permanecem no histórico.
 
 Não há varredura de exclusões, consultas extras de confirmação ou arquivamento durante a sincronização. Evidências antigas de ausência são descartadas ao sincronizar, sem alterar o quadro. Cada rodada executa no máximo um GET normal ao ERP, preservando paginação, bloqueio entre sessões e espera em caso de falha. A atualização compartilhada do quadro continua ativa.

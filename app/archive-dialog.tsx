@@ -3,9 +3,9 @@ import archiveStyles from "./archive.module.css";
 import {useEffect,useRef,useState} from "react";
 import {manualArchiveReasons} from "../lib/order-archive.mjs";
 import {Archive,ArchiveRestore,X} from "lucide-react";
-export default function ArchiveDialog({order,restoring,onClose,onConfirm}:{order:{id:string;codigo:string;cliente:string;pedidoConsultaFalhou?:boolean};restoring:boolean;onClose:()=>void;onConfirm:(options:{archived:boolean;reason:string;note:string;confirmedDeleted:boolean})=>Promise<void>}){
+export default function ArchiveDialog({initialReason="manual",order,restoring,onClose,onConfirm}:{initialReason?:string;order:{id:string;codigo:string;cliente:string;pedidoConsultaFalhou?:boolean};restoring:boolean;onClose:()=>void;onConfirm:(options:{archived:boolean;reason:string;note:string;confirmedDeleted:boolean})=>Promise<void>}){
  const cancelButton=useRef<HTMLButtonElement>(null);
- const dialog=useRef<HTMLDialogElement>(null),[reason,setReason]=useState("manual"),[note,setNote]=useState(""),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ const dialog=useRef<HTMLDialogElement>(null),[reason,setReason]=useState(initialReason),[note,setNote]=useState(""),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
  useEffect(()=>{const el=dialog.current;el?.showModal();cancelButton.current?.focus();return()=>el?.close()},[]);
  async function submit(e:React.FormEvent){e.preventDefault();if(busy)return;setBusy(true);setError("");try{await onConfirm({archived:!restoring,reason,note,confirmedDeleted:confirmed});onClose()}catch(e){setError(e instanceof Error?e.message:"Não foi possível confirmar.")}finally{setBusy(false)}}
  return <dialog ref={dialog} className={"archive-dialog "+archiveStyles.dialog} aria-labelledby="archive-title" onCancel={e=>{e.preventDefault();if(!busy)onClose()}}><form onSubmit={submit}>

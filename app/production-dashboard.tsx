@@ -1,4 +1,5 @@
 "use client";
+import ArchiveActions from "./archive-actions";
 import archiveStyles from "./archive.module.css";
 import {isCancelledOP,cancelledProduction} from "../lib/op-status.mjs";
 import ThemeToggle from "./theme-toggle";
@@ -37,7 +38,7 @@ import TeamChat from "./team-chat";
 import type {ChatChannel} from "../lib/team-chat.mjs";
 import {documentationReady} from "../lib/documentation-ready.mjs";
 import {useEffect,useMemo,useRef,useState,useCallback} from "react";
-import {Archive,ArchiveRestore,FileText,Factory,LayoutDashboard,Layers3,Search,RefreshCw,X,GripVertical,ArrowUp,ArrowDown,Check,CheckSquare,MessageSquare,UserRound,ShieldCheck,Download,LoaderCircle,ArrowRight,Flag,BookOpen,Bell,CalendarDays,AlertCircle,ExternalLink,ClipboardCheck,Package,Truck} from "lucide-react";
+import {Archive,FileText,Factory,LayoutDashboard,Layers3,Search,RefreshCw,X,GripVertical,ArrowUp,ArrowDown,Check,CheckSquare,MessageSquare,UserRound,ShieldCheck,Download,LoaderCircle,ArrowRight,Flag,BookOpen,Bell,CalendarDays,AlertCircle,ExternalLink,ClipboardCheck,Package,Truck} from "lucide-react";
 import {move} from "../lib/queue.mjs";
 import {createAutosave} from "../lib/autosave.mjs";
 import {matchesCreation,SITE_START_DATE,SITE_START_LABEL,clampStart} from "../lib/date-filter.mjs";
@@ -98,7 +99,7 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  async function leavePanel(){if(loading||dirty||saving||packingPending){setError("Aguarde o salvamento e conclua a seleção em andamento antes de sair.");return}setLeaving(true);try{await onSignOut()}catch(e){setError(e instanceof Error?e.message:"Não foi possível sair. Tente novamente.")}finally{setLeaving(false)}}
  const [chatOpen,setChatOpen]=useState(false),[chatChannel,setChatChannel]=useState("general"),[chatThreads,setChatThreads]=useState<ChatChannel[]>([]);
  function openOrderChat(id:string){setSelected(null);setChatChannel("order:"+id);setChatOpen(true)}
- const [archiveTarget,setArchiveTarget]=useState<{id:string;restoring:boolean}|null>(null);
+ const [archiveTarget,setArchiveTarget]=useState<{id:string;restoring:boolean;reason:string}|null>(null);
  const [packingOwner,setPackingOwner]=useState<string|null>(null);
  const [packingSection,setPackingSection]=useState("orders"),[packingPending,setPackingPending]=useState(false),[manualTopic,setManualTopic]=useState(""),[helpReturn,setHelpReturn]=useState("board");
  useEffect(()=>{document.querySelector<HTMLElement>('.app-navigation [aria-current="page"]')?.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"})},[tab]);
@@ -225,7 +226,7 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  useEffect(()=>{if(!selected)return;const previous=document.activeElement as HTMLElement;const modal=document.querySelector<HTMLElement>(".card-dialog");modal?.querySelector<HTMLButtonElement>("button")?.focus();const key=(e:KeyboardEvent)=>{if(e.key==="Escape")setSelected(null);if(e.key==="Tab"&&modal){const els=[...modal.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],summary,[tabindex]')].filter(el=>el.tabIndex>=0&&el.getClientRects().length>0&&getComputedStyle(el).visibility!=="hidden"&&!el.closest("[inert]"));const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};document.addEventListener("keydown",key);return()=>{document.removeEventListener("keydown",key);previous?.focus()}},[selected]);
  function edit(next:Board){boardRef.current=next;setBoard(next);saver.current?.enqueue(next)}
  function update(id:string,patch:Partial<Detail>){const latest=boardRef.current;if(patch.envio)patch={...patch,envio:bridgeDestination(latest.details[id]?.envio,patch.envio)};edit({...latest,details:{...latest.details,[id]:{...fresh(),...latest.details[id],...patch}}})}
- function archiveOrder(id:string,arquivado:boolean){if(loading||saving||dirty||packingPending){setError("Conclua as alterações em andamento antes de arquivar ou restaurar.");return}setArchiveTarget({id,restoring:!arquivado})}
+ function archiveOrder(id:string,arquivado:boolean,reason="manual"){if(loading||saving||dirty||packingPending){setError("Conclua as alterações em andamento antes de arquivar ou restaurar.");return}setArchiveTarget({id,restoring:!arquivado,reason})}
  async function confirmArchive(options:{archived:boolean;reason:string;note:string;confirmedDeleted:boolean}){
  if(!archiveTarget||boardBusy.current||saving||saver.current?.isDirty())throw Error("Aguarde o salvamento das alterações em andamento.");
  boardBusy.current=true;setLoading(true);
@@ -363,8 +364,8 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  </div>
  <div className="detail-panel" hidden={detailTab!=="shipping"}><OrderShippingSummary reviewed={boxReview.reviewed} onExpedition={()=>{setDetailTab("expedition");setAssemblyStep(shipment?.caixasEmMontagem?.length?"small":"outer");setExpeditionStep(shipment?.caixas.length||shipment?.caixasEmMontagem?.length?"boxes":"review")}} shipment={shipment} orderIds={shipment?.agrupamento?.pedidos??[active.id]} onPacking={()=>openPacking(active.id)} onInvoice={()=>openInvoice(active.id)}/></div>
  {detail.arquivado&&<p className={"archive-preserved "+archiveStyles.preserved}>Pedido arquivado · histórico preservado. <button className="text-action" onClick={()=>{setSelected(null);navigate("archived")}}>Ver Arquivados</button></p>}
- <div className="dialog-footer">{saveIndicator}<details className={"order-more-actions "+archiveStyles.actions}><summary>Outras ações</summary><button type="button" disabled={loading||saving||dirty} onClick={()=>archiveOrder(active.id,!detail.arquivado)}>{detail.arquivado?<ArchiveRestore size={15}/>:<Archive size={15}/>} {detail.arquivado?"Restaurar pedido…":"Arquivar pedido…"}</button></details><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
+ <div className="dialog-footer">{saveIndicator}<ArchiveActions archived={!!detail.arquivado} disabled={loading||saving||dirty} onSelect={(archived,reason)=>archiveOrder(active.id,archived,reason)}/><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
  </section></div>}
- {archiveTarget&&archiveOrderTarget&&<ArchiveDialog key={archiveTarget.id+String(archiveTarget.restoring)} order={archiveOrderTarget} restoring={archiveTarget.restoring} onClose={()=>setArchiveTarget(null)} onConfirm={confirmArchive}/>}
+ {archiveTarget&&archiveOrderTarget&&<ArchiveDialog initialReason={archiveTarget.reason} key={archiveTarget.id+String(archiveTarget.restoring)} order={archiveOrderTarget} restoring={archiveTarget.restoring} onClose={()=>setArchiveTarget(null)} onConfirm={confirmArchive}/>}
  </div>
 }

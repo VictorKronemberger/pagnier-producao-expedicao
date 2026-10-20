@@ -60,12 +60,13 @@ try{
  await change(a,'[aria-label="Etiqueta de envio"]','Carregamento');await a.until('document.querySelector(".autosave-status").textContent==="Salvo"');
  assert.equal(board.details.A.envio.transportadora,'Carregamento');
  assert.equal(await a.evaluate('document.querySelector(".card-dialog .order-more-actions").open'),false);
- await a.evaluate('document.querySelector(".card-dialog .order-more-actions summary").click();document.querySelector(".card-dialog .order-more-actions button").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');
- assert(!board.details.A.arquivado,'opening confirmation cannot archive');
+ await a.evaluate('document.querySelector(".card-dialog .order-more-actions summary").click();document.querySelector(".card-dialog .order-more-actions [data-archive-reason=nomus_deleted]").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');
+ assert(!board.details.A.arquivado,'choosing a reason only opens confirmation');
+ assert.deepEqual(await a.evaluate('[...document.querySelectorAll(".card-dialog .order-more-actions [data-archive-reason]")].map(el=>el.textContent)'),['Retirado da fila','Excluído no Nomus','Pedido cancelado','Pedido duplicado','Outro motivo']);
  assert.equal(await a.evaluate('document.activeElement.textContent'),'Cancelar','cancel is the initial focused action');
  await a.evaluate('document.querySelector(".archive-dialog footer button[type=button]").click()');await a.until('!document.querySelector(".archive-dialog")');assert(!board.details.A.arquivado);
- await a.evaluate('document.querySelector(".card-dialog .order-more-actions button").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');
- await change(a,'[aria-label="Motivo do arquivamento"]','nomus_deleted');assert(await a.evaluate('document.querySelector(".archive-dialog button[type=submit]").disabled'));
+ await a.evaluate('document.querySelector(".card-dialog .order-more-actions [data-archive-reason=nomus_deleted]").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');
+ assert.equal(await a.evaluate('document.querySelector(".archive-dialog select").value'),'nomus_deleted');assert(await a.evaluate('document.querySelector(".archive-dialog button[type=submit]").disabled'));
  await a.evaluate('document.querySelector(".archive-check input").click()');
  await change(a,'[aria-label="Observação do arquivamento"]','Exclusão conferida no ERP','input');
  const preserved=structuredClone(board.details.A.envio),stage=board.details.A.situacao;
@@ -78,7 +79,7 @@ try{
  await a.evaluate('document.querySelector("[data-archived-order=A] footer .button:last-child").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');await confirm(a);assert(!board.details.A.arquivado);assert.deepEqual(board.details.A.envio,preserved);assert.equal(board.details.A.situacao,stage);await b.until('!document.querySelector("[data-archived-order=A]")');
  // Catalog entry uses the same protected flow, and archive filters stay local.
  await navigate(a,'Pedidos de venda');await a.until('!!document.querySelector(".sales-order")');
- await a.evaluate('document.querySelector(".sales-order summary").click();document.querySelector(".sales-order .order-more-actions summary").click();document.querySelector(".sales-order .order-more-actions button").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');await confirm(a);
+ await a.evaluate('document.querySelector(".sales-order summary").click();document.querySelector(".sales-order .order-more-actions summary").click();document.querySelector(".sales-order .order-more-actions [data-archive-reason=duplicate]").click()');await a.until('!!document.querySelector(".archive-dialog[open]")');assert.equal(await a.evaluate('document.querySelector(".archive-dialog select").value'),'duplicate');await confirm(a);
  await navigate(a,'Arquivados');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
  await change(a,'[aria-label="Filtrar motivo do arquivamento"]','nomus_deleted');await a.until('document.querySelectorAll("[data-archived-order]").length===0');
  await change(a,'[aria-label="Filtrar motivo do arquivamento"]','all');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
@@ -109,8 +110,8 @@ try{
  await navigate(b,'Produção');await b.until('!!document.querySelector(".filter-toggle")');await b.evaluate('document.querySelector(".filter-toggle").click()');await change(b,'[aria-label="Filtrar transportadora"]','Carregamento');await b.until('document.querySelectorAll(".card-open").length===1');
  // Romulo explicitly chooses another reason; Victor receives the saved archive.
  await b.evaluate('document.querySelector(".card-open").click()');await b.until('!!document.querySelector(".card-dialog")');
- await b.evaluate('document.querySelector(".card-dialog .order-more-actions summary").click();document.querySelector(".card-dialog .order-more-actions button").click()');await b.until('!!document.querySelector(".archive-dialog[open]")');
- await change(b,'[aria-label="Motivo do arquivamento"]','other');assert(await b.evaluate('document.querySelector(".archive-dialog button[type=submit]").disabled'));
+ await b.evaluate('document.querySelector(".card-dialog .order-more-actions summary").click();document.querySelector(".card-dialog .order-more-actions [data-archive-reason=other]").click()');await b.until('!!document.querySelector(".archive-dialog[open]")');
+ assert.equal(await b.evaluate('document.querySelector(".archive-dialog select").value'),'other');assert(await b.evaluate('document.querySelector(".archive-dialog button[type=submit]").disabled'));
  await change(b,'[aria-label="Observação do arquivamento"]','Operação encerrada pela equipe','input');await confirm(b);
  assert.equal(board.details[remaining.id].arquivo.por,'Romulo');assert.equal(board.details[remaining.id].arquivo.motivo,'other');
  await b.until('document.querySelectorAll(".card-open").length===0');
@@ -119,5 +120,5 @@ try{
  assert.match(await a.evaluate('document.querySelector(".archive-list").innerText'),/Operação encerrada pela equipe/);
  assert.match(await a.evaluate('document.querySelector(".archive-reason").innerText'),/Outro motivo/);
  assert.deepEqual(errors,[]);
- console.log('OK archive browser: safe menu, cancel focus, explicit deletion checkbox, history, preserved shipping, restore, catalog flow, cross-user synchronization, responsive archive, Carregamento filter and manual reason with required note across both sessions.');
+ console.log('OK archive browser: safe menu, cancel focus, explicit deletion checkbox, history, preserved shipping, restore, catalog flow, cross-user synchronization, responsive archive, Carregamento filter and choosing the existing reasons directly in both action menus.');
 }finally{for(const p of pages)p.socket.close();browser.kill();server.kill()}

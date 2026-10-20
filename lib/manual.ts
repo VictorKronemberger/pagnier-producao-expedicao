@@ -2,7 +2,7 @@ export const manual = [
   {
     "category": "production",
     "title": "Como arquivar um pedido antigo sem concluir as etapas",
-    "text": "O arquivamento é manual. Abra Outras ações no cartão ou em Pedidos de venda, escolha Arquivar pedido, selecione o motivo e confirme. Motivos: retirado da fila, excluído no Nomus, pedido cancelado, pedido duplicado ou outro motivo (descreva na observação). A tela Arquivados permite buscar, filtrar por motivo e restaurar. Data, responsável, observação, produção, caixas, packing lists e invoices ficam preservados. O arquivamento é compartilhado com a equipe e não altera o Nomus. Não há varredura para detectar exclusões nem arquivamento automático; a atualização normal dos dados continua. Registros arquivados anteriormente são mantidos. Restaurar não recria um pedido no Nomus."
+    "text": "O arquivamento é manual. Abra Outras ações no cartão ou em Pedidos de venda, escolha um dos motivos em Arquivar pedido por e confirme na janela seguinte. Motivos: retirado da fila, excluído no Nomus, pedido cancelado, pedido duplicado ou outro motivo (descreva na observação). A tela Arquivados permite buscar, filtrar por motivo e restaurar. Data, responsável, observação, produção, caixas, packing lists e invoices ficam preservados. O arquivamento é compartilhado com a equipe e não altera o Nomus. Não há varredura para detectar exclusões nem arquivamento automático; a atualização normal dos dados continua. Registros arquivados anteriormente são mantidos. Restaurar não recria um pedido no Nomus."
   },
   {
     "category": "start",
