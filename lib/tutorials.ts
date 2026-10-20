@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"22",updatedAt:"20/10/2026"};
+export const manualEdition = {revision:"23",updatedAt:"20/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -190,8 +190,8 @@ export const tutorials = [
       },
       {
         "title": "Arquive pedidos antigos",
-        "short": "Abra o pedido e clique em Arquivar pedido. Para recuperar, use Pedidos de venda → Arquivados → Restaurar pedido.",
-        "text": "No cartão ou em Pedidos de venda, abra Outras ações e escolha um dos motivos de arquivamento listados. Na janela seguinte, preencha a observação se necessário e confirme. O arquivamento é manual e vale para toda a equipe; não depende de concluir produção, conferência ou documentos. Os dados ficam preservados. Para consultar ou restaurar, abra Arquivados no menu principal. Restaurar mantém a etapa anterior. Nenhuma dessas ações altera o Nomus."
+        "short": "Abra Outras ações, escolha o motivo e confirme. Consulte o histórico ou restaure um pedido disponível na aba Arquivados.",
+        "text": "No cartão ou em Pedidos de venda, abra Outras ações e escolha um dos motivos de arquivamento listados. Na janela seguinte, preencha a observação se necessário e confirme. O arquivamento é manual e vale para toda a equipe; não depende de concluir produção, conferência ou documentos. Os dados ficam preservados. Para consultar ou restaurar, abra Arquivados no menu principal. Restaurar mantém a etapa anterior e fica disponível enquanto o pedido estiver na base consultada. O histórico registra cada arquivamento e restauração. Nenhuma dessas ações altera o Nomus."
       }
     ],
     "done": "Os produtos estão disponíveis para conferência e as diferenças foram verificadas.",

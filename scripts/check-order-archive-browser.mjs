@@ -119,6 +119,18 @@ try{
  await change(a,'[aria-label="Filtrar motivo do arquivamento"]','other');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
  assert.match(await a.evaluate('document.querySelector(".archive-list").innerText'),/Operação encerrada pela equipe/);
  assert.match(await a.evaluate('document.querySelector(".archive-reason").innerText'),/Outro motivo/);
+ const eventText=await a.evaluate('document.querySelector(".archive-events").textContent');
+ assert.match(eventText,/Exclusão conferida no ERP/);assert.match(eventText,/Restaurado/);assert.match(eventText,/Operação encerrada pela equipe/);
+ // Legacy archive with no current ERP order: history remains readable, restoration is explicitly unavailable.
+ board.details.LEGACY={arquivado:true,responsavel:"",nota:"",situacao:"A programar"};revision++;
+ await change(a,'[aria-label="Filtrar motivo do arquivamento"]','all');await a.until('!!document.querySelector("[data-archived-order=LEGACY]")');
+ assert.match(await a.evaluate('document.querySelector("[data-archived-order=LEGACY] .archive-reason").textContent'),/Motivo não registrado/);
+ assert(await a.evaluate('document.querySelector("[data-archived-order=LEGACY] footer .button:last-child").disabled'));
+ assert.match(await a.evaluate('document.querySelector("[data-archived-order=LEGACY]").textContent'),/Restauração indisponível/);
+ await change(a,'[aria-label="Filtrar motivo do arquivamento"]','unknown');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
+ await a.evaluate('document.querySelector("[data-archived-order=LEGACY] footer .button.ghost").click()');await a.until('!!document.querySelector(".card-dialog")');
+ await a.evaluate('document.querySelector(".card-dialog .order-more-actions summary").click()');
+ assert(await a.evaluate('document.querySelector(".card-dialog .order-more-actions button").disabled'));
  assert.deepEqual(errors,[]);
  console.log('OK archive browser: safe menu, cancel focus, explicit deletion checkbox, history, preserved shipping, restore, catalog flow, cross-user synchronization, responsive archive, Carregamento filter and choosing the existing reasons directly in both action menus.');
 }finally{for(const p of pages)p.socket.close();browser.kill();server.kill()}

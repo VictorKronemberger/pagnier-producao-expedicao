@@ -1,5 +1,6 @@
 "use client";
 import ArchiveActions from "./archive-actions";
+import ArchiveHistory from "./archive-history";
 import archiveStyles from "./archive.module.css";
 import {isCancelledOP,cancelledProduction} from "../lib/op-status.mjs";
 import ThemeToggle from "./theme-toggle";
@@ -41,7 +42,7 @@ import {useEffect,useMemo,useRef,useState,useCallback} from "react";
 import {Archive,FileText,Factory,LayoutDashboard,Layers3,Search,RefreshCw,X,GripVertical,ArrowUp,ArrowDown,Check,CheckSquare,MessageSquare,UserRound,ShieldCheck,Download,LoaderCircle,ArrowRight,Flag,BookOpen,Bell,CalendarDays,AlertCircle,ExternalLink,ClipboardCheck,Package,Truck} from "lucide-react";
 import {move} from "../lib/queue.mjs";
 import {createAutosave} from "../lib/autosave.mjs";
-import {matchesCreation,SITE_START_DATE,SITE_START_LABEL,clampStart} from "../lib/date-filter.mjs";
+import {matchesCreation,matchesOrderCreation,SITE_START_DATE,SITE_START_LABEL,clampStart} from "../lib/date-filter.mjs";
 import {isInternal,groupInternal} from "../lib/internal-production.mjs";
 import {receiveOrders} from "../lib/intake.mjs";
 import SalesCatalog from "./sales-catalog";
@@ -255,7 +256,7 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  const archiveOrderTarget=archiveTarget?[...groups,...(data?.snapshot.pedidos??[]),...archived].find(g=>g.id===archiveTarget.id):null;
  const readyDocumentation=documentationReady(board,groups).filter(entry=>entry.orders.some(order=>!board.details[order.id]?.arquivado));
  const readyDocumentationOrders=readyDocumentation.reduce((total,entry)=>total+entry.orders.length,0);
- const waitingOrders=(data?.snapshot.pedidos??[]).filter(g=>!board.details[g.id]?.arquivado&&awaitsRelease(g,board.details[g.id]));
+ const waitingOrders=(data?.snapshot.pedidos??[]).filter(g=>!board.details[g.id]?.arquivado&&awaitsRelease(g,board.details[g.id])&&matchesOrderCreation(g,month,start,end)).map(g=>({...g,ordens:g.ordens.filter(o=>matchesCreation(o,month,start,end))}));
  const matchesMonth=(o:OP)=>matchesCreation(o,month,start,end);
  const uncertain=groups.filter(g=>!board.details[g.id]?.arquivado&&!g.ordens.length&&g.vinculo!=="none");
  const inMonth=groups.filter(g=>g.ordens.length?g.ordens.some(matchesMonth):month==="all"&&g.vinculo==="none").map(g=>({...g,ordens:g.ordens.filter(matchesMonth)}));
@@ -364,8 +365,9 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  </div>
  <div className="detail-panel" hidden={detailTab!=="shipping"}><OrderShippingSummary reviewed={boxReview.reviewed} onExpedition={()=>{setDetailTab("expedition");setAssemblyStep(shipment?.caixasEmMontagem?.length?"small":"outer");setExpeditionStep(shipment?.caixas.length||shipment?.caixasEmMontagem?.length?"boxes":"review")}} shipment={shipment} orderIds={shipment?.agrupamento?.pedidos??[active.id]} onPacking={()=>openPacking(active.id)} onInvoice={()=>openInvoice(active.id)}/></div>
  {detail.arquivado&&<p className={"archive-preserved "+archiveStyles.preserved}>Pedido arquivado · histórico preservado. <button className="text-action" onClick={()=>{setSelected(null);navigate("archived")}}>Ver Arquivados</button></p>}
- <div className="dialog-footer">{saveIndicator}<ArchiveActions archived={!!detail.arquivado} disabled={loading||saving||dirty} onSelect={(archived,reason)=>archiveOrder(active.id,archived,reason)}/><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
+ <ArchiveHistory record={detail.arquivo} archived={!!detail.arquivado}/>
+ <div className="dialog-footer">{saveIndicator}<ArchiveActions restoreUnavailable={![...(data?.snapshot.grupos??[]),...(data?.snapshot.pedidos??[])].some(g=>g.id===active.id)} archived={!!detail.arquivado} disabled={loading||saving||dirty} onSelect={(archived,reason)=>archiveOrder(active.id,archived,reason)}/><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
  </section></div>}
- {archiveTarget&&archiveOrderTarget&&<ArchiveDialog initialReason={archiveTarget.reason} key={archiveTarget.id+String(archiveTarget.restoring)} order={archiveOrderTarget} restoring={archiveTarget.restoring} onClose={()=>setArchiveTarget(null)} onConfirm={confirmArchive}/>}
+ {archiveTarget&&archiveOrderTarget&&<ArchiveDialog restoreUnavailable={![...(data?.snapshot.grupos??[]),...(data?.snapshot.pedidos??[])].some(g=>g.id===archiveTarget.id)} initialReason={archiveTarget.reason} key={archiveTarget.id+String(archiveTarget.restoring)} order={archiveOrderTarget} restoring={archiveTarget.restoring} onClose={()=>setArchiveTarget(null)} onConfirm={confirmArchive}/>}
  </div>
 }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {createAutosave} from "../lib/autosave.mjs";
 import {creationDate,initialSync,syncStep} from "../lib/nomus-sync.mjs";
-import {matchesCreation} from "../lib/date-filter.mjs";
+import {matchesCreation,matchesOrderCreation} from "../lib/date-filter.mjs";
 import {isInternal,groupInternal} from "../lib/internal-production.mjs";
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const empty={sequence:[],details:{}};
@@ -35,3 +35,12 @@ assert.equal(archiveWrites.length,1);assert.equal(archiveWrites[0].details.PV.ar
 const restored=b('');restored.details.PV.arquivado=false;archiveSaver.enqueue(restored);await archiveSaver.flush();
 assert.equal(archiveWrites.length,2);assert.equal(archiveWrites[1].details.PV.arquivado,false);archiveSaver.dispose();
 console.log('OK archive-only and restore-only changes trigger durable autosave.');
+
+const range=["range","2026-10-01","2026-10-31"];
+assert(!matchesOrderCreation({criacao:"2026-09-10",ordens:[{criacao:"2026-09-10"}]},...range));
+assert(!matchesOrderCreation({criacao:"2026-09-10",ordens:[]},...range));
+assert(matchesOrderCreation({criacao:"2026-10-05",ordens:[]},...range));
+assert(matchesOrderCreation({criacao:"2026-09-10",ordens:[{criacao:"2026-10-05"}]},...range));
+assert(!matchesOrderCreation({criacao:"2026-10-05",ordens:[{criacao:"2026-09-10"}]},...range));
+assert(matchesOrderCreation({ordens:[]},"unknown","",""));
+console.log("OK date filtering: awaiting orders with and without OPs respect the same creation range.");

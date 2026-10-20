@@ -81,7 +81,7 @@ try {
  assert.equal(selectedRequest,order.id,'refresh includes the opened order');await shot('commercial-status-detail');
  order.pedidoConsultaFalhou=true;nomusRevision++;
  await evaluate('document.querySelector(".nomus-refresh").click()');await until('!document.querySelector(".nomus-refresh").disabled');
- assert.match(await evaluate('document.querySelector(".card-dialog").textContent'),/Pedido não confirmado no Nomus/);
+ assert.match(await evaluate('document.querySelector(".card-dialog").textContent'),/Consulta do pedido indisponível/);
  assert.equal(await evaluate('document.querySelector(".card-dialog .order-commercial")'),null,'failed verification does not assert stale commercial status');
  order.pedidoConsultaFalhou=false;nomusRevision++;
  await evaluate('document.querySelector(".nomus-refresh").click()');await until('!document.querySelector(".nomus-refresh").disabled');
@@ -144,6 +144,16 @@ try {
  assert.equal(requests,afterFailure,'background attempts respect outage backoff');
  transportFailure=false;refreshMode='updated';await evaluate('document.querySelector(".nomus-refresh").click()');
  await until('!document.querySelector(".nomus-refresh").disabled');assert.equal(requests,afterFailure+1,'manual refresh remains available during backoff');
+ // Awaiting release must respect the selected OP/order creation range.
+ const oldWaiting={id:'PV SEPTEMBER',codigo:'PV SEPTEMBER',cliente:'Pedido setembro',liberacao:'waiting',vinculo:'none',criacao:'2026-09-10',ordens:[],itens:[{produto:'Teste',quantidade:'1',unidade:'UNID',status:1}]};
+ const octoberWaiting={...oldWaiting,id:'PV OCTOBER',codigo:'PV OCTOBER',criacao:'2026-10-10'};
+ const oldOPWaiting={...oldWaiting,id:'PV SEPTEMBER OP',codigo:'PV SEPTEMBER OP',ordens:[{id:'OP SEPTEMBER',nome:'OP SEPTEMBER',produto:'Teste',quantidade:'1',unidade:'UNID',criacao:'2026-09-10'}]};
+ snapshot.pedidos.push(oldWaiting,octoberWaiting,oldOPWaiting);snapshot.grupos.push(oldOPWaiting);order.pedidoConsultaFalhou=true;nomusRevision++;
+ await evaluate('localStorage.setItem("pagnier-view",JSON.stringify({month:"range",start:"2026-10-01",end:"2026-10-31"}))');
+ await navigate();await until('document.querySelector(".kanban")?.textContent.includes("PV OCTOBER")');
+ assert(!(await evaluate('document.querySelector(".kanban").textContent')).includes('PV SEPTEMBER'));
+ assert.match(await evaluate('document.querySelector(".kanban").textContent'),/Consulta do pedido indisponível/);
+ assert.doesNotMatch(await evaluate('[...document.querySelectorAll(".kanban [title]")].map(el=>el.title).join(" ")'),/varredura|não apareceu/);
  refreshMode='unconfigured';await evaluate('document.querySelector(".nomus-refresh").click()');await until('document.querySelector(".nomus-capture-notice")?.textContent.includes("não está configurada")');
  assert.equal(await evaluate('document.querySelector(".nomus-refresh").disabled'),true);
  assert.equal(errors.length,0,errors.join('\n'));

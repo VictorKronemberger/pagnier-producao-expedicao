@@ -1,4 +1,4 @@
-import {changeArchive} from "../../../lib/order-archive.mjs";
+import {changeArchive,archiveRestoreUnavailable} from "../../../lib/order-archive.mjs";
 import {assertReleaseTransitions} from "../../../lib/order-release.mjs";
 import {operationalGroups,stockEligibility} from "../../../lib/stock-orders.mjs";
 import {assertDispatchTransitions} from "../../../lib/dispatch.mjs";
@@ -121,7 +121,7 @@ export async function POST(request:Request){
  if((saved?.revision??0)!==input.revision)return json({error:"Outra pessoa alterou o quadro. Confira os dados atualizados e tente novamente."},409);
  const previous=saved?JSON.parse(saved.payload):{sequence:[],details:{}},visible=scopeBoard(previous,state.hiddenOrderCodes);
  const order=[...snapshot.grupos,...(snapshot.pedidos??[])].find((p:any)=>p.id===input.orderId);
- if(!order)return json({error:"Pedido indisponível ou fora do recorte permitido."},400);
+ if(!order)return json({error:input.archived===false&&visible.details[input.orderId]?.arquivado?archiveRestoreUnavailable:"Pedido indisponível ou fora do recorte permitido."},400);
  let next;const now=new Date().toISOString();
  try{next=changeArchive(visible,order,input,user.displayName,now)}catch(e){return json({error:e instanceof Error?e.message:"Arquivamento inválido."},400)}
  const payload=JSON.stringify(preserveExcludedNotes(previous,next,state.hiddenOrderCodes));

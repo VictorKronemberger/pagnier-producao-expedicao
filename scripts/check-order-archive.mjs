@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {archiveOrders,changeArchive} from "../lib/order-archive.mjs";
+import {archiveOrders,archiveReasonKey,archiveEvents,changeArchive} from "../lib/order-archive.mjs";
 import {receiveOrders} from "../lib/intake.mjs";
 import {syncStep,initialSync,publicSync} from "../lib/nomus-sync.mjs";
 const order={id:"PD TEST",codigo:"PD TEST",cliente:"Cliente teste",ordens:[{id:"OP1"}],liberacao:"released"};
@@ -29,3 +29,19 @@ assert.equal(publicSync(legacy,true).snapshot.pedidos[0].pedidoConsultaFalhou,fa
 const paths=[];const cleaned=await syncStep(legacy,"test",{now:"2026-10-20T14:00:00Z",fetcher:async url=>{paths.push(url);return Response.json([])}});
 assert.equal(paths.length,1);assert(paths[0].includes("/ordens?"),"absence must not prioritize a detail request");assert.equal(cleaned.orderAbsences,undefined);assert.equal(cleaned.orderScan,undefined);assert.equal(publicSync(cleaned,true).pedidoVarredura,undefined);
 console.log("OK archive: explicit deletion confirmation, durable history, restore, no automatic requeue; ERP errors/partial lists never delete records; no deletion inference from complete lists, recovery and explicit manual reasons.");
+
+const repeated=changeArchive(restored,order,{archived:true,reason:"duplicate",note:"Segundo motivo"},"Cyntia","2026-10-20T14:00:00Z");
+const events=repeated.details[order.id].arquivo.historico;
+assert.deepEqual(events.map(e=>e.acao),["arquivar","restaurar","arquivar"]);
+assert.deepEqual(events.map(e=>e.por),["Victor","Romulo","Cyntia"]);
+assert.equal(events[0].observacao,"Conferido no ERP");assert.equal(events[2].motivo,"duplicate");
+assert.equal(restored.details[order.id].arquivo.historico.length,2,"events cannot mutate previous snapshots");
+const oldRecord={motivo:"manual",em:"2026-10-01T12:00:00Z",por:"Victor",restauradoEm:"2026-10-02T12:00:00Z",restauradoPor:"Romulo"};
+assert.deepEqual(archiveEvents(oldRecord).map(e=>e.acao),["arquivar","restaurar"]);
+const migrated=changeArchive({...board,details:{[order.id]:{...board.details[order.id],arquivo:oldRecord}}},order,{archived:true},"Cyntia","2026-10-20T15:00:00Z");
+assert.equal(migrated.details[order.id].arquivo.historico.length,3);
+assert.equal(archiveReasonKey(undefined),"unknown");assert.equal(archiveReasonKey({motivo:"invalid"}),"unknown");assert.equal(archiveReasonKey({motivo:"manual"}),"manual");
+assert.equal(archiveEvents(undefined,true)[0].motivo,undefined,"legacy reason must stay unknown");
+assert.equal(archiveOrders({grupos:[]},archived)[0].restauravel,false);
+assert.equal(archiveOrders({grupos:[order]},archived)[0].restauravel,true);
+console.log("OK archive corrections: append-only decisions, legacy migration, unknown reason and restoration availability.");

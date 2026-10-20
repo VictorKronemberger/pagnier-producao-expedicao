@@ -77,3 +77,11 @@
 .list footer :global(.button){flex:1;min-height:40px}
 .tools :global(.search) input{font-size:16px}
 }
+
+.events{margin:12px 0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.events summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.events ol{list-style:none;padding:0 0 0 12px;margin:10px 0;border-left:2px solid var(--line)}
+.events li+li{margin-top:12px}
+.events strong,.events small{display:block}
+.events small{color:light-dark(#6b7d70,var(--night-muted));margin-top:3px}
+.events p{margin-top:5px;white-space:pre-wrap}

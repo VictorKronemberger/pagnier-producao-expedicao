@@ -176,6 +176,8 @@ try{
  response=await call('board','PUT',{board:modified,revision:archiveResult.revision});assert.equal(response.status,200,await response.text());
  const preserved=await (await call('board')).json();assert.equal(preserved.board.details['OLD-PV'].arquivo.por,'Victor','normal autosave cannot erase archive metadata');
  response=await call('board','POST',{action:'archive',orderId:'OLD-PV',revision:preserved.revision,archived:false});assert.equal(response.status,200,await response.clone().text());const unarchived=await response.json();assert(!unarchived.board.details['OLD-PV'].arquivado);assert.equal(unarchived.board.details['OLD-PV'].arquivo.restauradoPor,'Victor');assert.equal(unarchived.board.details['OLD-PV'].nota,'Nota posterior');
+ assert.equal(unarchived.board.details['OLD-PV'].arquivo.historico.at(-1).acao,'restaurar');
+ assert.equal(unarchived.board.details['OLD-PV'].arquivo.historico.at(-2).observacao,'Confirmado no ERP');
  console.log('OK archive API: confirmation, server actor/time, preserved notes, restore, revision/origin/auth guards and metadata survives autosave.');
  // Old confirmed absence evidence must never mutate the shared board, even on cached polls.
  const automaticState=seed(),missingCode='PD 900001',confirmedAt=new Date(Date.now()-60000).toISOString();
@@ -200,6 +202,14 @@ try{
  await call('nomus','POST',{productionOps:[]});assert(!(await (await call('board')).json()).board.details[missingCode].arquivado);
  testEnv.NOMUS_API_KEY='';
  console.log('OK manual-only archive: cached absence evidence is inert; chosen reason, actor, shared revision, stale-write guard and restoration preserved.');
+ // Archive metadata survives old autosave clients and missing orders cannot silently disappear from history.
+ const historyBase=await (await call('board')).json();
+ response=await call('board','POST',{action:'archive',orderId:missingCode,revision:historyBase.revision,archived:true,reason:'duplicate'});assert.equal(response.status,200);const archivedAgain=await response.json();
+ assert.deepEqual(archivedAgain.board.details[missingCode].arquivo.historico.map(e=>e.acao),['arquivar','restaurar','arquivar']);
+ assert.equal(archivedAgain.board.details[missingCode].arquivo.historico[0].motivo,'cancelled');
+ await saveSync(seed());
+ response=await call('board','POST',{action:'archive',orderId:missingCode,revision:archivedAgain.revision,archived:false});assert.equal(response.status,400);assert.match((await response.json()).error,/Restauração indisponível/);
+ const retained=await (await call('board')).json();assert.equal(retained.revision,archivedAgain.revision);assert(retained.board.details[missingCode].arquivado);assert.equal(retained.board.details[missingCode].arquivo.historico.length,3);
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');
