@@ -48,7 +48,7 @@ import {packingWorkflow} from "../lib/packing-workflow.mjs";
 import {relatedInvoiceIds} from "../lib/invoice-prepare.mjs";
 import ManualGuide from "./manual-guide";
 type OP={situacaoNomus?:string;id:string;nome:string;produto:string;quantidade:string;unidade:string;criacao?:string;quantidadeProgramada?:string;quantidadeAnterior?:string;quantidadeAlteradaEm?:string};
-type Group={pedidoConsultadoEm?:string|null;liberacao?:ReleaseState;estoque?:boolean;criacao?:string;id:string;codigo:string;cliente:string;ordens:OP[];vinculo?:"none"|"unknown"|"linked";itens?:{status?:number;item?:string;produto:string;quantidade:string;unidade:string}[]};
+type Group={pedidoConsultaFalhou?:boolean;pedidoConsultadoEm?:string|null;liberacao?:ReleaseState;estoque?:boolean;criacao?:string;id:string;codigo:string;cliente:string;ordens:OP[];vinculo?:"none"|"unknown"|"linked";itens?:{status?:number;item?:string;produto:string;quantidade:string;unidade:string}[]};
 type Detail={arquivado?:boolean;atendimentoEstoque?:boolean;envio?:Shipment;responsavel:string;responsavelConferencia?:string;nota:string;situacao:string;etiqueta?:string;conferidas?:string[];expedicao?:string[];empresa?:string;vistoNomus?:string};
 type Board={boxModels?:BoxModel[];invoices?:Record<string,Invoice>;sequence:string[];details:Record<string,Detail>};
 type Snapshot={consultadoEm:string;ordensConsultadas:number;grupos:Group[];semVinculo:OP[];pedidos?:Group[]};

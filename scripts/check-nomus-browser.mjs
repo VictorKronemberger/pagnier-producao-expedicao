@@ -71,6 +71,13 @@ try {
  assert(!await evaluate('document.querySelector(".card-dialog .release-notice").textContent.includes("Ainda não atendido")'));
  await until('!document.querySelector(".nomus-refresh").disabled');await evaluate('document.querySelector(".nomus-refresh").click()');await until('!document.querySelector(".nomus-refresh").disabled');
  assert.equal(selectedRequest,order.id,'refresh includes the opened order');await shot('commercial-status-detail');
+ order.pedidoConsultaFalhou=true;nomusRevision++;
+ await evaluate('document.querySelector(".nomus-refresh").click()');await until('!document.querySelector(".nomus-refresh").disabled');
+ assert.match(await evaluate('document.querySelector(".card-dialog").textContent'),/Pedido não confirmado no Nomus/);
+ assert.equal(await evaluate('document.querySelector(".card-dialog .release-notice")'),null,'failed verification does not assert stale commercial status');
+ order.pedidoConsultaFalhou=false;nomusRevision++;
+ await evaluate('document.querySelector(".nomus-refresh").click()');await until('!document.querySelector(".nomus-refresh").disabled');
+ await until('!!document.querySelector(".card-dialog .release-notice")');
  await evaluate('document.querySelector(".card-dialog .close").click()');
  refreshMode='failed';await evaluate('document.querySelector(".nomus-refresh").click()');await until('!!document.querySelector(".nomus-capture-notice.is-error")');
  assert.equal(await evaluate('document.querySelector(".nomus-capture time").dateTime'),lastCapture,'failure does not advance capture timestamp');

@@ -94,3 +94,14 @@ let productionFailure;
 await assert.rejects(()=>bootstrapNomus(productionSeed,'fixture',{includeProduction:true,now:()=>serverTime,checkpoint:async s=>productionFailure=s,fetcher:async()=>new Response('',{status:429})}));
 assert(productionFailure.retryAt);assert.equal(productionFailure.production.OP1.quantity,'0');assert(!productionFailure.bootstrapCompletedAt);
 console.log('OK full production capture: all batches, final operation only, cancelled OP exclusion and failure checkpoint.');
+
+// A saved order omitted from the list is checked directly; rejection is not deletion.
+const omitted=initialSync(empty);omitted.ordersComplete=true;omitted.opsComplete=true;
+omitted.orders[9]={code:'PV OMITTED',companyId:1,clientId:1,createdDate:'2026-10-19',items:[]};omitted.clients[1]='Fixture';omitted.products[1]={name:'Fixture product',unit:'UNID'};
+const omittedPaths=[];
+const rejected=await bootstrapNomus(omitted,'fixture',{refresh:true,now:()=>serverTime,fetcher:async url=>{omittedPaths.push(url);return url.endsWith('pedidos/9')?new Response('',{status:400}):Response.json([])}});
+assert(omittedPaths.some(p=>p.endsWith('pedidos/9')));assert.equal(rejected.orders[9].code,'PV OMITTED');assert.equal(rejected.orderReviewFailures[9].status,400);assert(publicSync(rejected,true).partial);assert(publicSync(rejected,true).snapshot.pedidos[0].pedidoConsultaFalhou);
+const confirmedPaths=[];
+const reconfirmed=await bootstrapNomus(rejected,'fixture',{verifyOrders:true,now:()=>serverTime,fetcher:async url=>{confirmedPaths.push(url);return Response.json({id:9,idEmpresa:1,codigoPedido:'PV OMITTED',idPessoaCliente:1,itensPedido:[{idProduto:1,quantidade:'1',status:4}]})}});
+assert(confirmedPaths[0].endsWith('pedidos/9'));assert(!reconfirmed.orderReviewFailures[9]);assert.equal(reconfirmed.orders[9].checkedAt,serverTime);
+console.log('OK omitted order: direct verification, explicit unconfirmed status, preserved data and recovery without repeating completed pagination.');

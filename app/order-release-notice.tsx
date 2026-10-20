@@ -1,6 +1,7 @@
 import {pendingReleaseItems,pendingFulfillmentItems} from "../lib/order-release.mjs";
 type Item={status?:number;item?:string;produto:string;quantidade:string;unidade:string};
-export default function OrderReleaseNotice({order,compact=false}:{order:{pedidoConsultadoEm?:string|null;liberacao?:string;itens?:Item[]};compact?:boolean}){
+export default function OrderReleaseNotice({order,compact=false}:{order:{pedidoConsultaFalhou?:boolean;pedidoConsultadoEm?:string|null;liberacao?:string;itens?:Item[]};compact?:boolean}){
+ if(order.pedidoConsultaFalhou)return <span className="release-state release-unknown" title="O pedido não apareceu na varredura e sua consulta direta foi recusada pelo Nomus. Os registros anteriores foram preservados.">Pedido não confirmado no Nomus · dados anteriores preservados</span>;
  if(order.liberacao==="unknown")return <span className="release-state release-unknown" title="O pedido permanece na etapa salva enquanto a consulta ao Nomus confirma a liberação.">Consultando liberação</span>;
  const fulfillment=pendingFulfillmentItems(order),pending=fulfillment.length?fulfillment:pendingReleaseItems(order);if(!pending.length)return null;
  const checked=order.pedidoConsultadoEm?new Date(order.pedidoConsultadoEm):null;
