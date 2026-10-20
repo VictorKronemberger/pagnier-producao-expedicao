@@ -48,7 +48,7 @@ import {packingWorkflow} from "../lib/packing-workflow.mjs";
 import {relatedInvoiceIds} from "../lib/invoice-prepare.mjs";
 import ManualGuide from "./manual-guide";
 type OP={situacaoNomus?:string;id:string;nome:string;produto:string;quantidade:string;unidade:string;criacao?:string;quantidadeProgramada?:string;quantidadeAnterior?:string;quantidadeAlteradaEm?:string};
-type Group={liberacao?:ReleaseState;estoque?:boolean;criacao?:string;id:string;codigo:string;cliente:string;ordens:OP[];vinculo?:"none"|"unknown"|"linked";itens?:{status?:number;item?:string;produto:string;quantidade:string;unidade:string}[]};
+type Group={pedidoConsultadoEm?:string|null;liberacao?:ReleaseState;estoque?:boolean;criacao?:string;id:string;codigo:string;cliente:string;ordens:OP[];vinculo?:"none"|"unknown"|"linked";itens?:{status?:number;item?:string;produto:string;quantidade:string;unidade:string}[]};
 type Detail={arquivado?:boolean;atendimentoEstoque?:boolean;envio?:Shipment;responsavel:string;responsavelConferencia?:string;nota:string;situacao:string;etiqueta?:string;conferidas?:string[];expedicao?:string[];empresa?:string;vistoNomus?:string};
 type Board={boxModels?:BoxModel[];invoices?:Record<string,Invoice>;sequence:string[];details:Record<string,Detail>};
 type Snapshot={consultadoEm:string;ordensConsultadas:number;grupos:Group[];semVinculo:OP[];pedidos?:Group[]};
@@ -160,6 +160,8 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  const flush=()=>{if(document.visibilityState==="hidden")void saver.current?.flush()};
  window.addEventListener("beforeunload",fn);document.addEventListener("visibilitychange",flush);
  return()=>{window.removeEventListener("beforeunload",fn);document.removeEventListener("visibilitychange",flush)}},[]);
+ const selectedOrder=useRef<string|null>(null);
+ useEffect(()=>{selectedOrder.current=selected;if(selected)window.dispatchEvent(new Event("nomus-production-request"))},[selected]);
  const productionRequests=useRef<string[]>([]),nomusRevision=useRef<number|undefined>(undefined);
  const requestProduction=useCallback((names:string[])=>{const changed=names.join(",")!==productionRequests.current.join(",");productionRequests.current=names;if(changed&&names.length)window.dispatchEvent(new Event("nomus-production-request"))},[]);
  const ready=!!data;
@@ -169,7 +171,7 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  if(busy||!manual&&(document.visibilityState==="hidden"||Date.now()<retryAfter))return;
  busy=true;setNomusBusy(true);if(manual)setSyncNotice("");
  try{
- const d:Partial<Sync>&{snapshot?:Snapshot;nomusRevision?:number}=await request("/api/nomus",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productionOps:productionRequests.current,knownRevision:nomusRevision.current,...(manual?{refresh:true}:{})})});
+ const d:Partial<Sync>&{snapshot?:Snapshot;nomusRevision?:number}=await request("/api/nomus",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productionOps:productionRequests.current,...(selectedOrder.current?{orderCode:selectedOrder.current}:{}),knownRevision:nomusRevision.current,...(manual?{refresh:true}:{})})});
  if(!stopped){
  failures=0;retryAfter=0;nomusRevision.current=d.nomusRevision;
  setSync(old=>({...old,...d}) as Sync);setSyncError(d.refreshStatus==="failed"?d.message||"Consulta indisponível.":"");

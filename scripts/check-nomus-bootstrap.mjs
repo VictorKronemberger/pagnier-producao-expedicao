@@ -75,3 +75,22 @@ const remainingPaths=[];
 await bootstrapNomus({...automaticExpansion,bootstrapCompletedAt:serverTime},'fixture',{fetcher:async url=>{remainingPaths.push(url.split('/rest/')[1]);return Response.json([])}});
 assert.deepEqual(remainingPaths,[opsPath(2)]);
 console.log('OK automatic scope expansion invalidates old completion; bootstrap resumes partial scopes even with a legacy marker.');
+
+// Full capture also reads final-operation quantities, beyond the first visible 20 OPs.
+const productionSeed=initialSync(empty);productionSeed.ordersComplete=true;productionSeed.opsComplete=true;
+productionSeed.snapshot.semVinculo=Array.from({length:22},(_,i)=>({id:'OP'+(i+1),nome:'OP'+(i+1),companyId:1,criacao:'2026-10-19',situacaoNomus:i===21?'Cancelada':'Encerrada'}));
+productionSeed.productionIds=Object.fromEntries(Array.from({length:22},(_,i)=>['OP'+(i+1),i+1]));
+productionSeed.production={OP1:{quantity:'0',nextAt:0}};
+const productionPaths=[];
+const fullyCaptured=await bootstrapNomus(productionSeed,'fixture',{includeProduction:true,now:()=>serverTime,fetcher:async(url,options)=>{
+ assert.equal(options.method,'GET');productionPaths.push(url);
+ const ids=new URL(url).searchParams.get('query').split(',').map(q=>Number(q.split('==')[1]));
+ return Response.json(ids.flatMap(id=>[1,2].map(operacao=>({id:id*10+operacao,idOrdem:id,nomeOrdem:'OP'+id,operacao,qtdeProduzida:operacao===2?'10':'20',descricao:'Etapa '+operacao}))));
+}});
+assert.equal(productionPaths.length,2);assert.equal(Object.keys(fullyCaptured.production).length,21);
+for(const value of Object.values(fullyCaptured.production)){assert.equal(value.quantity,'10');assert.equal(value.checkedAt,serverTime)}
+assert.equal(fullyCaptured.production.OP22,undefined);
+let productionFailure;
+await assert.rejects(()=>bootstrapNomus(productionSeed,'fixture',{includeProduction:true,now:()=>serverTime,checkpoint:async s=>productionFailure=s,fetcher:async()=>new Response('',{status:429})}));
+assert(productionFailure.retryAt);assert.equal(productionFailure.production.OP1.quantity,'0');assert(!productionFailure.bootstrapCompletedAt);
+console.log('OK full production capture: all batches, final operation only, cancelled OP exclusion and failure checkpoint.');

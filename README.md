@@ -34,6 +34,12 @@ O botão de sol/lua no login e no cabeçalho alterna entre modo claro e escuro. 
 
 Validação isolada do tema: após `npm run build`, execute `node scripts/check-theme-browser.mjs` no Windows com Edge instalado. O teste usa dados fictícios e um servidor próprio na porta 5175, sem acesso ao ERP ou banco.
 
+## Atendimento comercial e produção
+
+O aviso de atendimento comercial usa a situação dos itens do pedido no Nomus. Um item Liberado pode ter a produção concluída; a quantidade produzida vem da última operação da OP e é exibida em Conferir produtos. O aviso mostra o horário da consulta do próprio pedido. Abrir um pedido prioriza sua consulta GET direta quando ela tem mais de cinco minutos; a atualização manual consulta o pedido aberto, respeitando bloqueios e intervalos existentes.
+
+Para uma revisão completa autorizada, `npm run db:capture-nomus -- --refresh --production` percorre novamente os pedidos e OPs do recorte e consulta as quantidades produzidas de todas as OPs não canceladas em lotes, incluindo as que estão fora da página visível. A rotina salva progresso, preserva os dados anteriores em falhas e não altera o ERP. Sem `--production`, mantém a captura de pedidos/OPs. A cobertura do painel começa em 01/09/2026.
+
 ## Captura do Nomus e ordens canceladas
 
 O horário da última captura e o ícone de atualizar ficam na linha de status existente, junto à contagem de pedidos. Nas demais áreas, ficam nas ações do cabeçalho. Clicar no horário mostra a data completa, o fuso de Brasília e eventuais avisos, sem deslocar o conteúdo. O ícone de atualizar antecipa a próxima consulta GET, sem aguardar o intervalo automático de 22 segundos. A integração continua por páginas: uma captura não confirma que toda a base foi revisada. Chamadas simultâneas compartilham um bloqueio; cliques manuais têm intervalo de 10 segundos e falhas mantêm a espera de um minuto. Os dados e o horário confirmado são preservados em falhas.

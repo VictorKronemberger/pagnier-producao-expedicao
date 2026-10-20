@@ -10,13 +10,14 @@ const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','
 const browser=spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',['--headless','--disable-gpu','--no-first-run',`--remote-debugging-port=${debugPort}`,`--user-data-dir=${path.join(dir,'browser')}`,'about:blank'],{windowsHide:true,stdio:'ignore'});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const order={id:'PV TESTE',codigo:'PV TESTE',cliente:'Cliente de teste',liberacao:'released',vinculo:'linked',criacao:'2026-10-25',ordens:[{id:'OP TESTE',nome:'OP TESTE',produto:'Produto teste 10g',quantidade:'80',unidade:'UNID',criacao:'2026-10-25'}]};
+order.itens=[{item:'00010',produto:'Produto atendido',quantidade:'2',unidade:'UNID',status:4},{item:'00020',produto:'Produto teste 10g',quantidade:'80',unidade:'UNID',status:2}];order.pedidoConsultadoEm='2026-10-25T12:00:00.000Z';
 const snapshot={consultadoEm:'2026-10-25T12:00:00Z',ordensConsultadas:1,grupos:[order],pedidos:[order],semVinculo:[
 {id:'OP9001',nome:'OP9001',produto:'Produto ativo',quantidade:'2',unidade:'UNID',criacao:'2026-10-25',situacaoNomus:'Liberada'},
 {id:'OP9002',nome:'OP9002',produto:'Produto cancelado',quantidade:'2',unidade:'UNID',criacao:'2026-10-25',situacaoNomus:'Cancelada'},
 {id:'OP9003',nome:'OP9003',produto:'Interna cancelada',quantidade:'4',unidade:'KG',criacao:'2026-10-25',situacaoNomus:'Cancelada'},
 {id:'OP9004',nome:'OP9004',produto:'Situação não informada',quantidade:'2',unidade:'UNID',criacao:'2026-10-25'}]};
 const board={sequence:['PV TESTE'],details:{'PV TESTE':{responsavel:'Victor',situacao:'Programado',nota:''}}};
-let socket,employee='Victor';const errors=[];let captures=0,lastCapture='2026-10-25T12:00:00.000Z',refreshMode='updated',nomusRevision=1,compactReplies=0,requests=0,transportFailure=false;
+let selectedRequest;let socket,employee='Victor';const errors=[];let captures=0,lastCapture='2026-10-25T12:00:00.000Z',refreshMode='updated',nomusRevision=1,compactReplies=0,requests=0,transportFailure=false;
 try {
  for(let i=0;i<100;i++){try{if((await fetch(base)).ok)break}catch{}if(i===99)throw Error('QA server did not start');await pause(300)}
  let pages;for(let i=0;i<60;i++){try{pages=await(await fetch(`http://127.0.0.1:${debugPort}/json`)).json();if(pages.some(p=>p.type==='page'))break}catch{}await pause(200)}
@@ -28,7 +29,7 @@ try {
   if(u.pathname==='/api/chat/session')payload={employee,employees:[{name:'Victor',registered:true}]};
   else if(u.pathname==='/api/board')payload={snapshot,board,revision:0,updatedAt:null,updatedBy:null};
   else if(u.pathname==='/api/nomus'){
- const input=m.request.postData?JSON.parse(m.request.postData):{};requests++;
+ const input=m.request.postData?JSON.parse(m.request.postData):{};requests++;selectedRequest=input.orderCode;
  if(input.refresh){captures++;await pause(500);if(refreshMode==='updated')lastCapture='2026-10-25T12:01:22.000Z';}
  if(input.refresh&&['updated','failed'].includes(refreshMode))nomusRevision++;
  payload={nomusRevision,snapshot,changes:{},configured:refreshMode!=='unconfigured',lastChecked:lastCapture,partial:refreshMode==='failed',message:'Falha simulada na consulta',page:1,pedidosCoberturaCompleta:true,pedidosIdentificados:1,refreshStatus:input.refresh?refreshMode:'cached'};
@@ -64,6 +65,13 @@ try {
  assert.equal(await evaluate('document.querySelector(".nomus-capture time").dateTime'),lastCapture);
  assert.match(await evaluate('document.querySelector(".nomus-capture-notice").textContent'),/Etapa capturada/);
  await shot('capture-desktop');
+ await evaluate('document.querySelector(".card-open").click()');await until('!!document.querySelector(".card-dialog")');
+ assert.match(await evaluate('document.querySelector(".card-dialog .release-notice").textContent'),/atendimento comercial/);
+ assert.match(await evaluate('document.querySelector(".card-dialog .release-notice").textContent'),/Pedido consultado em/);
+ assert(!await evaluate('document.querySelector(".card-dialog .release-notice").textContent.includes("Ainda não atendido")'));
+ await until('!document.querySelector(".nomus-refresh").disabled');await evaluate('document.querySelector(".nomus-refresh").click()');await until('!document.querySelector(".nomus-refresh").disabled');
+ assert.equal(selectedRequest,order.id,'refresh includes the opened order');await shot('commercial-status-detail');
+ await evaluate('document.querySelector(".card-dialog .close").click()');
  refreshMode='failed';await evaluate('document.querySelector(".nomus-refresh").click()');await until('!!document.querySelector(".nomus-capture-notice.is-error")');
  assert.equal(await evaluate('document.querySelector(".nomus-capture time").dateTime'),lastCapture,'failure does not advance capture timestamp');
  assert(await evaluate('!!document.querySelector(".kanban-card")'),'existing data stays visible');

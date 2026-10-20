@@ -41,3 +41,22 @@ let recent=await syncStep({...state,nextAt:0,pages:{...state.pages,orders:22}},"
 assert(recentPaths[0].endsWith("pedidos?pagina=1"));assert.equal(recent.pages.orders,22);assert.equal(recent.recentOrdersNextAt,Date.parse(time)+300000);
 let requests=0;await syncStep(recent,"dummy",{refreshRecentOrders:true,now:time,fetcher:async()=>{requests++;return Response.json([])}});assert.equal(requests,0);
 console.log("OK recuperação: fatos por item consistentes, conflitos preservados, atendimento parcial destacado e pedidos recentes consultados sem reiniciar paginação ou ignorar intervalo.");
+
+// An older selected order must refresh directly, without resetting the catalog cursor.
+const focusedSeed=structuredClone(state);focusedSeed.nextAt=0;focusedSeed.pages.orders=22;
+focusedSeed.orders[1].checkedAt="2026-10-01T00:00:00Z";status=4;
+const focusedPaths=[];
+const focused=await syncStep(focusedSeed,"dummy",{now:time,requestedOrder:"PD QA",refreshRecentOrders:true,fetcher:async(url,opts)=>{focusedPaths.push(url);return fetcher(url,opts)}});
+assert(focusedPaths[0].endsWith("pedidos/1"));assert.equal(focusedPaths.length,1);assert.equal(focused.pages.orders,22);
+assert.equal(publicSync(focused,true).snapshot.pedidos[0].pedidoConsultadoEm,time);
+assert.equal(publicSync(focused,true).snapshot.grupos[0].liberacao,"closed");
+assert.deepEqual(pendingFulfillmentItems(publicSync(focused,true).snapshot.grupos[0]),[]);
+const repeat=[];await syncStep({...focused,nextAt:0},"dummy",{now:time,requestedOrder:"PD QA",refreshRecentOrders:true,fetcher:async(url,opts)=>{repeat.push(url);return fetcher(url,opts)}});
+assert(!repeat[0].endsWith("pedidos/1"));
+const forced=[];await syncStep({...focused,nextAt:0},"dummy",{now:time,requestedOrder:"PD QA",refreshOrder:true,fetcher:async(url,opts)=>{forced.push(url);return fetcher(url,opts)}});assert(forced[0].endsWith("pedidos/1"));
+for(const response of [()=>new Response('',{status:503}),()=>Response.json({id:999,itensPedido:[]}),()=>Response.json([])]){
+ const failed=await syncStep(focusedSeed,"dummy",{now:time,requestedOrder:"PD QA",fetcher:async()=>response()});
+ assert.deepEqual(failed.orders,focusedSeed.orders);assert(failed.retryAt);assert.equal(failed.orders[1].checkedAt,focusedSeed.orders[1].checkedAt);
+}
+const unknown=[];await syncStep(focusedSeed,"dummy",{now:time,requestedOrder:"../../clientes/1",fetcher:async(url,opts)=>{unknown.push(url);return fetcher(url,opts)}});assert(!unknown[0].includes('../'));
+console.log("OK focused order: direct GET, catalog cursor preserved, per-order timestamp, cache interval, manual refresh and failed-response preservation.");

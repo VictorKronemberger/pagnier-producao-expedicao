@@ -11,7 +11,7 @@ export async function readNomus(){
  const row=await readNomusRow(db);
  return {state:applyCompanyScope(row?JSON.parse(row.payload):initialSync(snapshot)),revision:row?.revision??0};
 }
-export async function pollNomus(requestedProduction:string[]=[],manualRefresh=false,knownRevision?:number){
+export async function pollNomus(requestedProduction:string[]=[],manualRefresh=false,knownRevision?:number,requestedOrder=""){
  const db=env.DB;if(!db)throw Error("Banco indisponível.");
  const {state,revision}=await readNomus(),key=nomusKey();
  const stamp=Date.now();
@@ -30,7 +30,7 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
  const fetcher:typeof fetch=fetch;
  const boardRow=await db.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();
  const requestedLots=requestedLotNames(boardRow?JSON.parse(boardRow.payload):{});
- const next=await syncStep(manualRefresh?{...state,nextAt:0}:state,key,{fetcher,requestedLots,requestedProduction,refreshRecentOrders:true});
+ const next=await syncStep(manualRefresh?{...state,nextAt:0}:state,key,{fetcher,requestedLots,requestedProduction,requestedOrder,refreshOrder:manualRefresh,refreshRecentOrders:true});
  delete next.leaseUntil;
  if(manualRefresh)next.manualNextAt=Date.now()+10000;
  const saved=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(JSON.stringify(next),now,"nomus",revision+1).first<{revision:number}>();

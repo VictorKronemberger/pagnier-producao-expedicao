@@ -34,7 +34,7 @@ try{
  }
  if(!owned)throw Error('Another capture is active.');
  console.log('Capture started. ERP access: GET only. Shared lease acquired.');
- state=await bootstrapNomus(state,process.env.NOMUS_API_KEY,{refresh:process.argv.includes('--refresh'),now:timestamp,pause:()=>pause(3000),checkpoint:async(next,progress)=>{
+ state=await bootstrapNomus(state,process.env.NOMUS_API_KEY,{refresh:process.argv.includes('--refresh'),includeProduction:process.argv.includes('--production'),now:timestamp,pause:()=>pause(3000),checkpoint:async(next,progress)=>{
   await persist(next);
   console.log(JSON.stringify({...progress,orders:Object.keys(next.orders??{}).length,ops:Object.keys(next.ops??{}).length,pendingOps:Object.keys(next.pendingOps??{}).length,revision}));
  }});

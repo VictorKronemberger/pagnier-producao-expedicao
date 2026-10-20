@@ -110,6 +110,12 @@ try{
  assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'cooldown');assert.equal(captures,3);
  const expiredLease={...seed(),leaseUntil:Date.now()-1,nextAt:Date.now()-1};await saveSync(expiredLease);nomusFetch=async()=>Response.json([]);
  assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'updated');
+ for(const orderCode of [null,7,[],{},'', ' '.repeat(2), 'x'.repeat(101)])assert.equal((await call('nomus','POST',{productionOps:[],orderCode})).status,400);
+ const focusedState=seed();focusedState.orders={7:{code:'PV SELECTED',companyId:1,clientId:9,createdDate:'2026-10-19',items:[{productId:8,quantity:'4',status:2}]}};focusedState.pages.orders=22;
+ await saveSync(focusedState);let focusedPath;
+ nomusFetch=async(url,options)=>{focusedPath=url;assert.equal(options.method,'GET');return Response.json({id:7,idEmpresa:1,codigoPedido:'PV SELECTED',idPessoaCliente:9,itensPedido:[{idProduto:8,quantidade:'4',status:4}]})};
+ const focusedReply=await (await call('nomus','POST',{productionOps:[],orderCode:'PV SELECTED',refresh:true})).json();
+ assert(focusedPath.endsWith('pedidos/7'));assert.equal(focusedReply.snapshot.pedidos[0].itens[0].status,4);assert(focusedReply.snapshot.pedidos[0].pedidoConsultadoEm);assert.equal(focusedReply.paginaPedidos,22);
  testEnv.NOMUS_API_KEY='';
  console.log('OK Nomus refresh: immediate GET, unchanged timestamp on failure, one request across concurrent tabs, cooldown, expired lease recovery and authenticated same-origin access.');
  // Archiving is independent of physical completion and survives a fresh board read.
