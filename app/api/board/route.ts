@@ -17,11 +17,18 @@ export const dynamic="force-dynamic";
 
 const states=["A programar","Programado","Em acompanhamento","Bloqueado","Concluído","Pronto para envio e documentação","Pronto para envio","Atendido totalmente e enviado"];
 function json(data:unknown,status=200){return Response.json(data,{status,headers:{"Cache-Control":"no-store"}})}
-export async function GET(){
+export async function GET(request?:Request){
  if(!await getPanelUser())return json({error:"Entre para acessar o painel."},401);
  if(!env.DB)return json({error:"Banco indisponível."},503);
  try{
- const nomusState=visibleOrderState((await readNomus()).state);const snapshot=publicSync(nomusState,false).snapshot;
+ const query=request?new URL(request.url).searchParams:null;
+ const known=query?.get("revision");
+ if(known!==null&&known!==undefined){
+  if(!/^\d+$/.test(known)||!Number.isSafeInteger(Number(known)))return json({error:"Versão inválida."},400);
+  const meta=await env.DB.prepare("SELECT revision, updated_at, updated_by FROM production_board WHERE id = ?").bind("main").first<{revision:number;updated_at:string;updated_by:string}>();
+  if((meta?.revision??0)===Number(known))return json({unchanged:true,revision:meta?.revision??0,updatedAt:meta?.updated_at??null,updatedBy:meta?.updated_by??null});
+ }
+ const nomusState=visibleOrderState((await readNomus()).state);const snapshot=query?.get("boardOnly")==="1"?undefined:publicSync(nomusState,false).snapshot;
  const row=await env.DB.prepare("SELECT payload, revision, updated_at, updated_by FROM production_board WHERE id = ?").bind("main").first<{payload:string;revision:number;updated_at:string;updated_by:string}>();
  return json({snapshot,board:scopeBoard(row?JSON.parse(row.payload):{sequence:[],details:{}},nomusState.hiddenOrderCodes),revision:row?.revision??0,updatedAt:row?.updated_at??null,updatedBy:row?.updated_by??null});
  }catch{return json({error:"Não foi possível carregar as prioridades. Tente novamente."},503)}
@@ -31,7 +38,7 @@ export async function PUT(request:Request){
  const origin=request.headers.get("origin");if(!origin||origin!==new URL(request.url).origin)return json({error:"Origem inválida."},403);
  if(!env.DB)return json({error:"Banco indisponível."},503);
  let data;try{const raw=await request.text();if(new TextEncoder().encode(raw).length>1000000)return json({error:"Conteúdo muito grande."},413);data=JSON.parse(raw)}catch{return json({error:"Dados inválidos."},400)}
- let snapshot:any,previous:any,excludedCodes:any;try{const state=visibleOrderState((await readNomus()).state);snapshot=publicSync(state,false).snapshot;excludedCodes=state.hiddenOrderCodes;const saved=await env.DB.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();previous=saved?JSON.parse(saved.payload):{details:{}};}catch{return json({error:"Banco indisponível. Suas edições permanecem na tela."},503)}
+ let snapshot:any,previous:any,excludedCodes:any;try{const state=visibleOrderState((await readNomus()).state);snapshot=publicSync(state,false).snapshot;excludedCodes=state.hiddenOrderCodes;const saved=await env.DB.prepare("SELECT payload, revision FROM production_board WHERE id=?").bind("main").first<{payload:string;revision:number}>();if(Number.isInteger(data?.revision)&&(saved?.revision??0)!==data.revision)return json({error:"Outra pessoa atualizou o quadro. Aguarde a sincronização para conferir as alterações."},409);previous=saved?JSON.parse(saved.payload):{details:{}};}catch{return json({error:"Banco indisponível. Suas edições permanecem na tela."},503)}
  const available=[...new Map([...snapshot.grupos,...(snapshot.pedidos??[])].map((g:any)=>[g.id,g])).values()] as any[];
  const groups=operationalGroups(snapshot,data?.board??{details:{}});
  const allowed=new Set<string>(groups.map((g:any)=>g.id));

@@ -39,7 +39,7 @@ const origin='https://panel.test';let cookie='';
 async function call(route,method='GET',body,options={}){
  const headers=new Headers({origin,...options.headers});if(cookie&&!options.anonymous)headers.set('cookie',cookie);
  currentHeaders=headers;
- const request=new Request(origin+'/api/'+route,{method,headers,...(body!==undefined?{body:JSON.stringify(body)}:{})});
+ const request=new Request(origin+'/api/'+route+(options.query??''),{method,headers,...(body!==undefined?{body:JSON.stringify(body)}:{})});
  return (await load('app/api/'+route+'/route.ts'))[method](request);
 }
 try{
@@ -74,6 +74,15 @@ try{
  const board={sequence:[],details:{}};
  response=await call('board','PUT',{revision:0,board});assert.equal(response.status,200,await response.text());
  assert.equal((await call('board','PUT',{revision:0,board})).status,409,'stale revisions rejected');
+ const compactBoard=await (await call('board','GET',undefined,{query:'?revision=1&boardOnly=1'})).json();
+ assert.equal(compactBoard.unchanged,true);assert.equal(compactBoard.revision,1);assert.equal(compactBoard.board,undefined);assert.equal(compactBoard.snapshot,undefined);
+ const freshBoardResponse=await call('board','GET',undefined,{query:'?revision=0&boardOnly=1'});
+ assert.equal(freshBoardResponse.headers.get('cache-control'),'no-store');
+ const freshBoard=await freshBoardResponse.json();assert.equal(freshBoard.revision,1);assert.deepEqual(freshBoard.board.sequence,[]);assert.equal(freshBoard.snapshot,undefined);
+ assert.equal((await call('board','GET',undefined,{query:'?revision=-1'})).status,400);
+ assert.equal((await call('board','GET',undefined,{query:'?revision=1',anonymous:true})).status,401);
+ assert.equal((await call('board','PUT',{revision:0,board:{invalid:true}})).status,409,'stale writes are detected before domain validation');
+ console.log('OK conditional board reads: compact unchanged result, fresh board without ERP snapshot, no cache, authentication and stale-write guard.');
  assert.equal((await call('board','PUT',{revision:1,board},{headers:{origin:'https://foreign.test'}})).status,403);
  response=await call('chat','POST',{channel:'general',body:'@Cyntia confira o pedido',clientId:'vercel-api-test-1'});assert.equal(response.status,201);
  const message=(await response.json()).message;assert.deepEqual(message.mentions,['Cyntia']);assert.equal(typeof message.id,'number');

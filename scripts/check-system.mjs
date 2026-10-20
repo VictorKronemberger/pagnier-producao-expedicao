@@ -12,6 +12,7 @@ const unitTests=[
  "check-connected-flow.mjs",
  "check-direct-box-rule.mjs",
  "check-features.mjs",
+ "check-board-live.mjs",
  "check-flow.mjs",
  "check-groups.mjs",
  "check-inner-boxes.mjs",

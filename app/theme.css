@@ -26,8 +26,8 @@
 [data-theme="dark"] .theme-toggle .theme-light-icon { display: none; }
 [data-theme="dark"] .theme-toggle .theme-dark-icon { display: inline; }
 .employee-login-card > .theme-toggle { display: flex; margin: 0 0 18px auto; }
-/* Preserve the original artwork against a suitable light backing. */
-:root[data-theme="dark"] .software-shell .app-brand img { background: #e6eddf; border-radius: 6px; }
+/* A monochrome version of the original transparent mark on dark surfaces. */
+:root[data-theme="dark"] .software-shell .app-brand img { background: transparent; border-radius: 0; filter: brightness(0) invert(1); opacity: .9; }
 @media (max-width: 640px) {
   .heading-actions .theme-toggle { width: 38px; padding: 8px; }
   .heading-actions .theme-toggle .theme-toggle-label { display: none; }

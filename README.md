@@ -28,9 +28,19 @@ Este checkout passa a ser a origem da versão Vercel. `painel-producao/` conserv
 
 Credenciais, banco local, backups e dados reais do ERP não fazem parte do Git. `lib/production-snapshot.json` permanece vazio. O banco de produção é independente: atualizar código não transfere dados. Os arquivos legados de Cloudflare/Sites e as migrações SQLite `drizzle/` foram preservados como referência/testes e não fazem parte do build Next.js ativo.
 
+## Alterações compartilhadas entre usuários
+
+O painel consulta a revisão do quadro a cada três segundos enquanto a aba está visível e consulta novamente ao voltar à aba, focar a janela ou recuperar a conexão. Sem mudanças, a API retorna apenas a revisão, sem reenviar o quadro e o snapshot do ERP. Exclusões, movimentos, documentos e edições salvas aparecem nas outras sessões automaticamente.
+
+Edições em registros diferentes são combinadas. Se duas pessoas alterarem o mesmo pedido, documento ou a ordem da fila de formas incompatíveis, o salvamento pausa com aviso e preserva o rascunho local. O usuário pode copiar o que deseja manter e recarregar a versão compartilhada. Pedidos e seus envios são tratados como uma unidade para impedir que uma edição antiga restaure um packing list excluído. A revisão também é conferida no servidor antes das validações e na gravação.
+
+Validação: `node scripts/check-board-live.mjs` e `npm run test:api:turso`. Após `npm run build`, `node scripts/check-board-live-browser.mjs` usa duas sessões de Edge, respostas fictícias e um servidor próprio na porta 5177 para conferir exclusão, edição, mudança de etapa, conflitos, retorno à aba, reconexão e o cabeçalho responsivo. Não acessa banco real ou ERP.
+
 ## Tema do painel
 
 O botão de sol/lua no login e no cabeçalho alterna entre modo claro e escuro. Na primeira visita, o tema acompanha a preferência do sistema; a escolha manual fica salva neste navegador e sincroniza entre abas. O tema cobre os formulários, cartões, janelas e chat. A impressão mantém o modo claro e os arquivos PDF/Excel não são alterados.
+
+O cabeçalho reúne os controles na mesma linha em telas largas e mantém os filtros ativos junto à contagem de pedidos. No modo escuro, a logo original aparece em branco com fundo transparente.
 
 Validação isolada do tema: após `npm run build`, execute `node scripts/check-theme-browser.mjs` no Windows com Edge instalado. O teste usa dados fictícios e um servidor próprio na porta 5175, sem acesso ao ERP ou banco.
 

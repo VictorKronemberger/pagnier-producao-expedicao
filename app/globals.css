@@ -754,3 +754,49 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 .cancelled-category .pending-icon{background:light-dark(#edf0ec,var(--night-raised));color:light-dark(#68776b,var(--night-muted))}
 .cancelled-order-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .cancelled-label{font-size:11px!important;font-weight:600;padding:4px 8px;border-radius:6px;background:light-dark(#edf0ec,var(--night-raised));color:light-dark(#56695b,var(--night-muted))}
+
+/* Compact workspace controls: keep the working area close to the header. */
+.software-shell .workspace-heading{padding:10px 20px 6px;flex-shrink:0}
+.software-shell .workspace-heading .global-bar{padding:0 0 8px;min-height:38px;gap:12px}
+.software-shell .workspace-heading .global-bar h1{font-size:20px;letter-spacing:-.4px}
+.software-shell .workspace-heading .workspace-toolbar{padding:0;gap:12px;align-items:center}
+.software-shell .workspace-heading .heading-actions{gap:6px!important}
+.software-shell .workspace-heading .heading-actions .button{min-height:34px;padding:7px 10px;font-size:12px}
+.software-shell .workspace-heading .production-view-switch{min-height:36px;padding:3px;border-radius:8px;flex-wrap:nowrap}
+.software-shell .workspace-heading .production-view-switch button{min-height:28px;padding:6px 10px;font-size:12px;white-space:nowrap}
+.software-shell .workspace-heading .simple-tools .search{height:36px;border-radius:8px;max-width:none;min-width:200px;margin:0}
+.software-shell .workspace-heading .filter-toggle{min-height:36px;padding:7px 10px;border-radius:8px}
+.software-shell .workspace-heading .filters-panel{margin:8px 0 0;padding:12px;gap:12px}
+.software-shell .data-strip{margin:0 20px 8px;min-height:24px;gap:8px 12px;justify-content:flex-start;flex-wrap:wrap}
+.software-shell .data-strip>span{flex-shrink:0;gap:7px}
+.software-shell .data-strip .active-filters{flex:1 1 auto;min-width:0;gap:5px}
+.software-shell .data-strip .active-filters button{font-size:11px;padding:3px 7px;line-height:1.4;background:transparent}
+.software-shell .data-strip .nomus-capture{margin-left:auto}
+/* The existing transparent mark becomes a soft white signature on dark surfaces. */
+[data-theme="dark"] .employee-login-logo{background:none;border-radius:0;filter:brightness(0) invert(1);opacity:.9}
+@media(min-width:1400px){
+ .software-shell .production-heading{display:grid;grid-template-columns:auto auto minmax(240px,1fr) auto;align-items:center;gap:10px 18px;padding-top:12px;padding-bottom:6px}
+ .software-shell .production-heading .global-bar,.software-shell .production-heading .workspace-toolbar{display:contents}
+ .software-shell .production-heading .global-bar>div:first-child{grid-column:1;grid-row:1}
+ .software-shell .production-heading .production-view-switch{grid-column:2;grid-row:1}
+ .software-shell .production-heading .board-tools{grid-column:3;grid-row:1;flex-wrap:nowrap}
+ .software-shell .production-heading .heading-actions{grid-column:4;grid-row:1}
+ .software-shell .production-heading>.filters-panel{grid-column:1/-1;grid-row:2}
+}
+@media(max-width:640px){
+ .software-shell .workspace-heading{padding:8px 14px 5px}
+ .software-shell .workspace-heading .global-bar{padding-bottom:6px}
+ .software-shell .workspace-heading .global-bar h1{font-size:19px}
+ .software-shell .workspace-heading .workspace-toolbar{gap:6px}
+ .software-shell .workspace-heading .production-view-switch{width:auto;max-width:100%;align-self:flex-start}
+ .software-shell .workspace-heading .production-view-switch button{padding:7px 10px;min-height:32px}
+ .software-shell .workspace-heading .board-tools.simple-tools{gap:6px}
+ .software-shell .workspace-heading .simple-tools .search{min-width:0;flex:1 1 180px;height:42px}
+ .software-shell .workspace-heading .filter-toggle{min-height:42px}
+ .software-shell .workspace-heading .simple-tools>.text-action{font-size:11px;padding:5px}
+ .software-shell .data-strip{margin:0 14px 7px;font-size:10px;gap:5px 8px}
+ .software-shell .data-strip .active-filters{order:3;flex-basis:100%}
+ .software-shell .workspace-heading .filters-panel{gap:10px;padding:10px}
+}
+
+.software-shell .data-strip>.text-action{font-size:11px;padding:2px 4px}

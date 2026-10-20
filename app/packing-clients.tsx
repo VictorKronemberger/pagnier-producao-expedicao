@@ -15,6 +15,10 @@ export default function PackingClients({owner,groups,board,disabled,onApply,onPe
  const [applyClient,setApplyClient]=useState(false),[replace,setReplace]=useState(false);
  const selectionPending=pendingOrderSelection(ids,confirmed),pending=selectionPending||applyClient;
  const requestId=useRef(0);
+ const shipmentVersion=JSON.stringify(shipment??null),selectionVersion=useRef(shipmentVersion);
+ const pendingBeforeUpdate=useRef(false);
+ const selectionStale=selectionVersion.current!==shipmentVersion&&pending;
+ useLayoutEffect(()=>{if(selectionVersion.current!==shipmentVersion&&!pendingBeforeUpdate.current){selectionVersion.current=shipmentVersion;setIds([...confirmed]);setKey(current?.titularKey??"");setDoc(null);setLoaded(false)}pendingBeforeUpdate.current=pending},[shipmentVersion,pending]);
  useLayoutEffect(()=>{onPending?.(pending)},[pending,onPending]);
  useEffect(()=>()=>{requestId.current++},[]);
  async function get(url:string){const r=await fetch(url,{cache:"no-store",signal:AbortSignal.timeout(45000)});const d:any=await r.json();if(!r.ok)throw Error(d.error||"Consulta indisponível.");return d}
@@ -24,15 +28,15 @@ export default function PackingClients({owner,groups,board,disabled,onApply,onPe
  const holder=applyClient&&doc&&key?{key,nome:doc.nome}:current?{key:current.titularKey,nome:current.titularNome}:null;
  const different=selected.some(g=>orderClients[g.id]?orderClients[g.id]!==holder?.key:g.cliente!==holder?.nome);
  const changedHolder=!!current&&applyClient&&key!==current.titularKey;
- function reset(){setIds([...confirmed]);setApplyClient(false);setKey(current?.titularKey??"");setDoc(null);setLoaded(false);setReplace(false);setError("")}
+ function reset(){requestId.current++;selectionVersion.current=shipmentVersion;setBusy(false);setIds([...confirmed]);setApplyClient(false);setKey(current?.titularKey??"");setDoc(null);setLoaded(false);setReplace(false);setError("")}
  function apply(){
- if(!holder||applyClient&&!doc)return;
+ if(selectionStale||shipment?.packingExcluido||!holder||applyClient&&!doc)return;
  const patch=applyClient&&doc?recipientPatch(shipment?.packing,doc,address,replace||changedHolder):{};
  if(changedHolder)Object.assign(patch,{contatoNome:"",contatoFax:""});
  const listing=selected.map(g=>g.codigo+" — "+(g.cliente||"Cliente a identificar")).join("\n");
  const warning=(different?"ATENÇÃO: há pedidos com clientes diferentes do titular.\n\n":"")+"Titular / destinatário: "+holder.nome+"\n\n"+listing+"\n\n"+(applyClient?(replace||changedHolder?"Os dados do destinatário serão substituídos pelo cadastro selecionado.":"Somente campos vazios serão preenchidos; correções existentes serão preservadas."):"O destinatário e os dados documentais já salvos serão mantidos.")+" As caixas dos pedidos adicionados serão reunidas neste envio.\n\nConfirma?";
  if(!confirm(warning))return;
- try{onApply(ids,holder,patch);setApplyClient(false);setReplace(false);setError("")}catch(e){setError(e instanceof Error?e.message:"Não foi possível reunir os pedidos.")}
+ try{onApply(ids,holder,patch);pendingBeforeUpdate.current=false;setApplyClient(false);setReplace(false);setError("")}catch(e){setError(e instanceof Error?e.message:"Não foi possível reunir os pedidos.")}
  }
  return <details className="client-document-section" open><summary><Users size={17}/>Pedidos e destinatário do packing list</summary>
  {current&&<p className="group-notice"><strong>{current.titularNome}</strong> · Destinatário confirmado. Você pode acrescentar pedidos sem consultar o cadastro novamente.</p>}
@@ -51,7 +55,8 @@ export default function PackingClients({owner,groups,board,disabled,onApply,onPe
  {changedHolder&&<p className="document-warning">A troca de titular substituirá os dados do destinatário após sua confirmação.</p>}
  </fieldset>}
  {different&&holder&&<p className="document-warning"><AlertCircle size={16}/>Há pedidos de clientes diferentes do titular. Confira o destinatário antes de confirmar.</p>}
- <div className="flow-actions"><button className="button client-apply" type="button" disabled={busy||disabled||!holder||applyClient&&!doc||!pending&&!!current||ids.length>50} onClick={apply}>{current&&!applyClient?"Confirmar pedidos e manter destinatário":ids.length>1?"Confirmar titular e reunir pedidos":"Confirmar titular e preencher documento"}</button>{pending&&<button className="button" type="button" disabled={busy} onClick={reset}>Descartar seleção não confirmada</button>}</div>
+ <div className="flow-actions"><button className="button client-apply" type="button" disabled={busy||disabled||selectionStale||shipment?.packingExcluido||!holder||applyClient&&!doc||!pending&&!!current||ids.length>50} onClick={apply}>{current&&!applyClient?"Confirmar pedidos e manter destinatário":ids.length>1?"Confirmar titular e reunir pedidos":"Confirmar titular e preencher documento"}</button>{pending&&<button className="button" type="button" disabled={busy} onClick={reset}>Descartar seleção não confirmada</button>}</div>
+ {selectionStale&&<p className="dialog-error" role="alert">Outra pessoa alterou este envio. Sua seleção foi preservada; descarte a seleção não confirmada e confira os dados atualizados antes de aplicar.</p>}
  {error&&<p className="dialog-error" role="alert">{error}</p>}
  </details>
 }

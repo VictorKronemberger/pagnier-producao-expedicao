@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import {createAutosave,mergeBoards} from "../lib/autosave.mjs";
+const detail=nota=>({responsavel:"Victor",nota,situacao:"Programado"});
+const base=()=>({sequence:["A","B"],details:{A:detail("a"),B:{...detail("b"),envio:{caixas:[],packing:{invoiceNumero:"PL-TEST"}}}},invoices:{draft:{id:"draft",orderIds:[],items:[],carrier:"FedEx"}}});
+const copy=value=>structuredClone(value);
+const remote=copy(base());remote.details.B.envio.packingExcluido=true;delete remote.invoices.draft;
+const local=copy(base());local.details.A.nota="edição local";
+const merged=mergeBoards(base(),local,remote);assert.deepEqual(merged.conflicts,[]);assert.equal(merged.board.details.A.nota,"edição local");assert.equal(merged.board.details.B.envio.packingExcluido,true);assert.equal(merged.board.invoices.draft,undefined);assert.equal(merged.board.details.A.envio,undefined,"do not materialize an empty shipment");
+const collision=copy(base());collision.details.B.nota="edição no documento excluído";assert.deepEqual(mergeBoards(base(),collision,remote).conflicts,["details:B"]);
+const reorder=copy(base());reorder.sequence.reverse();const other=copy(base());other.sequence=["A"];assert(mergeBoards(base(),reorder,other).conflicts.includes("sequence"));
+let state,visible,writes=[],saved=[];
+const create=write=>createAutosave({delay:60000,write:write??(async(board,revision)=>{writes.push({board,revision});return {revision:revision+1}}),read:async()=>({board:remote,revision:2}),onState:s=>state=s,onRemote:b=>visible=b,onSaved:r=>saved.push(r)});
+let saver=create();saver.reset(base(),1);assert(saver.receive({board:remote,revision:2}));assert.equal(visible.details.B.envio.packingExcluido,true);assert(!saver.isDirty());assert.equal(saver.receive({board:base(),revision:1}),false,"late responses cannot resurrect deleted data");saver.dispose();
+saver=create();saver.reset(base(),1);saver.enqueue(local);assert(saver.receive({board:remote,revision:2}));assert(saver.isDirty());await saver.flush();assert.equal(writes.at(-1).revision,2);assert.equal(writes.at(-1).board.details.B.envio.packingExcluido,true);assert.equal(writes.at(-1).board.invoices.draft,undefined);saver.dispose();
+saver=create();saver.reset(base(),1);saver.enqueue(collision);const before=writes.length;assert.equal(saver.receive({board:remote,revision:2}),false);assert.match(state.error,/mesmo pedido/);assert(saver.isDirty());await saver.flush();assert.equal(writes.length,before,"conflict never writes an old document");assert.equal(saver.getRevision(),1);saver.dispose();
+let release;saver=create(async()=>new Promise(resolve=>{release=resolve}));saver.reset(base(),1);saver.enqueue(local);const flight=saver.flush();assert.equal(saver.receive({board:remote,revision:3}),false,"do not mutate the baseline during a write");release({revision:2});await flight;const afterWrite=copy(local);afterWrite.details.B=remote.details.B;assert(saver.receive({board:afterWrite,revision:3}));assert.equal(visible.details.A.nota,"edição local");saver.dispose();
+saver=create(async()=>new Promise(resolve=>{release=resolve}));saver.reset(base(),1);saver.enqueue(local);const stale=saver.flush();saver.reset(remote,8);release({revision:2});await stale;assert.equal(saver.getRevision(),8,"reset invalidates delayed writes");saver.dispose();
+// A write may succeed even when the response is lost. Keep subsequent typing.
+let shared;saver=create(async(board,revision)=>{shared={board,revision:revision+1};throw Error("lost response")});saver.reset(base(),1);saver.enqueue(local);await saver.flush();const typed=copy(local);typed.details.A.nota="texto posterior";saver.enqueue(typed);assert(saver.receive(shared));assert.equal(visible.details.A.nota,"texto posterior");assert(saver.isDirty());saver.dispose();
+console.log("OK live board: remote deletion, independent edits, same-record and priority conflicts, stale responses, in-flight writes, resets and lost acknowledgements.");
