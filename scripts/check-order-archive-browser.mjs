@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
 import {emptyShipment} from '../lib/shipping.mjs';
-import {changeArchive,archiveMissingOrders} from '../lib/order-archive.mjs';
+import {changeArchive} from '../lib/order-archive.mjs';
 import {deleteDraftPacking} from '../lib/packing-delete.mjs';
 const port=5178,debugPort=9248,base=`http://127.0.0.1:${port}`,pause=ms=>new Promise(r=>setTimeout(r,ms));
 const dir=path.resolve('.sites-runtime/archive-qa');mkdirSync(dir,{recursive:true});
@@ -107,15 +107,17 @@ try{
  board=changeArchive(board,remaining,{archived:false},'Romulo',new Date().toISOString());revision++;
  await b.until('document.querySelectorAll("[data-archived-order]").length===1');
  await navigate(b,'Produção');await b.until('!!document.querySelector(".filter-toggle")');await b.evaluate('document.querySelector(".filter-toggle").click()');await change(b,'[aria-label="Filtrar transportadora"]','Carregamento');await b.until('document.querySelectorAll(".card-open").length===1');
- // Simulate the server detecting an absent PD; both open sessions must receive
- // the same archive through the existing shared revision polling.
- const autoNow=new Date().toISOString();
- board=archiveMissingOrders(board,{snapshot,orders:{11:{code:remaining.id}},orderAbsences:{11:{code:remaining.id,confirmedAt:autoNow,firstMissingAt:autoNow,lastScanAt:autoNow,scans:2,detailMisses:2,status:400}}},autoNow);revision++;updatedBy='Nomus · automático';
+ // Romulo explicitly chooses another reason; Victor receives the saved archive.
+ await b.evaluate('document.querySelector(".card-open").click()');await b.until('!!document.querySelector(".card-dialog")');
+ await b.evaluate('document.querySelector(".card-dialog .order-more-actions summary").click();document.querySelector(".card-dialog .order-more-actions button").click()');await b.until('!!document.querySelector(".archive-dialog[open]")');
+ await change(b,'[aria-label="Motivo do arquivamento"]','other');assert(await b.evaluate('document.querySelector(".archive-dialog button[type=submit]").disabled'));
+ await change(b,'[aria-label="Observação do arquivamento"]','Operação encerrada pela equipe','input');await confirm(b);
+ assert.equal(board.details[remaining.id].arquivo.por,'Romulo');assert.equal(board.details[remaining.id].arquivo.motivo,'other');
  await b.until('document.querySelectorAll(".card-open").length===0');
  await a.until('document.querySelectorAll("[data-archived-order]").length===2');
- await change(a,'[aria-label="Filtrar motivo do arquivamento"]','nomus_missing');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
- assert.match(await a.evaluate('document.querySelector(".archive-list").innerText'),/Arquivamento automático após verificações no Nomus/);
- assert.match(await a.evaluate('document.querySelector(".archive-reason").innerText'),/Não localizado no Nomus/);
+ await change(a,'[aria-label="Filtrar motivo do arquivamento"]','other');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
+ assert.match(await a.evaluate('document.querySelector(".archive-list").innerText'),/Operação encerrada pela equipe/);
+ assert.match(await a.evaluate('document.querySelector(".archive-reason").innerText'),/Outro motivo/);
  assert.deepEqual(errors,[]);
- console.log('OK archive browser: safe menu, cancel focus, explicit deletion checkbox, history, preserved shipping, restore, catalog flow, cross-user synchronization, responsive archive, Carregamento filter and automatic archive across both sessions.');
+ console.log('OK archive browser: safe menu, cancel focus, explicit deletion checkbox, history, preserved shipping, restore, catalog flow, cross-user synchronization, responsive archive, Carregamento filter and manual reason with required note across both sessions.');
 }finally{for(const p of pages)p.socket.close();browser.kill();server.kill()}

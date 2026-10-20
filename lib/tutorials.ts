@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"21",updatedAt:"19/10/2026"};
+export const manualEdition = {revision:"22",updatedAt:"20/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -191,7 +191,7 @@ export const tutorials = [
       {
         "title": "Arquive pedidos antigos",
         "short": "Abra o pedido e clique em Arquivar pedido. Para recuperar, use Pedidos de venda → Arquivados → Restaurar pedido.",
-        "text": "Use Arquivar pedido no rodapé do cartão ou nos detalhes em Pedidos de venda para retirar um pedido antigo do quadro, mesmo sem iniciar produção, conferir, embalar ou emitir documentos. Aguarde Salvo. O arquivamento fica salvo para a equipe e não marca o pedido como enviado nem altera o Nomus. Dados e documentos existentes são preservados. Para retomar o trabalho, escolha Arquivados no filtro Exibir pedidos de Pedidos de venda e clique em Restaurar pedido; o pedido mantém sua etapa anterior e as regras normais do fluxo."
+        "text": "No cartão ou em Pedidos de venda, abra Outras ações → Arquivar pedido. Escolha o motivo, preencha a observação se necessário e confirme. O arquivamento é manual e vale para toda a equipe; não depende de concluir produção, conferência ou documentos. Os dados ficam preservados. Para consultar ou restaurar, abra Arquivados no menu principal. Restaurar mantém a etapa anterior. Nenhuma dessas ações altera o Nomus."
       }
     ],
     "done": "Os produtos estão disponíveis para conferência e as diferenças foram verificadas.",
@@ -201,7 +201,7 @@ export const tutorials = [
     "code": "POP-03",
     "owner": "Supervisor e equipe de produção",
     "objective": "Disponibilizar os produtos previstos e identificar diferenças de quantidade.",
-    "records": "Prioridade, etapa, responsável e orientações no cartão; quantidades da OP e histórico consultado. O arquivamento fica registrado no pedido e pode ser revertido pelo catálogo.",
+    "records": "Prioridade, etapa, responsável e orientações no cartão; quantidades da OP e histórico consultado. O arquivamento registra motivo, data e responsável e pode ser revertido em Arquivados.",
     "deviation": "Em caso de impedimento, registre a orientação no pedido. Para cartões com impedimento anterior, revise as notas e use Retomar produção. Ajuste a quantidade da OP no Nomus conforme a rotina real e confira a atualização antes de embalar."
   },
   {

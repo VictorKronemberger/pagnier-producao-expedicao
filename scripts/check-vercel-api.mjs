@@ -125,19 +125,18 @@ try{
  nomusFetch=async(url,options)=>{focusedPath=url;assert.equal(options.method,'GET');return Response.json({id:7,idEmpresa:1,codigoPedido:'PV SELECTED',idPessoaCliente:9,itensPedido:[{idProduto:8,quantidade:'4',status:4}]})};
  const focusedReply=await (await call('nomus','POST',{productionOps:[],orderCode:'PV SELECTED',refresh:true})).json();
  assert(focusedPath.endsWith('pedidos/7'));assert.equal(focusedReply.snapshot.pedidos[0].itens[0].status,4);assert(focusedReply.snapshot.pedidos[0].pedidoConsultadoEm);assert.equal(focusedReply.paginaPedidos,22);
- // Each page checkpoint retains the same shared lease; another browser cannot
- // multiply the accelerated batch or make its completed first page disappear.
- await saveSync(seed());let enteredSecond,finishSecond;const secondEntered=new Promise(r=>enteredSecond=r);let batchCalls=0;
+ // Normal sync reads one page per poll, even with old scan state queued.
+ const legacyScan=seed();legacyScan.orderScan={nextPage:1,seen:{}};legacyScan.orderAbsences={11:{scans:2,detailMisses:1}};
+ await saveSync(legacyScan);let pageCalls=0;
  nomusFetch=async(url,options)=>{
-  assert.equal(options.method,'GET');batchCalls++;
-  if(url.endsWith('pedidos?pagina=1'))return Response.json(Array.from({length:50},(_,i)=>({id:100+i,codigoPedido:'PD QA '+i,idEmpresa:1,idPessoaCliente:9,itensPedido:[]})));
-  assert(url.endsWith('pedidos?pagina=2'));enteredSecond();return new Promise(r=>finishSecond=()=>r(Response.json([])));
+  assert.equal(options.method,'GET');pageCalls++;assert(url.endsWith('pedidos?pagina=1'));
+  return Response.json(Array.from({length:50},(_,i)=>({id:100+i,codigoPedido:'PD QA '+i,idEmpresa:1,idPessoaCliente:9,itensPedido:[]})));
  };
- const batchRunning=call('nomus','POST',{productionOps:[],refresh:true});await secondEntered;
- const progressRow=await db.prepare('SELECT payload FROM production_board WHERE id=?').bind('nomus').first();const progress=JSON.parse(progressRow.payload);assert.equal(progress.pages.orders,2);assert.equal(progress.orderScan.nextPage,2);assert(progress.leaseUntil>Date.now());
- assert.equal((await (await call('nomus','POST',{productionOps:[],refresh:true})).json()).refreshStatus,'busy');assert.equal(batchCalls,2);
- finishSecond();const batchResponse=await batchRunning;assert.equal(batchResponse.status,200,await batchResponse.clone().text());const batchView=await batchResponse.json();assert.equal(batchView.refreshStatus,'updated');assert.equal(batchView.pedidoVarredura.page,1);assert(batchView.pedidoVarredura.lastCompleted);
- console.log('OK paginated batch API: page checkpoint, protected shared lease, sequential requests and visible completion progress.');
+ const pageResponse=await call('nomus','POST',{productionOps:[],refresh:true});assert.equal(pageResponse.status,200);
+ const pageView=await pageResponse.json();assert.equal(pageView.refreshStatus,'updated');assert.equal(pageView.paginaPedidos,2);assert.equal(pageView.pedidoVarredura,undefined);assert.equal(pageCalls,1,'no additional deletion sweep');
+ const persisted=JSON.parse((await db.prepare('SELECT payload FROM production_board WHERE id=?').bind('nomus').first()).payload);
+ assert.equal(persisted.orderAbsences,undefined);assert.equal(persisted.orderScan,undefined);
+ console.log('OK normal paginated sync: one GET per poll and obsolete deletion checks discarded.');
  testEnv.NOMUS_API_KEY='';
  console.log('OK Nomus refresh: immediate GET, unchanged timestamp on failure, one request across concurrent tabs, cooldown, expired lease recovery and authenticated same-origin access.');
  // Archiving is independent of physical completion and survives a fresh board read.
@@ -178,23 +177,29 @@ try{
  const preserved=await (await call('board')).json();assert.equal(preserved.board.details['OLD-PV'].arquivo.por,'Victor','normal autosave cannot erase archive metadata');
  response=await call('board','POST',{action:'archive',orderId:'OLD-PV',revision:preserved.revision,archived:false});assert.equal(response.status,200,await response.clone().text());const unarchived=await response.json();assert(!unarchived.board.details['OLD-PV'].arquivado);assert.equal(unarchived.board.details['OLD-PV'].arquivo.restauradoPor,'Victor');assert.equal(unarchived.board.details['OLD-PV'].nota,'Nota posterior');
  console.log('OK archive API: confirmation, server actor/time, preserved notes, restore, revision/origin/auth guards and metadata survives autosave.');
- // Server-side automatic archives recover after a committed ERP sync, including
- // cached polls, and increment the shared board revision for every other session.
+ // Old confirmed absence evidence must never mutate the shared board, even on cached polls.
  const automaticState=seed(),missingCode='PD 900001',confirmedAt=new Date(Date.now()-60000).toISOString();
  automaticState.orders={11:{code:missingCode,companyId:1,clientId:9,createdDate:'2026-10-01',items:[{productId:7,quantity:'2',status:2}]} };
  automaticState.orderAbsences={11:{code:missingCode,scans:2,detailMisses:2,status:400,firstMissingAt:confirmedAt,lastScanAt:confirmedAt,confirmedAt}};
  automaticState.clients={9:'Cliente sintético'};
  await saveSync(automaticState);testEnv.NOMUS_API_KEY='test-only';
- const autoBase=await (await call('board')).json(),beforeAutoCaptures=captures;
- response=await call('nomus','POST',{productionOps:[]});assert.equal(response.status,200,await response.clone().text());assert.equal((await response.json()).refreshStatus,'cached');assert.equal(captures,beforeAutoCaptures,'no extra ERP calls while reconciling durable evidence');
- const autoResult=await (await call('board','GET',undefined,{query:'?boardOnly=1&revision='+autoBase.revision})).json();
- assert.equal(autoResult.revision,autoBase.revision+1);assert(autoResult.board.details[missingCode].arquivado);assert.equal(autoResult.board.details[missingCode].arquivo.por,'Nomus · automático');assert.equal(autoResult.board.details[missingCode].arquivo.nomusId,11);
- assert.equal((await call('board','PUT',{revision:autoBase.revision,board:autoBase.board})).status,409,'old browser cannot undo an automatic archive');
- await call('nomus','POST',{productionOps:[]});assert.equal((await (await call('board')).json()).revision,autoResult.revision,'reconciliation is idempotent');
- response=await call('board','POST',{action:'archive',orderId:missingCode,revision:autoResult.revision,archived:false});assert.equal(response.status,200,await response.clone().text());
- await call('nomus','POST',{productionOps:[]});const intentionallyRestored=await (await call('board')).json();assert(!intentionallyRestored.board.details[missingCode].arquivado,'same evidence respects explicit restoration');
+ const manualBase=await (await call('board')).json(),beforeCaptures=captures;
+ for(let i=0;i<3;i++){
+  response=await call('nomus','POST',{productionOps:[]});assert.equal(response.status,200);assert.equal((await response.json()).refreshStatus,'cached');
+  const current=await (await call('board')).json();assert.equal(current.revision,manualBase.revision);assert.deepEqual(current.board,manualBase.board);
+ }
+ assert.equal(captures,beforeCaptures,'cached sync does not make extra deletion requests');
+ // A person can archive that very same order with their chosen reason.
+ response=await call('board','POST',{action:'archive',orderId:missingCode,revision:manualBase.revision,archived:true,reason:'cancelled',note:'Cancelamento confirmado pela equipe'});
+ assert.equal(response.status,200,await response.clone().text());const manualResult=await response.json();
+ assert.equal(manualResult.revision,manualBase.revision+1);assert(manualResult.board.details[missingCode].arquivado);
+ assert.equal(manualResult.board.details[missingCode].arquivo.por,'Victor');assert.equal(manualResult.board.details[missingCode].arquivo.motivo,'cancelled');
+ const otherSession=await (await call('board','GET',undefined,{query:'?boardOnly=1&revision='+manualBase.revision})).json();assert(otherSession.board.details[missingCode].arquivado);
+ assert.equal((await call('board','POST',{action:'archive',orderId:missingCode,revision:manualBase.revision,archived:false})).status,409);
+ response=await call('board','POST',{action:'archive',orderId:missingCode,revision:manualResult.revision,archived:false});assert.equal(response.status,200);
+ await call('nomus','POST',{productionOps:[]});assert(!(await (await call('board')).json()).board.details[missingCode].arquivado);
  testEnv.NOMUS_API_KEY='';
- console.log('OK automatic archive API: cached-poll recovery, shared revision, metadata, stale-edit rejection, idempotence and intentional restore.');
+ console.log('OK manual-only archive: cached absence evidence is inert; chosen reason, actor, shared revision, stale-write guard and restoration preserved.');
  assert.equal((await call('chat/session','DELETE')).status,200);
  assert.equal((await call('board')).status,401,'revoked cookie cannot read board');
  assert.equal((await call('chat')).status,401,'revoked cookie cannot read chat');

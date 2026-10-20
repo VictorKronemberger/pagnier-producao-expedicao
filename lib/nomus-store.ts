@@ -1,11 +1,9 @@
-import {runNomusCycle} from "./nomus-cycle.mjs";
-import {reconcileNomusArchives} from "./nomus-archive-store.mjs";
 import {createRevisionReader} from "./revision-reader.mjs";
 import {requestedLotNames} from "./nomus-lots.mjs";
 import {applyCompanyScope} from "./company-scope.mjs";
 import {env} from "./server-env";
 import snapshot from "./production-snapshot.json";
-import {initialSync,publicSync,nomusGet} from "./nomus-sync.mjs";
+import {initialSync,publicSync,nomusGet,syncStep} from "./nomus-sync.mjs";
 export const nomusKey=()=>((env as unknown as Record<string,string>).NOMUS_API_KEY??"");
 const readNomusRow=createRevisionReader("nomus");
 export async function readNomus(){
@@ -21,7 +19,6 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
   {unchanged:true,nomusRevision:currentRevision,refreshStatus:status,configured:!!key,lastChecked:current.lastChecked,message:key?current.message:"Conexão com o Nomus não configurada."}:
   {...publicSync(current,!!key),nomusRevision:currentRevision,refreshStatus:status};
  if(!key)return reply(state,revision,"unconfigured");
- await reconcileNomusArchives(db,state,revision);
  if(stamp<(state.leaseUntil??0))return reply(state,revision,"busy");
  if(stamp<(state.retryAt??0)||manualRefresh&&stamp<(state.manualNextAt??0))return reply(state,revision,"cooldown");
  if(!manualRefresh&&stamp<state.nextAt)return reply(state,revision,"cached");
@@ -33,18 +30,11 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
  const fetcher:typeof fetch=fetch;
  const boardRow=await db.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();
  const requestedLots=requestedLotNames(boardRow?JSON.parse(boardRow.payload):{});
- let ownedRevision=revision+1;
- const checkpoint=async(current:typeof state)=>{
-  const payload=JSON.stringify({...current,leaseUntil:stamp+60000,nextAt:Math.max(current.nextAt??0,stamp+60000)});
-  const saved=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(payload,new Date().toISOString(),"nomus",ownedRevision).first<{revision:number}>();
-  if(!saved)throw Error("Outra captura assumiu a sincronização; progresso anterior preservado.");
-  ownedRevision=saved.revision;
- };
- const next=await runNomusCycle(manualRefresh?{...state,nextAt:0}:state,key,{fetcher,checkpoint,requestedLots,requestedProduction,requestedOrder,refreshOrder:manualRefresh,refreshRecentOrders:true});
+ const next=await syncStep(manualRefresh?{...state,nextAt:0}:state,key,{fetcher,requestedLots,requestedProduction,requestedOrder,refreshOrder:manualRefresh,refreshRecentOrders:true});
  delete next.leaseUntil;
  if(manualRefresh)next.manualNextAt=Date.now()+10000;
- const saved=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(JSON.stringify(next),new Date().toISOString(),"nomus",ownedRevision).first<{revision:number}>();
- if(saved){await reconcileNomusArchives(db,next,saved.revision);return reply(next,saved.revision,next.retryAt?"failed":"updated")}
+ const saved=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(JSON.stringify(next),new Date().toISOString(),"nomus",revision+1).first<{revision:number}>();
+ if(saved)return reply(next,saved.revision,next.retryAt?"failed":"updated");
  const latest=await readNomus();return reply(latest.state,latest.revision,"busy");
 }
 
