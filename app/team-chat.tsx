@@ -17,7 +17,7 @@ export default function TeamChat({open,onOpen,onClose,channel,onChannel,orders,o
  const unread=threads.reduce((sum,t)=>sum+t.unread,0),mentions=threads.reduce((sum,t)=>sum+t.mentions,0),currentOrder=orders.find(o=>"order:"+o.id===channel),title=channel==="general"?"Conversa geral":currentOrder?.codigo||"Pedido indisponível";
  const originalTitle=useRef("");
  useEffect(()=>{originalTitle.current=document.title;return()=>{document.title=originalTitle.current}},[]);
- useEffect(()=>{document.title=unread?`(${unread}) Mensagens · Pagnier`:originalTitle.current},[unread]);
+ useEffect(()=>{document.title=unread?`(${unread}) Pagnier · Mensagens`:originalTitle.current},[unread]);
  const updateThreads=useCallback((value:ChatChannel[])=>{setThreads(value);onThreads(value)},[onThreads]);
  const authLost=useCallback(()=>{onSessionExpired()},[onSessionExpired]);
  useEffect(()=>{if(!open)return;previousFocus.current=document.activeElement as HTMLElement;panel.current?.querySelector<HTMLButtonElement>("button")?.focus();return()=>{previousFocus.current?.focus()}},[open]);
