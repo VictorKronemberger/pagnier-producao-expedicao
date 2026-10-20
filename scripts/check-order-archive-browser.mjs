@@ -82,7 +82,30 @@ try{
  await navigate(a,'Arquivados');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
  await change(a,'[aria-label="Filtrar motivo do arquivamento"]','nomus_deleted');await a.until('document.querySelectorAll("[data-archived-order]").length===0');
  await change(a,'[aria-label="Filtrar motivo do arquivamento"]','all');await a.until('document.querySelectorAll("[data-archived-order]").length===1');
- for(const width of [1440,390]){await a.send('Page.bringToFront');await a.send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<640});await pause(250);assert(await a.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'no archive overflow at '+width);const shot=await a.send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(dir,'archives-'+width+'.png'),Buffer.from(shot.data,'base64'))}
+ // Check computed layout, not just overflow: missing archive CSS can fit on screen too.
+ // A second card catches collapsed grids and misaligned actions in both themes.
+ const remaining=groups.find(g=>!board.details[g.id].arquivado);
+ board=changeArchive(board,remaining,{archived:true,reason:'manual'},'Romulo',new Date().toISOString());revision++;
+ await a.until('document.querySelectorAll("[data-archived-order]").length===2');
+ for(const theme of ['light','dark'])for(const width of [1900,1440,768,390]){
+  await a.send('Page.bringToFront');
+  await a.evaluate(`document.documentElement.dataset.theme=${JSON.stringify(theme)};true`);
+  await a.send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<640});await pause(300);
+  const layout=await a.evaluate(`(()=>{
+   const page=document.querySelector('.archived-orders'),tools=document.querySelector('.archive-tools'),list=document.querySelector('.archive-list'),card=list.querySelector('article'),search=tools.querySelector('.search');
+   const cs=el=>getComputedStyle(el),rect=el=>el.getBoundingClientRect();
+   return {overflow:document.documentElement.scrollWidth>innerWidth+1,padding:parseFloat(cs(page).paddingLeft),grid:cs(list).display,columns:cs(list).gridTemplateColumns.split(' ').length,gap:parseFloat(cs(list).gap),border:parseFloat(cs(card).borderTopWidth),radius:parseFloat(cs(card).borderRadius),cardPadding:parseFloat(cs(card).paddingLeft),tools:cs(tools).display,searchLeft:rect(search).left-page.getBoundingClientRect().left,cardBackground:cs(card).backgroundColor,pageBackground:cs(document.body).backgroundColor,history:cs(card.querySelector('.archive-history')).display,cardOverflow:card.scrollWidth>card.clientWidth+1};
+  })()`);
+  assert(!layout.overflow && !layout.cardOverflow,theme+' no overflow at '+width);
+  assert(layout.padding>=14,theme+' page padding');assert.equal(layout.grid,'grid');assert(layout.gap>=12);
+  assert.equal(layout.columns,width<768?1:width<1440?1:width<1900?3:4);
+  assert.equal(layout.border,1);assert(layout.radius>=8);assert(layout.cardPadding>=16);
+  assert.equal(layout.tools,'flex');assert(layout.searchLeft<30,'search aligns with page, not far right');assert.equal(layout.history,'flex');
+  assert.notEqual(layout.cardBackground,layout.pageBackground,'cards separated from page in '+theme);
+  const shot=await a.send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(dir,'archives-'+theme+'-'+width+'.png'),Buffer.from(shot.data,'base64'));
+ }
+ board=changeArchive(board,remaining,{archived:false},'Romulo',new Date().toISOString());revision++;
+ await b.until('document.querySelectorAll("[data-archived-order]").length===1');
  await navigate(b,'Produção');await b.until('!!document.querySelector(".filter-toggle")');await b.evaluate('document.querySelector(".filter-toggle").click()');await change(b,'[aria-label="Filtrar transportadora"]','Carregamento');await b.until('document.querySelectorAll(".card-open").length===1');
  assert.deepEqual(errors,[]);
  console.log('OK archive browser: safe menu, cancel focus, explicit deletion checkbox, history, preserved shipping, restore, catalog flow, cross-user synchronization, responsive archive and Carregamento filter.');

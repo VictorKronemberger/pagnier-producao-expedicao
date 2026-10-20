@@ -54,7 +54,7 @@ try {
  await evaluate('window.dispatchEvent(new StorageEvent("storage",{key:"pagnier-theme",newValue:"light"}))');await until('document.documentElement.dataset.theme==="light"');
  await toggle();await until('document.documentElement.dataset.theme==="dark"');
  employee='Victor';await navigate();await until('!!document.querySelector(".kanban-card")');
- assert.equal(await theme(),'dark');assert.equal(await evaluate('getComputedStyle(document.querySelector(".app-brand img")).backgroundColor'),'rgb(230, 237, 223)');await shot('board-dark');
+ assert.equal(await theme(),'dark');assert.equal(await evaluate('getComputedStyle(document.querySelector(".app-brand img")).backgroundColor'),'rgba(0, 0, 0, 0)');assert.equal(await evaluate('getComputedStyle(document.querySelector(".app-brand img")).filter'),'brightness(0) invert(1)');await shot('board-dark');
  assert.equal(await evaluate('getComputedStyle(document.querySelector(".kanban-card")).backgroundColor'),'rgb(25, 37, 31)');
  await evaluate('document.querySelector(".card-open").click()');await until('!!document.querySelector(".card-dialog")');await shot('dialog-dark');
  await evaluate('document.querySelector(".card-dialog .close").click()');

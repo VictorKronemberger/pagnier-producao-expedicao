@@ -1,4 +1,5 @@
 "use client";
+import archiveStyles from "./archive.module.css";
 import {isCancelledOP,cancelledProduction} from "../lib/op-status.mjs";
 import ThemeToggle from "./theme-toggle";
 import NomusCapture from "./nomus-capture";
@@ -361,8 +362,8 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  {expeditionStep==="review"&&<ProductConference onVisibleOps={requestProduction} key={active.id} ops={active.ordens} value={shipment} carrier={activeCarrier.value} carrierSource={activeCarrier.source} onCarrier={changeShipmentCarrier} person={detail.responsavelConferencia??""} stock={active.estoque} disabled={loading} onPerson={value=>update(active.id,{responsavelConferencia:value})} onBox={showBox} onContinue={()=>setExpeditionStep("boxes")}/>}
  </div>
  <div className="detail-panel" hidden={detailTab!=="shipping"}><OrderShippingSummary reviewed={boxReview.reviewed} onExpedition={()=>{setDetailTab("expedition");setAssemblyStep(shipment?.caixasEmMontagem?.length?"small":"outer");setExpeditionStep(shipment?.caixas.length||shipment?.caixasEmMontagem?.length?"boxes":"review")}} shipment={shipment} orderIds={shipment?.agrupamento?.pedidos??[active.id]} onPacking={()=>openPacking(active.id)} onInvoice={()=>openInvoice(active.id)}/></div>
- {detail.arquivado&&<p className="archive-preserved">Pedido arquivado · histórico preservado. <button className="text-action" onClick={()=>{setSelected(null);navigate("archived")}}>Ver Arquivados</button></p>}
- <div className="dialog-footer">{saveIndicator}<details className="order-more-actions"><summary>Outras ações</summary><button type="button" disabled={loading||saving||dirty} onClick={()=>archiveOrder(active.id,!detail.arquivado)}>{detail.arquivado?<ArchiveRestore size={15}/>:<Archive size={15}/>} {detail.arquivado?"Restaurar pedido…":"Arquivar pedido…"}</button></details><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
+ {detail.arquivado&&<p className={"archive-preserved "+archiveStyles.preserved}>Pedido arquivado · histórico preservado. <button className="text-action" onClick={()=>{setSelected(null);navigate("archived")}}>Ver Arquivados</button></p>}
+ <div className="dialog-footer">{saveIndicator}<details className={"order-more-actions "+archiveStyles.actions}><summary>Outras ações</summary><button type="button" disabled={loading||saving||dirty} onClick={()=>archiveOrder(active.id,!detail.arquivado)}>{detail.arquivado?<ArchiveRestore size={15}/>:<Archive size={15}/>} {detail.arquivado?"Restaurar pedido…":"Arquivar pedido…"}</button></details><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
  </section></div>}
  {archiveTarget&&archiveOrderTarget&&<ArchiveDialog key={archiveTarget.id+String(archiveTarget.restoring)} order={archiveOrderTarget} restoring={archiveTarget.restoring} onClose={()=>setArchiveTarget(null)} onConfirm={confirmArchive}/>}
  </div>
