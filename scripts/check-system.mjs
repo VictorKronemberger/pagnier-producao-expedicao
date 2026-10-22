@@ -49,7 +49,7 @@ const unitTests=[
  "check-vercel-api.mjs"
 ];
 // Legacy browser scripts remain available for the old local D1 panel.
-const browserTests=["check-team-chat-browser.mjs"];
+const browserTests=["check-box-operations-browser.mjs","check-team-chat-browser.mjs"];
 const includeBrowser=process.argv.includes("--browser"),selected=[...unitTests,...(includeBrowser?browserTests:[])];
 const startedAt=new Date().toISOString(),results=[];
 mkdirSync(".sites-runtime/audit",{recursive:true});

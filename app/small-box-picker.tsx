@@ -4,7 +4,7 @@ import {ArrowRight,Check,Package,Search,X} from "lucide-react";
 import {smallBoxOptions} from "../lib/small-box-search.mjs";
 import type {PreparedBox} from "../lib/shipping.mjs";
 
-export default function SmallBoxPicker({boxes, target, onPlace}: {boxes: PreparedBox[]; target: string; onPlace: (id: string) => void}) {
+export default function SmallBoxPicker({boxes, target, onPlace}: {boxes: PreparedBox[]; target: string; onPlace: (id: string) => boolean | void}) {
  const groupId = useId();
  const [query, setQuery] = useState("");
  const [selectedId, setSelectedId] = useState("");
@@ -25,6 +25,6 @@ export default function SmallBoxPicker({boxes, target, onPlace}: {boxes: Prepare
    {!options.length && <div className="small-picker-empty"><Search size={24}/><strong>Nenhuma caixa encontrada</strong><span>Tente outro nome ou limpe a pesquisa.</span></div>}
   </div>
   {selected && <details className="small-picker-details" key={selected.id}><summary>Ver conteúdo da caixa selecionada</summary><p>{selected.contents}</p></details>}
-  <div className="small-picker-footer"><span role="status">{selected ? <><strong>{selected.quantity}</strong><small>na caixa selecionada</small></> : "Selecione uma caixa acima"}</span><button type="button" className="button primary" disabled={!selected} onClick={() => {if (selected) {onPlace(selected.id); setSelectedId("");}}}>Adicionar à Caixa 40<ArrowRight size={15}/></button></div>
+  <div className="small-picker-footer"><span role="status">{selected ? <><strong>{selected.quantity}</strong><small>na caixa selecionada</small></> : "Selecione uma caixa acima"}</span><button type="button" className="button primary" disabled={!selected} onClick={() => {if (selected && onPlace(selected.id) !== false) setSelectedId("");}}>Adicionar à Caixa 40<ArrowRight size={15}/></button></div>
  </section>;
 }
