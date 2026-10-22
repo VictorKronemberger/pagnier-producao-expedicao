@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {smallBoxOptions,smallBoxContents} from "../lib/small-box-search.mjs";
+import {smallBoxOptions,smallBoxContents,smallBoxQuantity} from "../lib/small-box-search.mjs";
 import {emptyShipment,newBox,newItem} from "../lib/shipping.mjs";
 import {placeSmallBox} from "../lib/assembly-flow.mjs";
 
@@ -30,3 +30,12 @@ assert.deepEqual(smallBoxOptions(placed.caixasEmMontagem).map(b=>b.id),["a","b"]
 assert.throws(()=>placeSmallBox(placed,"c","outer",[op]));
 assert.deepEqual(shipment.caixasEmMontagem,before);
 console.log("OK: pesquisa por texto, acentos, quantidade, caixas iguais, unidades mistas, decimais, vazio e transferência pelo ID sem duplicar.");
+
+assert.equal(options[0].title,"Caixa repetida");
+assert.equal(options[0].quantity,"20 UNID");
+assert.equal(options[0].number,1);
+assert.equal(smallBoxQuantity([{quantidade:"0,1",unidade:"KG"},{quantidade:"0,2",unidade:"kg"}]),"0,3 KG");
+assert.equal(smallBoxQuantity([{quantidade:"2",unidade:"UNID"},{quantidade:"1,25",unidade:"KG"}]),"2 UNID + 1,25 KG");
+assert.equal(smallBoxQuantity([]),"Vazia");
+assert.equal(smallBoxQuantity([{quantidade:"inválida",unidade:"KG"}]),"Revisar quantidade");
+console.log("OK: resumos compactos, totais por unidade sem misturar medidas e precisão decimal.");
