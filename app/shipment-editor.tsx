@@ -10,6 +10,8 @@ import {assemblyMode,ASSEMBLY_MODES,selectAssemblyMode,type AssemblyMode} from "
 import {boxFromModel,type BoxModel} from "../lib/box-models.mjs";
 import {packingBalance,suggestPackingQuantity} from "../lib/packing-assistant.mjs";
 import StaffPicker from "./staff-picker";
+import SmallBoxPicker from "./small-box-picker";
+import {smallBoxContents} from "../lib/small-box-search.mjs";
 import {inspectPacking,weightText} from "../lib/packing-list.mjs";
 import {updatePackingItem,productFieldsForOP,fillProductWeights,fillProductLots,needsPackContent,contentPerPack} from "../lib/packing-reuse.mjs";
 import {productUnitWeight} from "../lib/product-weight.mjs";
@@ -20,7 +22,7 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  const ref=useRef<Shipment>(value??emptyShipment());ref.current=value??emptyShipment();
  const [copyDraft,setCopyDraft]=useState({id:"",count:"1",notice:""});
  const [modelId,setModelId]=useState(""),[suggestionNotice,setSuggestionNotice]=useState("");
- const [localStep,setLocalStep]=useState<"small"|"outer"|"measure">("outer"),[chosenSmall,setChosenSmall]=useState<Record<string,string>>({}),[assemblyError,setAssemblyError]=useState("");
+ const [localStep,setLocalStep]=useState<"small"|"outer"|"measure">("outer"),[assemblyError,setAssemblyError]=useState("");
  const allProducts=products??ops.map(o=>o.produto),directOnly=mode==="boxes"&&directBoxOnly(allProducts);
  const automaticDirect=directOnly&&!hasInnerBoxes(ref.current);
  const requestedStep=controlledStep??localStep,assemblyStep=automaticDirect&&requestedStep==="small"?"outer":requestedStep;
@@ -123,8 +125,8 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  {!b.itens.some(i=>!i.caixaInternaId)&&<p className="check-help">Adicione um produto e informe a quantidade colocada nesta caixa.</p>}
  <button type="button" className="button add-direct-item" disabled={!ops.length||b.itens.length>=100} onClick={()=>addItem(b.id)}><Plus size={15}/>Adicionar produto</button></section>}
  {organization!=="direct"&&<section className="grouped-box-items"><div className="content-lane-heading"><h5>Caixas menores nesta Caixa 40</h5></div>
- {(b.caixasInternas??[]).map(inner=><details className="inner-box" key={inner.id}><summary><Package size={16}/><strong>{inner.codigo}</strong><span>{b.itens.filter(i=>i.caixaInternaId===inner.id).length} itens</span></summary><div className="inner-box-body">{b.itens.filter(i=>i.caixaInternaId===inner.id).map(i=><p className="small-content-line" key={i.id}>{i.produto}<strong>{i.quantidade} {i.unidade}</strong></p>)}<button type="button" className="text-action" onClick={()=>returnSmall(b.id,inner.id)}>Retirar para ajustar</button></div></details>)}
- {s.caixasEmMontagem?.some(v=>v.pronta)?<div className="place-small-controls"><label>Caixas menores prontas<select aria-label={"Caixa menor para "+b.codigo} value={chosenSmall[b.id]??""} onChange={e=>setChosenSmall({...chosenSmall,[b.id]:e.target.value})}><option value="">Selecione uma caixa menor</option>{s.caixasEmMontagem.filter(v=>v.pronta).map(inner=><option key={inner.id} value={inner.id}>{inner.codigo} · {inner.itens.length} itens</option>)}</select></label><button type="button" className="button primary" disabled={!s.caixasEmMontagem.some(v=>v.pronta&&v.id===chosenSmall[b.id])} onClick={()=>{changeAssembly(()=>placeSmallBox(ref.current,chosenSmall[b.id],b.id,ops));setChosenSmall({...chosenSmall,[b.id]:""})}}>Colocar nesta caixa</button></div>:<p className="check-help">Nenhuma caixa menor pronta aguardando distribuição.</p>}
+ {(b.caixasInternas??[]).map(inner=><details className="inner-box" key={inner.id}><summary><Package size={16}/><strong>{inner.codigo}</strong><span>{smallBoxContents(b.itens.filter(i=>i.caixaInternaId===inner.id))}</span></summary><div className="inner-box-body">{b.itens.filter(i=>i.caixaInternaId===inner.id).map(i=><p className="small-content-line" key={i.id}>{i.produto}<strong>{i.quantidade} {i.unidade}</strong></p>)}<button type="button" className="text-action" onClick={()=>returnSmall(b.id,inner.id)}>Retirar para ajustar</button></div></details>)}
+ {s.caixasEmMontagem?.some(v=>v.pronta)?<SmallBoxPicker key={b.id} boxes={s.caixasEmMontagem} target={b.codigo} onPlace={id=>changeAssembly(()=>placeSmallBox(ref.current,id,b.id,ops))}/>:<p className="check-help">Nenhuma caixa menor pronta aguardando distribuição.</p>}
  <button type="button" className="text-action" onClick={()=>goAssembly("small")}>Organizar caixas menores</button>
  </section>}
  <div className="flow-actions"><button type="button" className="button primary" disabled={!!smallBoxIssue(b,ops)} onClick={()=>{changeAssembly(()=>finishOuterBox(ref.current,b.id,ops));setSuggestionNotice(b.codigo+" finalizada. Disponível na aba Caixas 40 montadas.")}}>Finalizar Caixa 40 <ArrowRight size={15}/></button></div>
