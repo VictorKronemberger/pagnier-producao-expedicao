@@ -12,6 +12,8 @@ import {packingBalance,suggestPackingQuantity} from "../lib/packing-assistant.mj
 import StaffPicker from "./staff-picker";
 import SmallBoxPicker from "./small-box-picker";
 import SmallBoxProgress from "./small-box-progress";
+import DeleteBoxAction from "./delete-box-action";
+import {deleteShippingBox} from "../lib/delete-shipping-box.mjs";
 import {smallBoxContents,smallBoxQuantity} from "../lib/small-box-search.mjs";
 import {inspectPacking,weightText} from "../lib/packing-list.mjs";
 import {updatePackingItem,productFieldsForOP,fillProductWeights,fillProductLots,needsPackContent,contentPerPack} from "../lib/packing-reuse.mjs";
@@ -107,7 +109,7 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  </fieldset>}
  {issue&&!chosenInner.pronta&&<p className="check-help">{issue}</p>}
  <div className="flow-actions">{chosenInner.pronta?<><button type="button" className="button primary" onClick={()=>goAssembly("outer")}>Distribuir nas Caixas 40 <ArrowRight size={15}/></button><button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.map(v=>v.id===chosenInner.id?{...v,pronta:false}:v)})}>Editar conteúdo</button></>:<button type="button" className="button primary" disabled={!!issue} onClick={()=>changeAssembly(()=>finishSmallBox(ref.current,chosenInner.id,ops))}>Conferir e finalizar caixa menor</button>}
- {!chosenInner.itens.length&&<button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.filter(v=>v.id!==chosenInner.id)})}>Excluir caixa vazia</button>}</div>
+ <DeleteBoxAction name={chosenInner.codigo} description="Esta caixa e seu conteúdo serão removidos da montagem. Os produtos voltarão ao saldo disponível para embalar." onConfirm={text=>!!changeAssembly(()=>deleteShippingBox(ref.current,"small",chosenInner.id,text))}/></div>
 
  <section className="box-multiplier" aria-label="Multiplicar caixa selecionada">
  <div className="box-multiplier-heading"><Copy size={18}/><div><strong>Criar caixas iguais</strong><p>Repete os produtos e as quantidades desta caixa.</p></div></div>
@@ -131,7 +133,7 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  {!b.itens.some(i=>!i.caixaInternaId)&&<p className="check-help">Adicione um produto e informe a quantidade colocada nesta caixa.</p>}
  <button type="button" className="button add-direct-item" disabled={!ops.length||b.itens.length>=100} onClick={()=>addItem(b.id)}><Plus size={15}/>Adicionar produto</button></section>}
  {organization!=="direct"&&<section className="grouped-box-items"><div className="content-lane-heading"><h5>Caixas menores nesta Caixa 40</h5></div>
- {(b.caixasInternas??[]).map(inner=><details className="inner-box" key={inner.id}><summary><Package size={16}/><strong>{inner.codigo}</strong><span>{smallBoxContents(b.itens.filter(i=>i.caixaInternaId===inner.id))}</span></summary><div className="inner-box-body">{b.itens.filter(i=>i.caixaInternaId===inner.id).map(i=><p className="small-content-line" key={i.id}>{i.produto}<strong>{i.quantidade} {i.unidade}</strong></p>)}<button type="button" className="text-action" onClick={()=>returnSmall(b.id,inner.id)}>Retirar para ajustar</button></div></details>)}
+ {(b.caixasInternas??[]).map(inner=><details className="inner-box" key={inner.id}><summary><Package size={16}/><strong>{inner.codigo}</strong><span>{smallBoxContents(b.itens.filter(i=>i.caixaInternaId===inner.id))}</span></summary><div className="inner-box-body">{b.itens.filter(i=>i.caixaInternaId===inner.id).map(i=><p className="small-content-line" key={i.id}>{i.produto}<strong>{i.quantidade} {i.unidade}</strong></p>)}<button type="button" className="text-action" onClick={()=>returnSmall(b.id,inner.id)}>Retirar para ajustar</button><DeleteBoxAction name={inner.codigo} description="Esta caixa menor e seus produtos serão retirados da Caixa 40. Os produtos voltarão ao saldo disponível; será necessário conferir e pesar a Caixa 40 novamente." onConfirm={text=>!!changeAssembly(()=>deleteShippingBox(ref.current,"small",inner.id,text,b.id))}/></div></details>)}
  {s.caixasEmMontagem?.some(v=>v.pronta)?<SmallBoxPicker key={b.id} boxes={s.caixasEmMontagem} target={b.codigo} onPlace={id=>!!changeAssembly(()=>placeSmallBox(ref.current,id,b.id,ops))}/>:<p className="check-help">Nenhuma caixa menor pronta aguardando distribuição.</p>}
  <button type="button" className="text-action" onClick={()=>goAssembly("small")}>Organizar caixas menores</button>
  </section>}
@@ -144,7 +146,7 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  <button type="button" className="text-action" onClick={()=>{if(changeAssembly(()=>reopenOuterBox(ref.current,b.id))){setActiveOuterId(b.id);goAssembly("outer")}}}>Voltar à montagem</button>
  </>}
  <details className="box-options"><summary>Identificação e observações desta caixa</summary><div className="shipping-grid"><label>Identificação<input aria-label={"Identificação da caixa "+(index+1)} maxLength={50} value={b.codigo} onChange={e=>boxPatch(b.id,{codigo:e.target.value})}/></label><label>Modelo<input aria-label={"Modelo da caixa maior "+b.codigo} maxLength={80} placeholder="Ex.: Caixa 40" value={b.modeloNome??""} onChange={e=>boxPatch(b.id,{modeloNome:e.target.value})}/></label><label>Lacre<input aria-label={"Lacre de "+b.codigo} maxLength={80} value={b.lacre} onChange={e=>boxPatch(b.id,{lacre:e.target.value})}/></label><label>Embalagem<input aria-label={"Embalagem de "+b.codigo} maxLength={80} value={b.embalagem} onChange={e=>boxPatch(b.id,{embalagem:e.target.value})}/></label></div><label className="shipping-notes">Observações<textarea aria-label={"Observações de "+b.codigo} maxLength={500} rows={2} value={b.observacoes} onChange={e=>boxPatch(b.id,{observacoes:e.target.value})}/></label>
- {!b.itens.length&&!b.caixasInternas?.length&&<button type="button" className="text-action" onClick={()=>{if(confirm("Excluir esta caixa vazia?"))patch({caixas:ref.current.caixas.filter(v=>v.id!==b.id)})}}>Excluir caixa vazia</button>}
+ <DeleteBoxAction name={b.codigo} description="Esta Caixa 40, as caixas menores dentro dela e todo o conteúdo serão removidos da montagem. Os produtos voltarão ao saldo disponível para embalar." onConfirm={text=>!!changeAssembly(()=>deleteShippingBox(ref.current,"outer",b.id,text))}/>
  </details></section>})()}
  </div>}
  </>}

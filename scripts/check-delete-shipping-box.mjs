@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {deleteShippingBox} from "../lib/delete-shipping-box.mjs";
+import {emptyShipment,newBox,newItem,normalizeShipment} from "../lib/shipping.mjs";
+import {packingBalance} from "../lib/packing-assistant.mjs";
+const op={id:"op",nome:"OP",produto:"Produto 50g",quantidade:"100",unidade:"UNID"};
+const item=(id,inner,q)=>({...newItem(id),opId:"op",produto:op.produto,unidade:"UNID",quantidade:q,caixaInternaId:inner});
+const s={...emptyShipment(),organizacao:"mixed",conferenciaPor:"Teste",conferenciaEm:"2026-10-22",conferenciaBase:"base",caixasEmMontagem:[{id:"small",codigo:"Menor",pronta:true,itens:[item("a","small","20")]}],caixas:[{...newBox([],"outer"),montada:true,pesoBrutoKg:"2",caixasInternas:[{id:"inner",codigo:"Interna"}],itens:[item("b","inner","30"),item("c","","10")]}]};
+const original=structuredClone(s);
+for(const text of ["","excluir","EXCLUIR "," EXCLUIR","DELETE"])assert.throws(()=>deleteShippingBox(s,"small","small",text),/Digite EXCLUIR/);
+const small=deleteShippingBox(s,"small","small","EXCLUIR");assert.equal(small.caixasEmMontagem.length,0);assert.equal(packingBalance(small,[op])[0].remaining,"60");assert.equal(small.conferenciaBase,"");normalizeShipment(small,[op],s);
+const outer=deleteShippingBox(s,"outer","outer","EXCLUIR");assert.equal(outer.caixas.length,0);assert.equal(outer.caixasEmMontagem.length,1);assert.equal(packingBalance(outer,[op])[0].remaining,"80");normalizeShipment(outer,[op],s);
+const inner=deleteShippingBox(s,"small","inner","EXCLUIR","outer");assert.equal(inner.caixas[0].itens.length,1);assert.equal(inner.caixas[0].itens[0].id,"c");assert.equal(inner.caixas[0].caixasInternas.length,0);assert.equal(inner.caixas[0].montada,false);assert.equal(inner.caixas[0].pesoBrutoKg,"");assert.equal(packingBalance(inner,[op])[0].remaining,"70");normalizeShipment(inner,[op],s);
+assert.throws(()=>deleteShippingBox(s,"outer","missing","EXCLUIR"),/não encontrada/);assert.deepEqual(s,original);
+console.log("OK deletion: exact confirmation, small/outer/nested boxes, correct balances, unrelated items preserved, conference invalidation and persistence.");
