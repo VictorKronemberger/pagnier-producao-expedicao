@@ -1,5 +1,5 @@
 ﻿"use client";
-import {useLayoutEffect,useEffect,useRef,useState} from "react";
+import {useLayoutEffect,useEffect,useRef,useState,useId} from "react";
 import ContextHelp from "./context-help";
 import {Users,Download,AlertCircle} from "lucide-react";
 import {shipmentOwner} from "../lib/shipment-groups.mjs";
@@ -8,7 +8,7 @@ import type {ClientDocument} from "../lib/packing-client.mjs";
 import type {Packing} from "../lib/shipping.mjs";
 type Group={id:string;codigo:string;cliente:string};
 type Holder={key:string;nome:string};
-export default function PackingClients({owner,groups,board,disabled,onApply,onPending}:{owner:string;groups:Group[];board:any;disabled:boolean;onApply:(ids:string[],holder:Holder,patch:Partial<Packing>)=>void;onPending?:(pending:boolean)=>void}){
+export default function PackingClients({owner,groups,board,disabled,blockedReason,onApply,onPending}:{owner:string;groups:Group[];board:any;disabled:boolean;blockedReason?:string;onApply:(ids:string[],holder:Holder,patch:Partial<Packing>)=>void;onPending?:(pending:boolean)=>void}){
  const shipment=board.details[owner]?.envio,current=shipment?.agrupamento;
  const confirmed:string[]=current?.pedidos??[owner];
  const [options,setOptions]=useState<Holder[]>([]),[key,setKey]=useState(current?.titularKey??""),[doc,setDoc]=useState<ClientDocument|null>(null),[address,setAddress]=useState(""),[ids,setIds]=useState<string[]>(confirmed),[busy,setBusy]=useState(false),[error,setError]=useState(""),[search,setSearch]=useState(""),[loaded,setLoaded]=useState(false),[orderClients,setOrderClients]=useState<Record<string,string>>({});
@@ -29,8 +29,10 @@ export default function PackingClients({owner,groups,board,disabled,onApply,onPe
  const different=selected.some(g=>orderClients[g.id]?orderClients[g.id]!==holder?.key:g.cliente!==holder?.nome);
  const changedHolder=!!current&&applyClient&&key!==current.titularKey;
  function reset(){requestId.current++;selectionVersion.current=shipmentVersion;setBusy(false);setIds([...confirmed]);setApplyClient(false);setKey(current?.titularKey??"");setDoc(null);setLoaded(false);setReplace(false);setError("")}
+ const applyHelpId=useId();
+ const applyBlock=disabled?"Aguarde o carregamento dos dados.":selectionStale?"Outra pessoa alterou este envio. Sua seleção foi preservada; descarte a seleção não confirmada e confira os dados atualizados antes de aplicar.":shipment?.packingExcluido?"Recrie o packing list para confirmar o destinatário.":blockedReason|| (busy?"Aguarde a consulta do cadastro.":applyClient&&!doc?"Não foi possível carregar o titular. Consulte novamente o cadastro para continuar.":!holder?"Consulte o cadastro e selecione o cliente titular para confirmar.":ids.length>50?"Selecione no máximo 50 pedidos.":!pending&&current?"Destinatário confirmado. Você já pode avançar para Itens e caixas.":"");
  function apply(){
- if(selectionStale||shipment?.packingExcluido||!holder||applyClient&&!doc)return;
+ if(applyBlock||!holder)return;
  const patch=applyClient&&doc?recipientPatch(shipment?.packing,doc,address,replace||changedHolder):{};
  if(changedHolder)Object.assign(patch,{contatoNome:"",contatoFax:""});
  const listing=selected.map(g=>g.codigo+" — "+(g.cliente||"Cliente a identificar")).join("\n");
@@ -55,8 +57,9 @@ export default function PackingClients({owner,groups,board,disabled,onApply,onPe
  {changedHolder&&<p className="document-warning">A troca de titular substituirá os dados do destinatário após sua confirmação.</p>}
  </fieldset>}
  {different&&holder&&<p className="document-warning"><AlertCircle size={16}/>Há pedidos de clientes diferentes do titular. Confira o destinatário antes de confirmar.</p>}
- <div className="flow-actions"><button className="button client-apply" type="button" disabled={busy||disabled||selectionStale||shipment?.packingExcluido||!holder||applyClient&&!doc||!pending&&!!current||ids.length>50} onClick={apply}>{current&&!applyClient?"Confirmar pedidos e manter destinatário":ids.length>1?"Confirmar titular e reunir pedidos":"Confirmar titular e preencher documento"}</button>{pending&&<button className="button" type="button" disabled={busy} onClick={reset}>Descartar seleção não confirmada</button>}</div>
- {selectionStale&&<p className="dialog-error" role="alert">Outra pessoa alterou este envio. Sua seleção foi preservada; descarte a seleção não confirmada e confira os dados atualizados antes de aplicar.</p>}
+ {applyBlock&&<p id={applyHelpId} className={selectionStale||blockedReason?"document-warning":"document-help"} role="status">{applyBlock}</p>}
+ <div className="flow-actions"><button className="button client-apply" type="button" disabled={!!applyBlock} aria-describedby={applyBlock?applyHelpId:undefined} onClick={apply}>{current&&!applyClient?"Confirmar pedidos e manter destinatário":ids.length>1?"Confirmar titular e reunir pedidos":"Confirmar titular e preencher documento"}</button>{pending&&<button className="button" type="button" disabled={busy} onClick={reset}>Descartar seleção não confirmada</button>}</div>
+
  {error&&<p className="dialog-error" role="alert">{error}</p>}
  </details>
 }

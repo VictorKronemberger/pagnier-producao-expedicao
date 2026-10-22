@@ -49,7 +49,7 @@ const unitTests=["check-delete-shipping-box.mjs","check-small-box-progress.mjs",
  "check-vercel-api.mjs"
 ];
 // Legacy browser scripts remain available for the old local D1 panel.
-const browserTests=["check-delete-box-browser.mjs","check-small-progress-browser.mjs","check-small-build-layout-browser.mjs","check-box-operations-browser.mjs","check-team-chat-browser.mjs"];
+const browserTests=["check-packing-confirmation-browser.mjs","check-delete-box-browser.mjs","check-small-progress-browser.mjs","check-small-build-layout-browser.mjs","check-box-operations-browser.mjs","check-team-chat-browser.mjs"];
 const includeBrowser=process.argv.includes("--browser"),selected=[...unitTests,...(includeBrowser?browserTests:[])];
 const startedAt=new Date().toISOString(),results=[];
 mkdirSync(".sites-runtime/audit",{recursive:true});
