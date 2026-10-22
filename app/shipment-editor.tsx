@@ -11,7 +11,7 @@ import {boxFromModel,type BoxModel} from "../lib/box-models.mjs";
 import {packingBalance,suggestPackingQuantity} from "../lib/packing-assistant.mjs";
 import StaffPicker from "./staff-picker";
 import SmallBoxPicker from "./small-box-picker";
-import {smallBoxContents} from "../lib/small-box-search.mjs";
+import {smallBoxContents,smallBoxQuantity} from "../lib/small-box-search.mjs";
 import {inspectPacking,weightText} from "../lib/packing-list.mjs";
 import {updatePackingItem,productFieldsForOP,fillProductWeights,fillProductLots,needsPackContent,contentPerPack} from "../lib/packing-reuse.mjs";
 import {productUnitWeight} from "../lib/product-weight.mjs";
@@ -91,24 +91,28 @@ export default function ShipmentEditor({value,ops,products,onChange,disabled=fal
  {ops.length>0&&<details className="packing-balance"><summary>{balance.some(b=>b.excess||b.invalid)?"Revisar distribuição":balance.some(b=>b.remainingScaled===null||b.remainingScaled>BigInt(0))?"Produtos a distribuir · "+balance.filter(b=>b.remainingScaled===null||b.remainingScaled>BigInt(0)).length:"Todos os produtos distribuídos"}</summary>{balance.map(b=><div className="packing-balance-row" key={b.opId}><span><strong>{b.produto}</strong><small>{b.opId} · Previsto: {b.target??"—"} {b.unidade} · Distribuído: {b.packed} {b.unidade}</small></span><b>{b.invalid?"Revisar quantidade":b.remaining===null?"Quantidade a confirmar":b.excess?"Excesso: "+b.remaining+" "+b.unidade:b.remainingScaled===BigInt(0)?"Distribuído":"Disponível: "+b.remaining+" "+b.unidade}</b></div>)}</details>}
  {assemblyStep==="small"&&organization!=="direct"?<>
  <div className="assembly-task-header"><div><h4>Organizar caixas menores</h4><p>Monte e confira cada uma antes de distribuir nas Caixas 40.</p></div><button type="button" className="button primary" disabled={directOnly||(s.caixasEmMontagem?.length??0)>=100} onClick={createInner}><Plus size={16}/>Nova caixa menor</button></div>
- {!s.caixasEmMontagem?.length?<p className="packing-empty">Nenhuma caixa menor em preparo. Crie uma para adicionar os produtos.</p>:<div className="box-workspace">
- <nav className="box-selector" aria-label="Selecionar caixa menor">{s.caixasEmMontagem.map(b=><button type="button" key={b.id} aria-pressed={smallId===b.id} onClick={()=>setActiveSmallId(b.id)}><Package size={17}/><span><strong>{b.codigo}</strong><small>{b.itens.length} {b.itens.length===1?"item":"itens"} · {b.pronta?"Pronta":"Em montagem"}</small></span>{smallId===b.id&&<Check size={16}/>}</button>)}</nav>
- {chosenInner&&(()=>{const b=assemblyBoxes(s).find(v=>v.id===chosenInner.id)!;const issue=smallBoxIssue(chosenInner,ops),capacity=smallBoxCopyCapacity(s,chosenInner.id,ops),count=Number(copyCount),validCount=Number.isInteger(count)&&count>=1&&count<=capacity.max;return <section className="box-focus" aria-label={"Caixa menor "+chosenInner.codigo} key={chosenInner.id}>
- <header><div><small>CAIXA MENOR SELECIONADA</small><h4>{chosenInner.codigo}</h4></div><span className="box-state">{chosenInner.pronta?"Pronta":"Em montagem"}</span></header>
+ {!s.caixasEmMontagem?.length?<p className="packing-empty">Nenhuma caixa menor em preparo. Crie uma para adicionar os produtos.</p>:<div className="box-workspace small-build-workspace">
+ <nav className="box-selector small-build-selector" aria-label="Selecionar caixa menor"><div className="small-build-list-heading"><strong>Suas caixas</strong><span>{s.caixasEmMontagem.length}</span></div>{s.caixasEmMontagem.map((b,index)=><button type="button" key={b.id} aria-pressed={smallId===b.id} onClick={()=>setActiveSmallId(b.id)}><span className="small-build-card-top"><span className="small-build-card-icon"><Package size={17}/></span><span className="small-build-card-name"><strong>{b.codigo}</strong><small>Caixa menor {index+1}</small></span>{smallId===b.id&&<Check size={15}/>}</span><span className="small-build-card-bottom"><b>{smallBoxQuantity(b.itens)}</b><span className={"small-build-status"+(b.pronta?" is-ready":"")}>{b.pronta?"Pronta":"Em montagem"}</span></span></button>)}</nav>
+ {chosenInner&&(()=>{const b=assemblyBoxes(s).find(v=>v.id===chosenInner.id)!;const issue=smallBoxIssue(chosenInner,ops),capacity=smallBoxCopyCapacity(s,chosenInner.id,ops),count=Number(copyCount),validCount=Number.isInteger(count)&&count>=1&&count<=capacity.max;return <section className="box-focus small-build-focus" aria-label={"Caixa menor "+chosenInner.codigo} key={chosenInner.id}>
+ <header><div><small>CAIXA MENOR SELECIONADA</small><h4>{chosenInner.codigo}</h4></div><span className={"small-build-status"+(chosenInner.pronta?" is-ready":"")}>{chosenInner.pronta?<><Check size={13}/>Pronta para distribuir</>:"Em montagem"}</span></header>
+ <div className="small-build-overview"><span className="small-build-overview-icon"><Package size={23}/></span><div><small>CONTEÚDO DA CAIXA</small><strong>{smallBoxQuantity(chosenInner.itens)}</strong></div><span>{chosenInner.itens.length} {chosenInner.itens.length===1?"produto":"produtos"}</span></div>
+
+ {chosenInner.pronta?<div className="small-build-ready" aria-label="Conteúdo conferido">{chosenInner.itens.map(item=><div className="small-build-content-row" key={item.id}><span>{item.produto}</span><strong>{smallBoxQuantity([item])}</strong></div>)}<p><Check size={14}/>Conteúdo conferido. Esta caixa está pronta para a Caixa 40.</p></div>:<fieldset className="shipment-form small-build-form">
+ <div className="small-build-section-heading"><strong>Monte o conteúdo</strong><span>Escolha os produtos e informe as quantidades.</span></div>
+ <label className="box-name-field">Nome da caixa<input aria-label={"Identificação de "+chosenInner.codigo} value={chosenInner.codigo} maxLength={50} onChange={e=>boxPatch(chosenInner.id,{codigo:e.target.value})}/></label>
+ {chosenInner.itens.map((item,i)=>renderItem(b,item,i))}
+ <button type="button" className="button" disabled={directOnly||!ops.length||chosenInner.itens.length>=100} onClick={()=>addItem(chosenInner.id)}><Plus size={15}/>Adicionar produto</button>
+ </fieldset>}
+ {issue&&!chosenInner.pronta&&<p className="check-help">{issue}</p>}
+ <div className="flow-actions">{chosenInner.pronta?<><button type="button" className="button primary" onClick={()=>goAssembly("outer")}>Distribuir nas Caixas 40 <ArrowRight size={15}/></button><button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.map(v=>v.id===chosenInner.id?{...v,pronta:false}:v)})}>Editar conteúdo</button></>:<button type="button" className="button primary" disabled={!!issue} onClick={()=>changeAssembly(()=>finishSmallBox(ref.current,chosenInner.id,ops))}>Conferir e finalizar caixa menor</button>}
+ {!chosenInner.itens.length&&<button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.filter(v=>v.id!==chosenInner.id)})}>Excluir caixa vazia</button>}</div>
+
  <section className="box-multiplier" aria-label="Multiplicar caixa selecionada">
  <div className="box-multiplier-heading"><Copy size={18}/><div><strong>Criar caixas iguais</strong><p>Repete os produtos e as quantidades desta caixa.</p></div></div>
  <div className="box-multiplier-controls"><label>Cópias adicionais<input aria-label="Cópias adicionais da caixa menor" aria-describedby="box-copy-hint" type="number" min="1" max={Math.max(1,capacity.max)} step="1" disabled={directOnly||capacity.max===0} value={copyCount} onChange={e=>{setCopyCount(e.target.value)}}/></label><button type="button" className="button primary" disabled={directOnly||!validCount} onClick={multiplyInner}><Copy size={16}/>Multiplicar caixa</button></div>
  <p className="box-copy-hint" id="box-copy-hint">{directOnly?"Este envio usa produtos diretamente nas Caixas 40.":capacity.reason||(!validCount?"Informe de 1 a "+capacity.max+" cópias adicionais.":"1 original + "+count+(count===1?" cópia = ":" cópias = ")+(count+1)+" caixas iguais. Disponível para até "+capacity.max+(capacity.max===1?" cópia.":" cópias."))}</p>
  {copyNotice&&<p className="box-copy-success" role="status"><Check size={15}/>{copyNotice}</p>}
  </section>
- <fieldset disabled={chosenInner.pronta} className="shipment-form">
- <label className="box-name-field">Identificação<input aria-label={"Identificação de "+chosenInner.codigo} value={chosenInner.codigo} maxLength={50} onChange={e=>boxPatch(chosenInner.id,{codigo:e.target.value})}/></label>
- {chosenInner.itens.map((item,i)=>renderItem(b,item,i))}
- <button type="button" className="button" disabled={directOnly||!ops.length||chosenInner.itens.length>=100} onClick={()=>addItem(chosenInner.id)}><Plus size={15}/>Adicionar produto</button>
- </fieldset>
- {issue&&!chosenInner.pronta&&<p className="check-help">{issue}</p>}
- <div className="flow-actions">{chosenInner.pronta?<><button type="button" className="button primary" onClick={()=>goAssembly("outer")}>Distribuir nas Caixas 40 <ArrowRight size={15}/></button><button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.map(v=>v.id===chosenInner.id?{...v,pronta:false}:v)})}>Editar conteúdo</button></>:<button type="button" className="button primary" disabled={!!issue} onClick={()=>changeAssembly(()=>finishSmallBox(ref.current,chosenInner.id,ops))}>Conferir e finalizar caixa menor</button>}
- {!chosenInner.itens.length&&<button type="button" className="text-action" onClick={()=>patch({caixasEmMontagem:ref.current.caixasEmMontagem?.filter(v=>v.id!==chosenInner.id)})}>Excluir caixa vazia</button>}</div>
  </section>})()}
  </div>}
  {s.caixas.some(b=>b.caixasInternas?.length)&&<details className="placed-small-list"><summary>Caixas menores já distribuídas</summary>{s.caixas.flatMap(b=>(b.caixasInternas??[]).map(inner=><div key={b.id+inner.id}><span><strong>{inner.codigo}</strong> · {b.codigo}</span><button type="button" className="text-action" onClick={()=>returnSmall(b.id,inner.id)}>Retirar para ajustar</button></div>))}</details>}
