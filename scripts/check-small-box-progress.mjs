@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import {smallBoxProgress} from "../lib/small-box-progress.mjs";
+import {emptyShipment,newItem,newBox} from "../lib/shipping.mjs";
+import {finishSmallBox,placeSmallBox,unpackSmallBox} from "../lib/assembly-flow.mjs";
+const op={id:"op",nome:"OP teste",produto:"Produto 50g",quantidade:"100",unidade:"UNID"};
+const item=(id,box,q)=>({...newItem(id),opId:op.id,produto:op.produto,unidade:op.unidade,quantidade:q,caixaInternaId:box});
+const s={...emptyShipment(),organizacao:"inner",caixasEmMontagem:[{id:"draft",codigo:"Em preparo",pronta:false,itens:[item("d","draft","20")]},{id:"ready",codigo:"Pronta",pronta:true,itens:[item("r","ready","30")]}],caixas:[{...newBox([],"outer"),caixasInternas:[{id:"placed",codigo:"Distribuída"}],itens:[item("p","placed","10")]}]};
+const before=structuredClone(s);
+let report=smallBoxProgress(s,[op]);assert.equal(report.ready.length,2);assert.equal(report.draftCount,1);assert.equal(report.pending[0].remaining,"40");assert.equal(report.pending[0].draft,"20");assert.equal(report.ready[1].location,"Dentro de CX-001");assert.deepEqual(s,before);
+const finished=finishSmallBox(s,"draft",[op]);report=smallBoxProgress(finished,[op]);assert.equal(report.ready.length,3);assert.equal(report.draftCount,0);assert.equal(report.pending[0].remaining,"40");
+const placed=placeSmallBox(finished,"ready","outer",[op]);report=smallBoxProgress(placed,[op]);assert.equal(report.ready.length,3);assert.equal(report.pending[0].remaining,"40");
+const returned=unpackSmallBox(placed,"outer","ready","new");report=smallBoxProgress(returned,[op]);assert.equal(report.ready.length,2);assert.equal(report.pending[0].draft,"30");assert.equal(report.pending[0].remaining,"40");
+report=smallBoxProgress(s,[{...op,quantidade:"60"}]);assert.equal(report.pending[0].remaining,"0");assert.equal(report.pending[0].hasDraft,true,"unfinished boxes stay visible even if all product is allocated");
+assert.equal(smallBoxProgress(finished,[{...op,quantidade:"60"}]).pending.length,0);
+assert.equal(smallBoxProgress(s,[{...op,quantidade:"50"}]).pending[0].excess,true);
+assert.equal(smallBoxProgress(s,[{...op,quantidade:""}]).pending[0].remaining,null);
+const invalid=structuredClone(s);invalid.caixasEmMontagem[0].itens[0].quantidade="";assert.equal(smallBoxProgress(invalid,[op]).pending[0].invalid,true);
+console.log("OK progress: pending stock, draft allocations, ready and placed boxes, no double counting, full allocation, excess, unknown and invalid quantities.");

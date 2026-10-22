@@ -1,7 +1,7 @@
 import {spawn} from "node:child_process";
 import {mkdirSync,writeFileSync} from "node:fs";
 // Explicit list: these tests use fixtures, an in-memory database or intercepted browser APIs.
-const unitTests=[
+const unitTests=["check-small-box-progress.mjs",
  "check-allocation.mjs",
  "check-assembly-flow.mjs",
  "check-small-box-search.mjs",
@@ -49,7 +49,7 @@ const unitTests=[
  "check-vercel-api.mjs"
 ];
 // Legacy browser scripts remain available for the old local D1 panel.
-const browserTests=["check-small-build-layout-browser.mjs","check-box-operations-browser.mjs","check-team-chat-browser.mjs"];
+const browserTests=["check-small-progress-browser.mjs","check-small-build-layout-browser.mjs","check-box-operations-browser.mjs","check-team-chat-browser.mjs"];
 const includeBrowser=process.argv.includes("--browser"),selected=[...unitTests,...(includeBrowser?browserTests:[])];
 const startedAt=new Date().toISOString(),results=[];
 mkdirSync(".sites-runtime/audit",{recursive:true});
