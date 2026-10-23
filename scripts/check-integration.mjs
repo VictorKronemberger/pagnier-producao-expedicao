@@ -16,10 +16,10 @@ const context={Error,exports:{},require:name=>{assert(name in imports,name);retu
 const request=(body,origin="http://site.test")=>new Request("http://site.test/api/board",{method:"PUT",headers:{origin},body:typeof body==="string"?body:JSON.stringify(body)});
 identity=null;assert.equal((await context.exports.GET()).status,401);assert.equal((await context.exports.PUT(request({}))).status,401);assert.equal((await context.exports.DELETE(new Request("http://site.test/api/board",{method:"DELETE"}))).status,401);identity={displayName:"Teste"};
 assert.equal((await context.exports.PUT(request({},"https://outside.invalid"))).status,403);assert.equal((await context.exports.PUT(request("{"))).status,400);
-const board={sequence:[sale.id],details:{STOCK:{responsavel:"Teste",nota:"Persistência isolada",situacao:"Concluído",atendimentoEstoque:true}}};const originalRevision=revision;
+const board={sequence:[sale.id],details:{STOCK:{responsavel:"Teste",nota:"Persistência isolada",etiqueta:"Aguardando documentação",situacao:"Concluído",atendimentoEstoque:true}}};const originalRevision=revision;
 assert.equal((await context.exports.PUT(request({board,revision}))).status,200);assert.equal(stored.details.STOCK.nota,"Persistência isolada");
 assert.equal((await context.exports.PUT(request({board,revision:originalRevision}))).status,409);assert.equal(updates,1);
 assert.equal((await context.exports.PUT(request({board:{sequence:["fake"],details:{}},revision}))).status,400);
-const read=await(await context.exports.GET()).json();assert.equal(read.revision,revision);assert.equal(read.board.details.STOCK.nota,"Persistência isolada");
+const read=await(await context.exports.GET()).json();assert.equal(read.revision,revision);assert.equal(read.board.details.STOCK.nota,"Persistência isolada");assert.equal(read.board.details.STOCK.etiqueta,"Aguardando documentação");
 testEnv.DB=null;assert.equal((await context.exports.GET()).status,503);assert.equal((await context.exports.PUT(request({board,revision}))).status,503);
 console.log("OK integração isolada: autenticação, origem, JSON inválido, IDs, salvamento/recarga, conflito entre sessões e banco indisponível. Nenhum acesso ao banco operacional.");
