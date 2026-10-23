@@ -893,3 +893,45 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 .pl-stage-content .packing-document>.shipment-title,.pl-stage-content .shipment-section:not(.assembly-editor)>.shipment-title,.pl-stage-content .pl-client-section>h3{display:none}
 
 .documentation-ready>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none}.documentation-ready>summary::-webkit-details-marker{display:none}.documentation-ready>summary h2{margin:0;flex-wrap:wrap}.documentation-ready>summary>svg{flex-shrink:0;transition:transform .15s}.documentation-ready[open]>summary>svg{transform:rotate(180deg)}.documentation-ready[open]>header{margin-top:14px}.documentation-ready>summary:focus-visible{outline:2px solid #36734f;outline-offset:5px;border-radius:4px}
+
+/* Packing overview: one scroll area for the queue and the documents. */
+.pl-workspace{max-width:1480px;padding:18px 28px 48px;scrollbar-width:thin;scrollbar-gutter:stable}
+.pl-workspace .packing-workspace-heading{margin-bottom:20px;align-items:flex-start}
+.pl-workspace .packing-workspace-heading h2{font-size:21px;line-height:1.4;margin-bottom:5px}
+.pl-workspace>.documentation-ready{margin:0 0 20px;padding:0;background:light-dark(#f8fbf8,var(--night-surface));overflow:visible}
+.pl-workspace>.documentation-ready>summary{padding:16px 18px;min-height:60px}
+.pl-workspace>.documentation-ready h2{font-size:14px;letter-spacing:0;margin:0;line-height:1.5}
+.pl-workspace>.documentation-ready>header{margin:0;padding:0 18px 14px;flex-wrap:wrap}
+.pl-workspace>.documentation-ready .documentation-ready-list{max-height:none;overflow:visible;margin:0;padding:0 18px 18px;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pl-workspace>.documentation-ready .documentation-empty{margin:0;padding:0 18px 18px}
+.pl-workspace .documentation-ready-list article{padding:12px;align-items:flex-start;flex-wrap:wrap}
+.pl-workspace .documentation-ready-list article>div{flex:1 1 200px}
+.pl-workspace .documentation-ready-list button{align-self:center}
+.pl-catalog-controls{padding:16px 18px;margin-bottom:20px;background:light-dark(#fff,var(--night-surface));border:1px solid var(--line);border-radius:12px}
+.pl-catalog-controls .pl-list-toolbar{margin-bottom:12px}
+.pl-catalog-controls .pl-list-filters{margin:0;gap:6px}
+.pl-catalog-controls .packing-workspace-search{max-width:640px;min-height:44px;padding:9px 12px}
+.pl-catalog-controls .pl-list-filters button{min-height:38px;padding:8px 12px}
+.pl-catalog-controls .pl-list-filters button[aria-pressed=true]{background:light-dark(#e9f3ec,var(--night-green-soft));border-color:light-dark(#c6dcca,var(--night-border))}
+.pl-workspace .packing-document-list{gap:18px}
+.pl-workspace .packing-document-card:hover{border-color:light-dark(#9cbaa7,var(--night-green));box-shadow:0 3px 12px #163c230a}
+.pl-workspace .packing-document-card:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.pl-workspace .pl-card-body{padding:16px 18px;gap:7px}
+.pl-workspace .pl-card-next{min-height:46px;line-height:1.5}
+@media(max-width:900px){.pl-workspace>.documentation-ready .documentation-ready-list{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){
+ .pl-workspace{padding:12px 14px 32px;scrollbar-gutter:auto}
+ .pl-workspace .packing-workspace-heading{flex-wrap:wrap;gap:12px;margin-bottom:16px}
+ .pl-workspace .packing-workspace-heading>.button{width:100%;min-height:44px}
+ .pl-workspace>.documentation-ready{margin-bottom:16px}
+ .pl-workspace>.documentation-ready>summary{padding:14px 12px}
+ .pl-workspace>.documentation-ready h2{font-size:13px;gap:7px}
+ .pl-workspace>.documentation-ready>header{padding:0 12px 12px;gap:10px}
+ .pl-workspace>.documentation-ready .search{width:100%;max-width:none}
+ .pl-workspace>.documentation-ready .documentation-ready-list{padding:0 12px 12px}
+ .pl-catalog-controls{padding:12px;margin-bottom:16px}
+ .pl-catalog-controls .pl-list-toolbar{gap:10px}
+ .pl-catalog-controls .packing-workspace-search{flex-basis:100%;width:100%}
+ .pl-catalog-controls .pl-list-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pl-catalog-controls .pl-list-filters button{justify-content:space-between;text-align:left;font-size:11px;padding:9px 8px;min-width:0}
+}

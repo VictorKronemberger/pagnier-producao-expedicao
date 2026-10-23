@@ -2,6 +2,8 @@
 import {useLayoutEffect,useEffect,useState} from "react";
 import {FileText,Plus,ArrowLeft,ArrowRight,Trash2,Search,Check,Package,UserRound} from "lucide-react";
 import ContextHelp from "./context-help";
+import DocumentationReady from "./documentation-ready";
+import type {DocumentationEntry} from "../lib/documentation-ready.mjs";
 import {PACKING_STEPS,packingWorkflow} from "../lib/packing-workflow.mjs";
 import {packingDeletionReason,packingOrderIds} from "../lib/packing-delete.mjs";
 import PackingClients from "./packing-clients";
@@ -11,7 +13,8 @@ import {emptyShipment,type Shipment,type Packing,type ShippingOP} from "../lib/s
 import {shipmentOwner,shipmentOps} from "../lib/shipment-groups.mjs";
 type Group={id:string;codigo:string;cliente:string;ordens:ShippingOP[]};
 type Board={details:Record<string,{envio?:Shipment;situacao?:string}>};
-export default function PackingWorkspace({onDelete,groups,board,owner,onSelect,onChange,onGroup,disabled,canExport,confirmationBlockedReason,section,onSection,onOpenOrder,onHelp,onPending,onInvoice}:{
+export default function PackingWorkspace({readyEntries=[],onDelete,groups,board,owner,onSelect,onChange,onGroup,disabled,canExport,confirmationBlockedReason,section,onSection,onOpenOrder,onHelp,onPending,onInvoice}:{
+ readyEntries?:DocumentationEntry[];
  onDelete:(id:string)=>Promise<void>;groups:Group[];board:Board;owner:string|null;onSelect:(id:string|null)=>void;
  onChange:(id:string,value:Shipment)=>void;
  onGroup:(owner:string,ids:string[],holder:{key:string;nome:string},patch:Partial<Packing>)=>void;
@@ -47,7 +50,7 @@ export default function PackingWorkspace({onDelete,groups,board,owner,onSelect,o
  const classify=(g:Group)=>{const shipment=board.details[g.id]?.envio;return shipment?.dataEnvio||board.details[g.id]?.situacao==="Atendido totalmente e enviado"?"sent":packingWorkflow(shipment,shipmentOps(shipment,g.id,groups)).ready?"ready":"pending"};
  const entries=allEntries.filter(g=>creating||statusFilter==="all"||classify(g)===statusFilter);
  return <section className="packing-workspace pl-workspace" aria-label="Área de packing lists">
- <div className="packing-workspace-heading"><div><h2><FileText size={24}/>Packing lists<ContextHelp label="Fluxo do packing list">Prepare um envio por vez. Os dados são salvos automaticamente. Ao reabrir, a primeira pendência indica de onde continuar. A revisão para emitir o PDF deve ser feita por quem estiver finalizando o documento.</ContextHelp></h2><p>Do pedido ao documento, uma etapa por vez.</p></div>{!active&&<button className="button primary" disabled={pending||disabled} onClick={()=>{onSelect(null);setSearch("");setCreating(true)}}><Plus size={16}/>Novo packing list</button>}</div>
+ <div className="packing-workspace-heading"><div><h2><FileText size={24}/>Documentos de envio<ContextHelp label="Fluxo do packing list">Prepare um envio por vez. Os dados são salvos automaticamente. Ao reabrir, a primeira pendência indica de onde continuar. A revisão para emitir o PDF deve ser feita por quem estiver finalizando o documento.</ContextHelp></h2><p>Encontre um envio abaixo ou comece um novo packing list.</p></div>{!active&&<button className="button primary" disabled={pending||disabled} onClick={()=>{onSelect(null);setSearch("");setCreating(true)}}><Plus size={16}/>Novo packing list</button>}</div>
  {deleteError&&<p className="dialog-error" role="alert">{deleteError}</p>}{deleted&&<p className="document-help" role="status">{deleted}</p>}
  {active&&resolved?<div className="packing-workspace-editor">
  <div className="pl-editor-toolbar"><button className="text-action" disabled={pending} onClick={()=>onSelect(null)}><ArrowLeft size={16}/>Todos os packing lists</button><button className="text-action" disabled={pending} onClick={onHelp}>Como preencher</button></div>
@@ -66,8 +69,10 @@ export default function PackingWorkspace({onDelete,groups,board,owner,onSelect,o
  <div className="pl-stage-footer"><button className="button" disabled={pending} onClick={()=>stageIndex?go(PACKING_STEPS[stageIndex-1].id):onSelect(null)}><ArrowLeft size={15}/>{stageIndex?"Etapa anterior":"Voltar à lista"}</button><span>Etapa {stageIndex+1} de {PACKING_STEPS.length}</span>{stageIndex<PACKING_STEPS.length-1&&(currentStep==="orders"||boxReview.reviewed)&&<button className="button primary" disabled={pending||disabled||!!value?.packingExcluido} onClick={()=>go(PACKING_STEPS[stageIndex+1].id)}>{PACKING_STEPS[stageIndex+1].title}<ArrowRight size={15}/></button>}</div>
  <section className="linked-order-actions pl-related"><h4>Pedidos vinculados · {linkedIds.length}</h4>{linkedIds.map(id=><div key={id}><strong>{groups.find(g=>g.id===id)?.codigo||id}</strong><button className="button" disabled={pending} onClick={()=>onOpenOrder(id)}>Abrir expedição</button><button className="text-action" disabled={pending||!boxReview.reviewed} onClick={()=>onInvoice(id)}>Invoice deste pedido</button></div>)}</section>
  </div>:<>
- <div className="pl-list-toolbar"><label className="search packing-workspace-search"><Search size={18}/><input aria-label="Buscar packing lists ou pedidos" placeholder="Pedido, cliente ou número da invoice" value={search} onChange={e=>setSearch(e.target.value)}/></label><button className="text-action" onClick={onHelp}>Como preparar</button></div>
+ {!creating&&<DocumentationReady entries={readyEntries} kind="packing" disabled={disabled} onOpen={open}/>}
+ <div className="pl-catalog-controls"><div className="pl-list-toolbar"><label className="search packing-workspace-search"><Search size={18}/><input aria-label="Buscar packing lists ou pedidos" placeholder="Pedido, cliente ou número da invoice" value={search} onChange={e=>setSearch(e.target.value)}/></label><button className="text-action" onClick={onHelp}>Como preparar</button></div>
  {!creating&&<div className="pl-list-filters" aria-label="Filtrar packing lists">{[["all","Todos"],["pending","A preparar"],["ready","Prontos para revisão"],["sent","Despachados"]].map(([key,label])=><button key={key} aria-pressed={statusFilter===key} onClick={()=>setStatusFilter(key)}>{label}<span>{allEntries.filter(g=>key==="all"||classify(g)===key).length}</span></button>)}</div>}
+ </div>
  {creating&&<div className="pl-create-heading"><h3>Escolha o primeiro pedido</h3><ContextHelp label="Criar packing list">Comece por um pedido e, se necessário, reúna outros que viajam juntos na próxima etapa. Documentos excluídos podem ser recriados com as caixas preservadas.</ContextHelp><button className="text-action" onClick={()=>{setCreating(false);setSearch("")}}>Cancelar</button></div>}
  <div className="packing-document-list">{entries.map(g=>{
  const shipment=board.details[g.id]?.envio,ids=shipment?.agrupamento?.pedidos??[g.codigo],state=packingWorkflow(shipment,shipmentOps(shipment,g.id,groups)),status=classify(g);
