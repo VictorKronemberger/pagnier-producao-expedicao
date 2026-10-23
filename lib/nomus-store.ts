@@ -43,3 +43,9 @@ export async function readNomusClient(id:number){
  const fetcher:typeof fetch=fetch;
  return nomusGet("clientes/"+id,nomusKey(),fetcher);
 }
+
+export async function readNomusProduct(id:number){
+ if(!Number.isInteger(id)||id<1)throw Error("Produto inválido.");
+ const fetcher:typeof fetch=fetch;
+ return nomusGet("produtos/"+id,nomusKey(),fetcher);
+}
