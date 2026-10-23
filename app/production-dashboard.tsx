@@ -72,7 +72,7 @@ const columns:{id:Stage;title:string;color:string;status:string}[]=[
 {id:"ready",title:"Pronto para envio",color:"#468477",status:"Pronto para envio"},
 {id:"sent",title:"Enviados",color:"#447253",status:"Atendido totalmente e enviado"}];
 const companies=["Maya","Sacred Connection","Four visions","Katukina","Haux Haux","Nayaku"];
-const labels=["","Urgente","Atenção","Normal","Aguardando documentação"];
+const labels=["","Urgente","Atenção","Normal","Aguardando documentação","Documentação concluída"];
 const fresh=():Detail=>({responsavel:"",nota:"",situacao:"A programar",etiqueta:"",conferidas:[],expedicao:[],vistoNomus:""});
 function stage(board:Board,id:string):Stage{if(!board.sequence.includes(id))return "backlog";const s=board.details[id]?.situacao;return s==="Atendido totalmente e enviado"?"sent":s==="Pronto para envio"?"ready":s==="Pronto para envio e documentação"?"shipping":s==="Em acompanhamento"?"doing":s==="Bloqueado"?"blocked":s==="Concluído"?"done":"queue"}
 const date=(v:string)=>new Date(v).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"});

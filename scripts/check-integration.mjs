@@ -21,5 +21,8 @@ assert.equal((await context.exports.PUT(request({board,revision}))).status,200);
 assert.equal((await context.exports.PUT(request({board,revision:originalRevision}))).status,409);assert.equal(updates,1);
 assert.equal((await context.exports.PUT(request({board:{sequence:["fake"],details:{}},revision}))).status,400);
 const read=await(await context.exports.GET()).json();assert.equal(read.revision,revision);assert.equal(read.board.details.STOCK.nota,"Persistência isolada");assert.equal(read.board.details.STOCK.etiqueta,"Aguardando documentação");
+const completed=structuredClone(board);completed.details.STOCK.etiqueta="Documentação concluída";
+assert.equal((await context.exports.PUT(request({board:completed,revision}))).status,200);
+assert.equal((await(await context.exports.GET()).json()).board.details.STOCK.etiqueta,"Documentação concluída");
 testEnv.DB=null;assert.equal((await context.exports.GET()).status,503);assert.equal((await context.exports.PUT(request({board,revision}))).status,503);
 console.log("OK integração isolada: autenticação, origem, JSON inválido, IDs, salvamento/recarga, conflito entre sessões e banco indisponível. Nenhum acesso ao banco operacional.");

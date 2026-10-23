@@ -40,7 +40,7 @@ export default function PackingClients({owner,groups,board,disabled,blockedReaso
  if(!confirm(warning))return;
  try{onApply(ids,holder,patch);pendingBeforeUpdate.current=false;setApplyClient(false);setReplace(false);setError("")}catch(e){setError(e instanceof Error?e.message:"Não foi possível reunir os pedidos.")}
  }
- return <details className="client-document-section" open><summary><Users size={17}/>Pedidos e destinatário do packing list</summary>
+ return <section className="client-document-section pl-client-section"><h3><Users size={17}/>Pedidos e destinatário do packing list</h3>
  {current&&<p className="group-notice"><strong>{current.titularNome}</strong> · Destinatário confirmado. Você pode acrescentar pedidos sem consultar o cadastro novamente.</p>}
  <div className="pl-client-intro"><strong>1. Pedidos neste envio</strong><ContextHelp label="Reunir pedidos">Selecione somente pedidos que viajarão juntos. As caixas já cadastradas serão aproveitadas. Pedidos confirmados são mantidos para preservar seus volumes; cada pedido mantém sua etapa e prioridade.</ContextHelp></div><div className="pl-selected-orders">{selected.map(g=><span key={g.id}>{g.codigo}</span>)}</div><details className="pl-add-orders" open={selectionPending}><summary>{selectionPending?"Revisar seleção de pedidos":"Adicionar outros pedidos ao envio"}</summary>
  <fieldset disabled={busy||disabled} className="client-fields"><label>Selecione os pedidos para reunir<input aria-label="Buscar pedidos para agrupar" placeholder="Buscar pedido ou cliente…" value={search} onChange={e=>setSearch(e.target.value)}/></label>
@@ -61,5 +61,5 @@ export default function PackingClients({owner,groups,board,disabled,blockedReaso
  <div className="flow-actions"><button className="button client-apply" type="button" disabled={!!applyBlock} aria-describedby={applyBlock?applyHelpId:undefined} onClick={apply}>{current&&!applyClient?"Confirmar pedidos e manter destinatário":ids.length>1?"Confirmar titular e reunir pedidos":"Confirmar titular e preencher documento"}</button>{pending&&<button className="button" type="button" disabled={busy} onClick={reset}>Descartar seleção não confirmada</button>}</div>
 
  {error&&<p className="dialog-error" role="alert">{error}</p>}
- </details>
+ </section>
 }

@@ -170,7 +170,7 @@ export const tutorials = [
     "steps": [
       {
         "title": "Defina a prioridade",
-        "text": "O supervisor organiza os cartões pelas setas ou arrastando, seleciona responsáveis e registra orientações. Etiquetas Urgente, Atenção e Normal sinalizam a necessidade, sem mudar a ordem automaticamente. Use Aguardando documentação na aba Geral para identificar pedidos que dependem dos documentos. A etiqueta aparece no cartão e pode ser selecionada no filtro Etiqueta do quadro.",
+        "text": "O supervisor organiza os cartões pelas setas ou arrastando, seleciona responsáveis e registra orientações. Etiquetas Urgente, Atenção e Normal sinalizam a necessidade, sem mudar a ordem automaticamente. Use Aguardando documentação na aba Geral para identificar pedidos que dependem dos documentos. Depois de preparar os documentos, troque para Documentação concluída. As duas etiquetas aparecem no cartão e podem ser selecionadas no filtro Etiqueta do quadro.",
         "short": "Organize os cartões na ordem em que a equipe deve trabalhar."
       },
       {
