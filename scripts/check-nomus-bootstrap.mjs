@@ -105,3 +105,13 @@ const confirmedPaths=[];
 const reconfirmed=await bootstrapNomus(rejected,'fixture',{verifyOrders:true,now:()=>serverTime,fetcher:async url=>{confirmedPaths.push(url);return Response.json({id:9,idEmpresa:1,codigoPedido:'PV OMITTED',idPessoaCliente:1,itensPedido:[{idProduto:1,quantidade:'1',status:4}]})}});
 assert(confirmedPaths[0].endsWith('pedidos/9'));assert(!reconfirmed.orderReviewFailures[9]);assert.equal(reconfirmed.orders[9].checkedAt,serverTime);
 console.log('OK omitted order: direct verification, explicit unconfirmed status, preserved data and recovery without repeating completed pagination.');
+
+// A completed legacy capture without product classification must hydrate, not return early.
+const legacyCatalog={...initialSync(empty),ordersComplete:true,opsComplete:true,partial:false,bootstrapCompletedAt:serverTime};
+legacyCatalog.orders[1]={code:'RESALE',companyId:1,clientId:1,createdDate:'2026-10-19',items:[{productId:7,quantity:'2',status:2}]};
+legacyCatalog.clients[1]='Fixture';legacyCatalog.products[7]={name:'Kuripe',unit:'UNID'};
+const classificationPaths=[];
+const classifiedCatalog=await bootstrapNomus(legacyCatalog,'fixture',{now:()=>serverTime,fetcher:async url=>{classificationPaths.push(url.split('/rest/')[1]);return Response.json({descricao:'Kuripe',siglaUnidadeMedida:'UNID',nomeTipoProduto:'Mercadoria para revenda',nomeGrupoProduto:'Aplicadores'})}});
+assert.deepEqual(classificationPaths,['produtos/7']);assert.equal(classifiedCatalog.products[7].type,'Mercadoria para revenda');
+await bootstrapNomus(classifiedCatalog,'fixture',{fetcher:()=>{throw Error('Already classified')}});
+console.log('OK completed legacy catalog hydrates missing classifications once without rescanning orders or OPs.');

@@ -151,3 +151,5 @@ O bloco de informações complementares fica aberto antes do destinatário, com 
 Validação: `node scripts/check-packing-excel.mjs`, `node scripts/check-packing.mjs`, `npm run check` e `npm run build`.
 
 O packing list apresenta países, Incoterm, pagamento e campos de transporte em blocos separados. Dimensões, pesos líquido/bruto e unidades ficam junto de cada caixa. A coluna duplicada de quantidade da OP foi retirada; permanece a quantidade de unidades embaladas. Os valores comerciais e de destino vêm do envio, sem fixar um país ou condição para todos os documentos.
+
+Pedidos totalmente liberados e sem OP, cujos itens estejam classificados no Nomus como `Mercadoria para revenda` ou `Produtos para revenda`, entram em **Preparar envio**. A consulta prioriza a classificação dos pedidos liberados sem OP, começando pelos mais recentes; o cache antigo incompleto é atualizado mesmo quando a carga inicial já consta como concluída. Pedidos mistos seguem o fluxo de produção.

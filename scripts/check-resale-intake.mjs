@@ -17,3 +17,23 @@ let called;state=await syncStep(state,"fixture",{fetcher:async url=>{called=url;
 let view=publicSync(state,true);assert(autoResaleShipping(view.snapshot.grupos[0]));assert.equal(view.snapshot.pedidos[0].itens[0].grupoProduto,"Aplicadores");
 state=await syncStep({...state,nextAt:0,turn:1},"fixture",{fetcher:async()=>Response.json([{id:8,idEmpresa:1,nome:"OP8",idProduto:7,descricaoProduto:"Kuripe",unidadeMedida:"UNID",qtde:"2",itensPedido:[]}])});assert.equal(state.products[7].type,raw.nomeTipoProduto);
 console.log("OK resale intake: confirmed classification, whole release, mixed/unknown/OP guards, preserved work, idempotency, stock products and legacy hydration.");
+
+// A legacy catalog must classify recent released orders before older linked production.
+const legacy=initialSync({grupos:[{id:"OLD",codigo:"OLD",ordens:[{id:"OP OLD"}]},{id:"NEW",codigo:"NEW",ordens:[]}],semVinculo:[]});
+legacy.ordersComplete=true;legacy.opsComplete=true;
+legacy.orders={1:{code:"OLD",companyId:1,createdDate:"2026-10-01",clientId:1,items:[{productId:8,quantity:"1",status:2}]},2:{code:"NEW",companyId:1,createdDate:"2026-10-27",clientId:2,items:[{productId:7,quantity:"2",status:2}]}};
+legacy.products={7:{name:"Kuripe",unit:"UNID"},8:{name:"Manufactured",unit:"UNID"}};
+for(const turn of [2,3,4]){
+ let calls=0;const classified=await syncStep({...legacy,turn},"fixture",{fetcher:async url=>{calls++;assert(url.endsWith("produtos/7"));return Response.json(raw)}});
+ assert.equal(calls,1);const order=publicSync(classified,true).snapshot.grupos.find(g=>g.id==="NEW");
+ assert(autoResaleShipping(order));assert.equal(receiveOrders({sequence:[],details:{}},[order]).details.NEW.situacao,"Conclu\u00eddo");
+}
+let recentPath;
+await syncStep({...legacy,turn:3},"fixture",{refreshRecentOrders:true,fetcher:async url=>{recentPath=url;return Response.json([])}});
+assert(recentPath.endsWith("pedidos?pagina=1"));
+console.log("OK released resale classification priority across detail/catalog turns, one GET and recent order priority preserved.");
+
+const alternateType={...sale,itens:[item,{...item,produto:"Kuripe alternativo",tipoProduto:"Produtos para revenda"}]};
+assert(autoResaleShipping(alternateType));assert.equal(receiveOrders(board,[alternateType]).details.R1.situacao,"Conclu\u00eddo");
+assert(!autoResaleShipping({...sale,itens:[item,{...item,tipoProduto:"Materia Prima / Revenda"}]}));
+console.log("OK both Nomus resale types route together; manufacturing/raw material classifications remain outside automatic resale.");
