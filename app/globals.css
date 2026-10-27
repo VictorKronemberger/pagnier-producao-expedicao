@@ -1077,3 +1077,16 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 .product-preview>div+div{margin-top:11px}
 .product-preview .product-identity>small{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .packed-description .product-identity{margin-bottom:7px}
+
+/* Suggestions stay in the form flow so boxes and small screens never clip them. */
+.small-picker-search.product-picker-search{margin:0 0 7px}
+.product-suggestions{border:1px solid light-dark(#d7e3da,var(--night-border));border-radius:9px;background:light-dark(#fff,var(--night-surface));overflow:hidden}
+.product-suggestions-heading{padding:9px 12px;font-size:11px;font-weight:600;color:light-dark(#718076,var(--night-muted));border-bottom:1px solid light-dark(#e9efeb,var(--night-border))}
+.product-suggestions-list{max-height:270px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.product-suggestions-list>.product-suggestion{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:11px 12px;border:0;border-bottom:1px solid light-dark(#edf1ee,var(--night-border));border-radius:0;background:transparent;text-align:left;white-space:normal}
+.product-suggestions-list>.product-suggestion:last-child{border-bottom:0}
+.product-suggestions-list>.product-suggestion.is-active,.product-suggestions-list>.product-suggestion:hover{background:light-dark(#f0f6f2,var(--night-raised))}
+.product-suggestion>span{min-width:0}.product-suggestion>svg{flex-shrink:0;color:light-dark(#2b6b48,var(--night-green))}
+.product-suggestion-op{display:block;margin-top:5px;color:light-dark(#86938b,var(--night-muted));font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.product-suggestions-empty{padding:14px 12px;font-size:12px;line-height:1.5;color:light-dark(#738178,var(--night-muted))}
+.product-picker-status{display:block;margin-top:5px;color:light-dark(#738178,var(--night-muted));font-size:11px}
