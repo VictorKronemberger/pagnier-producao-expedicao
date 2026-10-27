@@ -137,3 +137,5 @@ O filtro de criação também se aplica a pedidos aguardando liberação: usa a 
 Pedidos novos aparecem em **Aguardando libera??o** enquanto n?o houver OP identificada, inclusive quando o pedido j? estiver liberado comercialmente no Nomus ou o v?nculo ainda estiver em consulta. Quando a captura identifica a OP e a libera??o comercial permite produ??o, o pedido entra automaticamente em **Na fila**. Pedidos encerrados sem OP n?o entram nessa espera; atendimentos por estoque e etapas j? iniciadas s?o preservados.
 
 Valida??o: `node scripts/check-order-release.mjs`, incluindo a chegada da OP, preserva??o de notas e repeti??o da captura.
+
+A captura prioriza a primeira página de pedidos e de OPs a cada minuto, sem reiniciar a paginação histórica. Os vínculos novos entram mesmo durante a leitura inicial de pedidos. Cada consulta continua respeitando o intervalo compartilhado de 22 segundos, o bloqueio de concorrência e a espera após falhas. O minuto é um intervalo de prioridade, não garantia de latência: depende do painel ativo, da resposta do ERP e da posição do registro nas páginas.

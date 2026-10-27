@@ -38,7 +38,7 @@ const mismatched=structuredClone(legacy);mismatched.items[0].quantity="5";assert
 const reordered=structuredClone(legacy);reordered.items.reverse();assert.equal(restoreReleaseItems(reordered),reordered.items);
 const recentPaths=[];const time="2026-10-15T17:00:00.000Z";
 let recent=await syncStep({...state,nextAt:0,pages:{...state.pages,orders:22}},"dummy",{refreshRecentOrders:true,now:time,fetcher:async(url,opts)=>{recentPaths.push(url);return fetcher(url,opts)}});
-assert(recentPaths[0].endsWith("pedidos?pagina=1"));assert.equal(recent.pages.orders,22);assert.equal(recent.recentOrdersNextAt,Date.parse(time)+300000);
+assert(recentPaths[0].endsWith("pedidos?pagina=1"));assert.equal(recent.pages.orders,22);assert.equal(recent.recentOrdersNextAt,Date.parse(time)+60000);
 let requests=0;await syncStep(recent,"dummy",{refreshRecentOrders:true,now:time,fetcher:async()=>{requests++;return Response.json([])}});assert.equal(requests,0);
 console.log("OK recuperação: fatos por item consistentes, conflitos preservados, atendimento parcial destacado e pedidos recentes consultados sem reiniciar paginação ou ignorar intervalo.");
 
@@ -81,3 +81,24 @@ assert(!awaitsRelease(group("closed-no-op","closed",false)));
 assert(!awaitsRelease(noOP,{atendimentoEstoque:true}));
 assert(!awaitsRelease(noOP,{situacao:"Em acompanhamento"}));
 console.log("OK backlog: new sales without OP stay visible; linked OP enters queue; closed and started orders preserved.");
+
+// Fresh OPs must attach without waiting for the historical OP cursor to wrap.
+const freshSeed=structuredClone(state);freshSeed.nextAt=0;freshSeed.recentOrdersNextAt=Date.parse(time)+300000;
+freshSeed.pages.ops=9;freshSeed.cycleCount=400;freshSeed.ordersComplete=false;
+const freshPaths=[];
+const fresh=await syncStep(freshSeed,"dummy",{now:time,refreshRecentOrders:true,requestedProduction:["OP999"],fetcher:async(url)=>{freshPaths.push(url);return Response.json([{id:9000,nome:"OP9000",idEmpresa:1,status:"Liberada",dataHoraCriacao:"15/10/2026",descricaoProduto:"QA",qtde:"4",unidadeMedida:"UNID",itensPedido:[{idPedido:1,nomeCliente:"QA"}]}])}});
+assert(freshPaths[0].includes("ordens?pagina=1&query="));assert.equal(fresh.pages.ops,9);assert.equal(fresh.cycleCount,400);
+assert.equal(fresh.recentOpsNextAt,Date.parse(time)+60000);
+assert(publicSync(fresh,true).snapshot.grupos.find(g=>g.id==="PD QA").ordens.some(o=>o.id==="OP9000"));
+assert(freshPaths.length===1);
+const failedOP=await syncStep(freshSeed,"dummy",{now:time,refreshRecentOrders:true,fetcher:async()=>new Response("",{status:503})});
+assert.deepEqual(failedOP.snapshot,freshSeed.snapshot);assert.equal(failedOP.pages.ops,9);assert(failedOP.retryAt);
+console.log("OK recent OPs: priority over history, links attached, cursor preserved, single GET and failure preservation.");
+
+const cyclePaths=[];let rapid=structuredClone(freshSeed);rapid.recentOrdersNextAt=0;rapid.recentOpsNextAt=0;rapid.pages.orders=22;
+for(let i=0;i<8;i++)rapid=await syncStep(rapid,"dummy",{now:new Date(Date.parse(time)+i*22000).toISOString(),refreshRecentOrders:true,fetcher:async(url)=>{cyclePaths.push(url);return Response.json([])}});
+assert(cyclePaths.filter(url=>url.endsWith("pedidos?pagina=1")).length>=2);
+assert(cyclePaths.filter(url=>url.includes("ordens?pagina=1&query=")).length>=2);
+assert(cyclePaths.some(url=>url.includes("pagina=22")));
+assert(cyclePaths.length===8);
+console.log("OK fast sync: both recent feeds refreshed repeatedly, historical progress maintained, one GET per interval.");
