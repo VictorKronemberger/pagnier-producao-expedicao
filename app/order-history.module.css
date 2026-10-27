@@ -1,0 +1,11 @@
+.history{margin:18px 0;border-top:1px solid light-dark(#dce6df,#3b5144);padding-top:12px}
+.history>summary{display:flex;align-items:center;gap:9px;cursor:pointer;min-height:44px;font-size:14px;font-weight:600;color:light-dark(#325b43,#c6dfcf)}
+.history>summary::after{content:"+";margin-left:auto;font-size:19px}.history[open]>summary::after{content:"−"}
+.content{padding:6px 0 12px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px}.toolbar p,.hint{font-size:12px;line-height:1.6;color:light-dark(#6d7c72,#a8baad)}
+.toolbar button{display:flex;align-items:center;gap:6px;min-height:40px}.pending,.empty,.error{font-size:13px;line-height:1.6;padding:12px;border-radius:8px;background:light-dark(#f3f6f2,#24352b)}.error{color:light-dark(#923a2c,#ffb9a8)}
+.timeline{list-style:none;margin:12px 0;padding:0}.timeline>li{padding:13px 0 13px 18px;border-left:2px solid light-dark(#d4e4d8,#43614c);position:relative}
+.timeline>li::before{content:"";width:8px;height:8px;background:#4c8863;border-radius:50%;position:absolute;left:-5px;top:18px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;font-size:12px}.meta time{color:light-dark(#6d7c72,#a8baad)}
+.event>summary{cursor:pointer;min-height:40px;font-size:13px;line-height:1.5;padding-top:10px}.event>summary small{margin-left:12px;color:light-dark(#6d7c72,#a8baad)}
+.changes{list-style:none;padding:0;margin:12px 0}.changes>li{border:1px solid light-dark(#dce6df,#3b5144);border-radius:8px;padding:13px;margin-bottom:8px;overflow-wrap:anywhere}.changes>li>strong{font-size:12px}.changes dl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 0}.changes dt{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:light-dark(#738277,#afc2b3)}.changes dd{white-space:pre-wrap;margin:5px 0 0;font-size:13px;line-height:1.5}
+@media(max-width:560px){.changes dl{grid-template-columns:1fr}.meta{flex-direction:column;gap:4px}.toolbar{align-items:flex-start}.event>summary small{display:block;margin:4px 0}.timeline>li{padding-left:12px}}

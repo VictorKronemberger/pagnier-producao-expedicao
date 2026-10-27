@@ -1,4 +1,9 @@
 export const manual = [
+{
+  "category": "production",
+  "title": "Como consultar o histórico do pedido",
+  "text": "Abra o cartão e expanda Histórico do pedido. Os registros mostram funcionário, data e hora, com os mais recentes primeiro. Expanda cada registro para comparar Antes e Depois. O histórico inclui alterações salvas de etapas, responsáveis, orientações, caixas e bags, produtos, pesos, medidas, conferências, documentos, despacho e arquivamento. Em envios agrupados, alterações compartilhadas aparecem nos pedidos envolvidos; orientações individuais ficam no próprio pedido. O funcionário registrado é o da sessão de acesso. Alterações ainda não salvas e tentativas que falharam não entram. O registro começa nesta atualização, sem reconstruir mudanças antigas. Atualizações do Nomus continuam em Novidades neste pedido."
+},
   {
     "category": "production",
     "title": "Como arquivar um pedido antigo sem concluir as etapas",

@@ -1,3 +1,4 @@
+import {enableHistoryBatch} from "./history-mock-db.mjs";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
@@ -24,7 +25,8 @@ const db={prepare(sql){return {bind(...args){return {async first(){
  if(sql.startsWith("UPDATE production_board")){assert(sql.includes("AND revision=?"));if(race){revision++;race=false}if(args[4]!==revision)return null;stored=JSON.parse(args[0]);revision++;updates++;return {revision}}
  throw Error("Unexpected database request");
  }}}}}};
-const imports={"../../../lib/order-archive.mjs":await import("../lib/order-archive.mjs"),"../../../lib/order-release.mjs":await import("../lib/order-release.mjs"),"../../../lib/stock-orders.mjs":await import("../lib/stock-orders.mjs"),"../../../lib/dispatch.mjs":await import("../lib/dispatch.mjs"),
+enableHistoryBatch(db);
+const imports={"../../../lib/order-history-store.mjs":await import("../lib/order-history-store.mjs"),"../../../lib/order-archive.mjs":await import("../lib/order-archive.mjs"),"../../../lib/order-release.mjs":await import("../lib/order-release.mjs"),"../../../lib/stock-orders.mjs":await import("../lib/stock-orders.mjs"),"../../../lib/dispatch.mjs":await import("../lib/dispatch.mjs"),
  "../../../lib/invoice-delete.mjs":await import("../lib/invoice-delete.mjs"),
  "../../../lib/box-models.mjs":await import("../lib/box-models.mjs"),
  "../../../lib/packing-delete.mjs":deletion,

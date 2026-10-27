@@ -1,5 +1,5 @@
 export type ManualVisual = {image:string; width:number; height:number; title:string; text:string; target:[number,number,number,number]};
-const sizes:Record<string,[number,number]>={"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
+const sizes:Record<string,[number,number]>={"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
 const scenes:Record<string,Array<[string,string,string,[number,number,number,number]]>> = {
   "overview": [
     [
@@ -55,6 +55,17 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
         80,
         32,
         46
+      ]
+    ],
+    [
+      "historico",
+      "Consulte quem alterou e o que mudou",
+      "Abra Histórico do pedido e expanda um registro para comparar Antes e Depois. Somente alterações salvas a partir desta atualização aparecem aqui.",
+      [
+        154,
+        374,
+        898,
+        290
       ]
     ]
   ],

@@ -1,3 +1,4 @@
+import {enableHistoryBatch} from "./history-mock-db.mjs";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
@@ -9,7 +10,8 @@ let stored={sequence:[],details:{}},revision=4,updates=0;
 const sale={id:"STOCK",codigo:"STOCK",cliente:"Teste",criacao:"2026-10-14",ordens:[],vinculo:"none",itens:[{produto:"Tepi",quantidade:"2",unidade:"UN"}]};
 const snapshot={grupos:[],pedidos:[sale]};
 const db={prepare(sql){return {bind(...args){return {async first(){if(sql.startsWith("SELECT"))return {payload:JSON.stringify(stored),revision};if(sql.startsWith("UPDATE")){if(args[4]!==revision)return null;stored=JSON.parse(args[0]);revision++;updates++;return {revision}}throw Error("Unexpected SQL")}}}}}};
-const imports={"../../../lib/order-archive.mjs":await import("../lib/order-archive.mjs"),"../../../lib/server-env":{env:{DB:db}},"../../employee-auth":{getPanelUser:async()=>({displayName:"Simulação"})},"../../../lib/order-visibility.mjs":{visibleOrderState:s=>s},"../../../lib/nomus-sync.mjs":{publicSync:s=>({snapshot:s.snapshot})},"../../../lib/nomus-store":{readNomus:async()=>({state:{snapshot,hiddenOrderCodes:{}}})}};
+enableHistoryBatch(db);
+const imports={"../../../lib/order-history-store.mjs":await import("../lib/order-history-store.mjs"),"../../../lib/order-archive.mjs":await import("../lib/order-archive.mjs"),"../../../lib/server-env":{env:{DB:db}},"../../employee-auth":{getPanelUser:async()=>({displayName:"Simulação"})},"../../../lib/order-visibility.mjs":{visibleOrderState:s=>s},"../../../lib/nomus-sync.mjs":{publicSync:s=>({snapshot:s.snapshot})},"../../../lib/nomus-store":{readNomus:async()=>({state:{snapshot,hiddenOrderCodes:{}}})}};
 for(const name of ["order-release","stock-orders","dispatch","packing-delete","invoice-delete","box-models","invoice","shipment-groups","company-scope","shipping"])imports["../../../lib/"+name+".mjs"]=await import("../lib/"+name+".mjs");
 const context={Error,exports:{},require:name=>{assert(name in imports,name);return imports[name]},Response,Request,TextEncoder,URL};vm.runInNewContext(ts.transpileModule(readFileSync("app/api/board/route.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
 const put=board=>context.exports.PUT(new Request("http://site.test/api/board",{method:"PUT",headers:{origin:"http://site.test"},body:JSON.stringify({board,revision})}));

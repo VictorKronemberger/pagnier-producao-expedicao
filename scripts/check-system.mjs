@@ -5,6 +5,8 @@ const unitTests=["check-resale-intake.mjs","check-delete-shipping-box.mjs","chec
  "check-allocation.mjs",
  "check-assembly-flow.mjs",
  "check-bags.mjs",
+ "check-order-history.mjs",
+ "check-order-history-api.mjs",
  "check-small-box-search.mjs",
  "check-assembly-modes.mjs",
  "check-box-models-api.mjs",

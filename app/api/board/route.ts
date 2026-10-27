@@ -1,3 +1,4 @@
+import {saveBoardWithHistory} from "../../../lib/order-history-store.mjs";
 import {changeArchive,archiveRestoreUnavailable} from "../../../lib/order-archive.mjs";
 import {assertReleaseTransitions} from "../../../lib/order-release.mjs";
 import {operationalGroups,stockEligibility} from "../../../lib/stock-orders.mjs";
@@ -69,11 +70,9 @@ export async function PUT(request:Request){
  details[id]={...(previous.details[id]?.arquivo?{arquivo:previous.details[id].arquivo}:{}),...(d.arquivado?{arquivado:true}:{}),...(d.atendimentoEstoque?{atendimentoEstoque:true}:{}),responsavel:d.responsavel.trim(),responsavelConferencia:responsavelConferencia.trim(),nota:d.nota.trim(),situacao:d.situacao,etiqueta,conferidas,expedicao,vistoNomus,empresa,envio};
  }
  try{assertDispatchTransitions(previous,{...board,details,invoices},groups)}catch(e){return json({error:e instanceof Error?e.message:"Conclua a conferência antes do envio."},400)}
- const payload=JSON.stringify(preserveExcludedNotes(previous,{sequence:board.sequence,details,invoices,boxModels},excludedCodes));const now=new Date().toISOString();
+ const next=preserveExcludedNotes(previous,{sequence:board.sequence,details,invoices,boxModels},excludedCodes);const now=new Date().toISOString();
  try{
- let result;
- if(revision===0)result=await env.DB.prepare("INSERT INTO production_board (id,payload,revision,updated_at,updated_by) VALUES (?,?,1,?,?) ON CONFLICT(id) DO NOTHING RETURNING revision").bind("main",payload,now,user.displayName).first();
- else result=await env.DB.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=?,updated_by=? WHERE id=? AND revision=? RETURNING revision").bind(payload,now,user.displayName,"main",revision).first();
+ const result=await saveBoardWithHistory(env.DB,previous,next,revision,user.displayName,now);
  if(!result)return json({error:"Outra sessão atualizou a fila. Suas alterações continuam na tela; anote-as e recarregue antes de salvar."},409);
  return json({revision:revision+1,updatedAt:now,updatedBy:user.displayName});
  }catch{return json({error:"Falha ao salvar. Suas alterações continuam na tela; recarregue as prioridades para conferir o resultado antes de tentar novamente."},503)}
@@ -102,7 +101,7 @@ export async function DELETE(request:Request){
  try{next=deleteDraftPacking(previous,data.owner)}catch(e){return json({error:e instanceof Error?e.message:"Não foi possível excluir este packing list."},400)}
  }
  const now=new Date().toISOString();
- const result=await env.DB.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=?,updated_by=? WHERE id=? AND revision=? RETURNING revision").bind(JSON.stringify(next),now,user.displayName,"main",data.revision).first();
+ const result=await saveBoardWithHistory(env.DB,previous,next,data.revision,user.displayName,now);
  if(!result)return json({error:"Outra sessão alterou o quadro. Recarregue antes de tentar excluir."},409);
  return json({board:scopeBoard(next,state.hiddenOrderCodes),revision:data.revision+1,updatedAt:now,updatedBy:user.displayName});
  }catch{return json({error:"Não foi possível confirmar a exclusão. Recarregue a lista para conferir antes de tentar novamente."},503)}
@@ -124,8 +123,7 @@ export async function POST(request:Request){
  if(!order)return json({error:input.archived===false&&visible.details[input.orderId]?.arquivado?archiveRestoreUnavailable:"Pedido indisponível ou fora do recorte permitido."},400);
  let next;const now=new Date().toISOString();
  try{next=changeArchive(visible,order,input,user.displayName,now)}catch(e){return json({error:e instanceof Error?e.message:"Arquivamento inválido."},400)}
- const payload=JSON.stringify(preserveExcludedNotes(previous,next,state.hiddenOrderCodes));
- const result=saved?await env.DB.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=?,updated_by=? WHERE id=? AND revision=? RETURNING revision").bind(payload,now,user.displayName,"main",input.revision).first():await env.DB.prepare("INSERT INTO production_board (id,payload,revision,updated_at,updated_by) VALUES (?,?,1,?,?) ON CONFLICT(id) DO NOTHING RETURNING revision").bind("main",payload,now,user.displayName).first();
+ const result=await saveBoardWithHistory(env.DB,previous,preserveExcludedNotes(previous,next,state.hiddenOrderCodes),input.revision,user.displayName,now);
  if(!result)return json({error:"Outra pessoa alterou o quadro. Confira os dados antes de confirmar."},409);
  return json({board:next,revision:input.revision+1,updatedAt:now,updatedBy:user.displayName});
  }catch{return json({error:"Não foi possível confirmar a operação. Recarregue o quadro para conferir antes de tentar novamente."},503)}

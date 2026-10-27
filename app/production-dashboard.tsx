@@ -1,5 +1,6 @@
 "use client";
 import ArchiveActions from "./archive-actions";
+import OrderHistory from "./order-history";
 import ArchiveHistory from "./archive-history";
 import archiveStyles from "./archive.module.css";
 import {isCancelledOP,cancelledProduction} from "../lib/op-status.mjs";
@@ -385,7 +386,7 @@ export default function Dashboard({employee,sessionActive,onSessionExpired,onSig
  </div>
  <div className="detail-panel" hidden={detailTab!=="shipping"}><OrderShippingSummary reviewed={boxReview.reviewed} onExpedition={()=>{setDetailTab("expedition");setAssemblyStep(shipment?.caixasEmMontagem?.length?"small":"outer");setExpeditionStep(shipment?.caixas.length||shipment?.caixasEmMontagem?.length?"boxes":"review")}} shipment={shipment} orderIds={shipment?.agrupamento?.pedidos??[active.id]} onPacking={()=>openPacking(active.id)} onInvoice={()=>openInvoice(active.id)}/></div>
  {detail.arquivado&&<p className={"archive-preserved "+archiveStyles.preserved}>Pedido arquivado · histórico preservado. <button className="text-action" onClick={()=>{setSelected(null);navigate("archived")}}>Ver Arquivados</button></p>}
- <ArchiveHistory record={detail.arquivo} archived={!!detail.arquivado}/>
+ <OrderHistory key={active.id} orderId={active.id} revision={data?.revision??0} pending={dirty||saving}/><ArchiveHistory record={detail.arquivo} archived={!!detail.arquivado}/>
  <div className="dialog-footer">{saveIndicator}<ArchiveActions restoreUnavailable={![...(data?.snapshot.grupos??[]),...(data?.snapshot.pedidos??[])].some(g=>g.id===active.id)} archived={!!detail.arquivado} disabled={loading||saving||dirty} onSelect={(archived,reason)=>archiveOrder(active.id,archived,reason)}/><button className="button" onClick={()=>setSelected(null)}>Fechar</button></div>{error&&<div className="dialog-error" role="alert">{error}<button disabled={saving} onClick={()=>void saver.current?.retry()}>Tentar novamente</button></div>}
  </section></div>}
  {archiveTarget&&archiveOrderTarget&&<ArchiveDialog restoreUnavailable={![...(data?.snapshot.grupos??[]),...(data?.snapshot.pedidos??[])].some(g=>g.id===archiveTarget.id)} initialReason={archiveTarget.reason} key={archiveTarget.id+String(archiveTarget.restoring)} order={archiveOrderTarget} restoring={archiveTarget.restoring} onClose={()=>setArchiveTarget(null)} onConfirm={confirmArchive}/>}

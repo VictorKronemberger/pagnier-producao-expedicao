@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"25",updatedAt:"27/10/2026"};
+export const manualEdition = {revision:"26",updatedAt:"27/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -70,6 +70,11 @@ export const tutorials = [
         "title": "Confirme o salvamento",
         "text": "Aguarde o sinal de confirmação de salvamento antes de sair, exportar ou excluir. Passe o mouse no sinal para ler Salvo. Aguardando gravação e Salvando indicam que ainda há trabalho pendente. Não salvo ou Sem sincronização exige conferir o aviso antes de continuar.",
         "short": "Espere a confirmação de salvamento. Aguardando gravação, Salvando e falhas continuam visíveis."
+      },
+      {
+        "title": "Consulte o histórico do pedido",
+        "short": "Abra Histórico do pedido para ver quem alterou, quando e os valores antes e depois.",
+        "text": "O histórico fica recolhido no cartão. Abra um registro para comparar Antes e Depois; Carregar anteriores mostra eventos mais antigos. Só entram alterações salvas no painel a partir desta atualização. O nome vem do funcionário conectado. Alterações do Nomus continuam em Novidades neste pedido."
       },
       {
         "title": "Saiba de onde vêm os dados",

@@ -163,3 +163,11 @@ Revisão de 27/10/2026: 51/51 verificações automatizadas aprovadas, build Next
 O manual revisão 25 apresenta os 13 capítulos com explicações sobre as imagens, destaques numerados e ampliação. Procedimentos completos, responsabilidades e exemplos continuam recolhidos. As capturas novas usam dados fictícios.
 
 Montar caixas oferece Com bags para artesanatos, além de caixas menores e montagem direta. Bags mantêm tipo próprio ao salvar, copiar, distribuir nas Caixas 40 e retirar para ajustes. Modo misto permite combinar embalagens sem alterar o tipo das existentes. A montagem direta automática para os tamanhos já definidos permanece. A conferência física continua obrigatória.
+
+### Histórico automático dos pedidos
+
+O cartão apresenta Histórico do pedido recolhido por padrão. A equipe pode consultar funcionário, data e valores antes/depois das alterações confirmadas de etapas, orientações, responsáveis, caixas/bags, produtos, pesos, documentos e despacho. Envios compartilhados propagam apenas mudanças compartilhadas aos pedidos envolvidos. O histórico começa nesta versão, sem reconstrução retroativa; mudanças do ERP permanecem nas novidades da consulta.
+
+O servidor usa o funcionário autenticado e grava o evento na mesma transação do quadro, com controle de revisão e marca única de gravação. Falhas e conflitos não geram eventos indevidos. Os eventos ficam em registros separados da tabela production_board, sem migração de esquema, com paginação e acesso limitado ao escopo atual dos pedidos. O painel não oferece alteração ou exclusão desses registros. Nenhuma gravação é realizada no Nomus.
+
+Manual revisão 26 inclui a orientação sobre a imagem do histórico, com dados fictícios. Validação: 54/54 verificações automatizadas, incluindo PostgreSQL e SQLite/Turso isolados; build Next.js e teste de navegador do histórico em desktop/celular, com erro/repetição, paginação e atualização após salvar.
