@@ -21,7 +21,7 @@ try{
  // Use database time: the operator computer can be minutes behind Vercel.
  const time=await db.prepare("SELECT CAST(strftime('%s','now') AS INTEGER)*1000 AS clock").first();
  serverEpoch=Number(time.clock);startedAt=performance.now();
- for(let attempt=0;attempt<40;attempt++){
+ for(let attempt=0;attempt<75;attempt++){
   const row=await db.prepare('SELECT payload,revision FROM production_board WHERE id=?').bind('nomus').first();
   state=row?JSON.parse(row.payload):initialSync(JSON.parse(readFileSync(new URL('../lib/production-snapshot.json',import.meta.url),'utf8')));revision=row?.revision??0;
   if(clock()<(state.leaseUntil??0)||clock()<(state.retryAt??0)){await pause(2000);continue}
@@ -34,7 +34,7 @@ try{
  }
  if(!owned)throw Error('Another capture is active.');
  console.log('Capture started. ERP access: GET only. Shared lease acquired.');
- state=await bootstrapNomus(state,process.env.NOMUS_API_KEY,{refresh:process.argv.includes('--refresh'),includeProduction:process.argv.includes('--production'),verifyOrders:process.argv.includes('--verify-orders'),now:timestamp,pause:()=>pause(3000),checkpoint:async(next,progress)=>{
+ state=await bootstrapNomus(state,process.env.NOMUS_API_KEY,{refresh:process.argv.includes('--refresh'),refreshProductCatalog:process.argv.includes('--skus'),includeProduction:process.argv.includes('--production'),verifyOrders:process.argv.includes('--verify-orders'),now:timestamp,pause:()=>pause(3000),checkpoint:async(next,progress)=>{
   await persist(next);
   console.log(JSON.stringify({...progress,orders:Object.keys(next.orders??{}).length,ops:Object.keys(next.ops??{}).length,pendingOps:Object.keys(next.pendingOps??{}).length,revision}));
  }});

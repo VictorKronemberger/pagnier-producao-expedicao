@@ -49,7 +49,7 @@ export const tutorials = [
       {
         "title": "Identifique pelo SKU",
         "short": "Use o SKU em destaque para identificar o produto; o nome aparece como apoio.",
-        "text": "O SKU é capturado do cadastro do produto no Nomus e acompanha pedidos, OPs, caixas, bags e documentos. As buscas aceitam o código completo. SKU não informado indica que ainda não há código disponível. Campos vazios dos registros existentes são completados quando a origem é confirmada; códigos preenchidos manualmente são preservados."
+        "text": "O SKU é capturado do cadastro do produto no Nomus e acompanha pedidos, OPs, caixas, bags e documentos. As buscas aceitam o código completo. Enquanto um código não está disponível, o produto é identificado pelo nome. Campos vazios dos registros existentes são completados quando a origem é confirmada; códigos preenchidos manualmente são preservados."
       },
       {
         "title": "Entenda o quadro de produção",

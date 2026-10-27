@@ -1,1 +1,1 @@
-export default function ProductIdentity({sku,name}:{sku?:string;name?:string}){return <span className="product-identity"><strong>{sku?.trim()||"SKU não informado"}</strong><small>{name||"Produto aguardando consulta"}</small></span>}
+export default function ProductIdentity({sku,name}:{sku?:string;name?:string}){const code=sku?.trim();return <span className="product-identity"><strong>{code||name||"Produto"}</strong>{code&&name&&<small>{name}</small>}</span>}

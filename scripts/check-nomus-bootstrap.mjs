@@ -11,10 +11,11 @@ const state=await bootstrapNomus(initialSync(empty),'fixture',{checkpoint:async(
   {id:3,idEmpresa:1,codigoPedido:'OLD',idPessoaCliente:11,dataCriacao:'01/08/2026',itensPedido:[]}
  ]);
  if(path===opsPath(1))return Response.json([{id:20,nome:'OP20',idEmpresa:1,idProduto:7,descricaoProduto:'Produto teste',unidadeMedida:'UNID',qtde:2,status:'Cancelada',dataHoraCriacao:'15/10/2026',itensPedido:[{idPedido:1,nomeCliente:'Cliente teste'}]}]);
+ if(path==='produtos/7')return Response.json({codigo:'0007',descricao:'Produto teste',siglaUnidadeMedida:'UNID'});
  if(path==='produtos/8')return Response.json({descricao:'Segundo produto',siglaUnidadeMedida:'KG'});
  throw Error('Unexpected request: '+path);
 }});
-const view=publicSync(state,true);assert.equal(view.partial,false);assert.equal(view.snapshot.pedidos.length,1);assert.equal(view.pedidosIdentificados,1);assert.equal(view.snapshot.grupos[0].ordens[0].situacaoNomus,'Cancelada');assert(!paths.some(path=>path.includes('clientes/11')));assert.equal(paths.length,3);assert.equal(checkpoints,4);
+const view=publicSync(state,true);assert.equal(view.partial,false);assert.equal(view.snapshot.pedidos.length,1);assert.equal(view.pedidosIdentificados,1);assert.equal(view.snapshot.grupos[0].ordens[0].situacaoNomus,'Cancelada');assert(!paths.some(path=>path.includes('clientes/11')));assert.equal(paths.length,4);assert.equal(checkpoints,5);assert.equal(view.snapshot.grupos[0].ordens[0].sku,'0007');
 let saved;await assert.rejects(()=>bootstrapNomus(initialSync(empty),'fixture',{checkpoint:async state=>saved=state,fetcher:async()=>new Response('',{status:429})}));assert(saved.retryAt);assert.equal(saved.ordersComplete,false);
 console.log('OK bootstrap: read-only ERP, full pagination completion, visible-only hydration, company/date scope, cancellations and checkpoint on throttling.');
 
@@ -115,3 +116,30 @@ const classifiedCatalog=await bootstrapNomus(legacyCatalog,'fixture',{now:()=>se
 assert.deepEqual(classificationPaths,['produtos/7']);assert.equal(classifiedCatalog.products[7].type,'Mercadoria para revenda');
 await bootstrapNomus(classifiedCatalog,'fixture',{fetcher:()=>{throw Error('Already classified')}});
 console.log('OK completed legacy catalog hydrates missing classifications once without rescanning orders or OPs.');
+
+// A completed cache must also hydrate product references from OPs without sale items.
+const opOnly=structuredClone(state);opOnly.orders[1].items=[];delete opOnly.products[7].sku;
+const opOnlyPaths=[];
+const opOnlyHydrated=await bootstrapNomus(opOnly,'fixture',{fetcher:async(url,options)=>{
+ assert.equal(options.method,'GET');opOnlyPaths.push(url.split('/rest/')[1]);
+ return Response.json({codigo:'0007',descricao:'Produto teste',siglaUnidadeMedida:'UNID'});
+}});
+assert.deepEqual(opOnlyPaths,['produtos/7']);
+assert.equal(publicSync(opOnlyHydrated,true).snapshot.grupos[0].ordens[0].sku,'0007');
+await bootstrapNomus(opOnlyHydrated,'fixture',{fetcher:()=>{throw Error('Unexpected duplicate product read')}});
+console.log('OK legacy OP-only SKU hydration preserves leading zeros and completed pagination.');
+
+// Bulk SKU capture checkpoints catalog pagination and resumes after rate limiting.
+let bulkSaved;const bulkPaths=[];
+await assert.rejects(()=>bootstrapNomus(state,'fixture',{refreshProductCatalog:true,now:()=>serverTime,checkpoint:async s=>bulkSaved=structuredClone(s),fetcher:async(url,options)=>{
+ assert.equal(options.method,'GET');const path=url.split('/rest/')[1];bulkPaths.push(path);
+ return path==='produtos?pagina=1'?Response.json(Array.from({length:50},(_,i)=>({id:i+1,codigo:'000'+(i+1),descricao:'Fixture '+i,siglaUnidadeMedida:'UNID'}))):new Response('',{status:429});
+}}));
+assert.deepEqual(bulkPaths,['produtos?pagina=1','produtos?pagina=2']);
+assert.equal(bulkSaved.skuCatalogPage,2);assert(bulkSaved.retryAt);
+assert.equal(bulkSaved.products[1].sku,'0001');
+const bulkResumePaths=[];
+const bulkDone=await bootstrapNomus(bulkSaved,'fixture',{refreshProductCatalog:true,now:()=>serverTime,fetcher:async url=>{bulkResumePaths.push(url.split('/rest/')[1]);return Response.json([])}});
+assert.deepEqual(bulkResumePaths,['produtos?pagina=2']);assert(!bulkDone.skuCatalogPage);assert(!bulkDone.retryAt);
+assert.deepEqual(bulkDone.orders,state.orders);
+console.log('OK bulk product SKUs: GET only, pagination, checkpoint, throttle recovery and unchanged orders.');

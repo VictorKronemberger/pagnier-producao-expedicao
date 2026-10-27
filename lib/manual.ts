@@ -2,7 +2,7 @@ export const manual = [
 {
   "category": "production",
   "title": "SKU: identificação principal do produto",
-  "text": "O código/SKU aparece em destaque e o nome como informação de apoio. Pesquise por SKU no quadro, nos pedidos, na conferência e na seleção de produtos. Ele acompanha caixas, bags, packing lists e invoices. No Excel do packing list, edite o código na coluna SKU da aba Produtos; a aba principal o mostra acima da descrição. Zeros iniciais são preservados. SKU não informado significa que o código ainda não está disponível; aguarde a consulta e confira o cadastro no Nomus. Campos já preenchidos manualmente são mantidos."
+  "text": "O código/SKU aparece em destaque e o nome como informação de apoio. Pesquise por SKU no quadro, nos pedidos, na conferência e na seleção de produtos. Ele acompanha caixas, bags, packing lists e invoices. No Excel do packing list, edite o código na coluna SKU da aba Produtos; a aba principal o mostra acima da descrição. Zeros iniciais são preservados. A captura completa os códigos dos produtos já cadastrados; enquanto um código não está disponível, o produto é identificado pelo nome. Campos já preenchidos manualmente são mantidos."
 },
 {
   "category": "production",
