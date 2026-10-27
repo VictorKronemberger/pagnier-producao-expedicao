@@ -28,3 +28,8 @@ let releaseBoard=structuredClone(stored);releaseBoard.sequence.push(releaseOrder
 response=await put(releaseBoard);assert.equal(response.status,400);assert.match((await response.json()).error,/liberação/);assert(!stored.sequence.includes(releaseOrder.id));
 releaseOrder.liberacao="partial";response=await put(releaseBoard);assert.equal(response.status,200,JSON.stringify(await response.json()));assert(stored.sequence.includes(releaseOrder.id));
 console.log("OK API liberação: pedido pendente bloqueado e liberação parcial com OP aceita.");
+
+const {receiveOrders}=await import("../lib/intake.mjs");
+const resale={id:"RESALE",codigo:"RESALE",cliente:"QA",liberacao:"released",vinculo:"none",ordens:[],itens:[{produto:"Kuripe",quantidade:"2",unidade:"UNID",tipoProduto:"Mercadoria para revenda",status:2}]};snapshot.grupos.push(resale);snapshot.pedidos.push(resale);
+const autoBoard=receiveOrders(stored,[resale]);response=await put(autoBoard);assert.equal(response.status,200,JSON.stringify(await response.json()));assert(stored.details.RESALE.atendimentoEstoque);assert.equal(stored.details.RESALE.situacao,"Conclu\u00eddo");
+console.log("OK resale auto intake persists through board API with shipping checks intact.");

@@ -22,7 +22,7 @@ for(const reason of ["manual","cancelled","duplicate","other"]){
 assert.throws(()=>changeArchive(board,order,{archived:true,reason:"other",note:"  "},"Victor","now"),/Descreva/);
 assert.throws(()=>changeArchive(board,order,{archived:true,reason:"nomus_missing"},"Victor","now"),/Revise/);
 // Persisted absence evidence must neither trigger extra detail reads nor show a pending deletion check.
-const legacy=seed();legacy.ordersComplete=true;legacy.turn=4;legacy.clients={2:"Cliente teste"};legacy.products={3:{name:"Teste",unit:"UNID"}};
+const legacy=seed();legacy.ordersComplete=true;legacy.turn=4;legacy.clients={2:"Cliente teste"};legacy.products={3:{name:"Teste",unit:"UNID",type:"",group:""}};
 legacy.orderReviewFailures={1:{reason:"missing_from_list"}};legacy.orderAbsences={1:{code:order.id,scans:2,detailMisses:2,confirmedAt:"2026-10-20T11:00:00Z"}};
 legacy.orderScan={nextPage:2,seen:{}};legacy.orderSweepNextAt=0;
 assert.equal(publicSync(legacy,true).snapshot.pedidos[0].pedidoConsultaFalhou,false);

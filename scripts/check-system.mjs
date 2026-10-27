@@ -1,7 +1,7 @@
 import {spawn} from "node:child_process";
 import {mkdirSync,writeFileSync} from "node:fs";
 // Explicit list: these tests use fixtures, an in-memory database or intercepted browser APIs.
-const unitTests=["check-delete-shipping-box.mjs","check-small-box-progress.mjs",
+const unitTests=["check-resale-intake.mjs","check-delete-shipping-box.mjs","check-small-box-progress.mjs",
  "check-allocation.mjs",
  "check-assembly-flow.mjs",
  "check-small-box-search.mjs",

@@ -30,7 +30,7 @@ const received=receiveOrders(board,[{id:"P0",ordens:[{}]},{id:"P1",ordens:[{}]},
 assert.deepEqual(received.sequence,["P0","P1"]);assert.equal(received.details.P0.situacao,"Em acompanhamento");assert.equal(received.details.P0.empresa,"Maya");assert.equal(received.details.P1.situacao,"Programado");assert.equal(receiveOrders(received,[{id:"P1",ordens:[{},{}]}]),received);
 console.log("OK: catálogo inclui pedidos fechados, captura por páginas, nomes, privacidade, vínculos, avisos, falhas e ERP somente GET.");
 
-const noOP=receiveOrders(received,[{id:"P0",ordens:[],vinculo:"none"}]);assert.deepEqual(noOP.sequence,["P1"]);assert.equal(noOP.details.P0.nota,"preservar");assert.equal(noOP.details.P0.situacao,"A programar");assert.equal(receiveOrders(received,[{id:"P0",ordens:[],vinculo:"unknown"}]),received);
+const noOP=receiveOrders(received,[{id:"P0",ordens:[],vinculo:"none"}]);assert.deepEqual(noOP.sequence,["P0","P1"]);assert.equal(noOP.details.P0.nota,"preservar");assert.equal(noOP.details.P0.situacao,"Em acompanhamento");assert.equal(receiveOrders(received,[{id:"P0",ordens:[],vinculo:"unknown"}]),received);
 // An unlinked OP stays outside sales-order cards; KG/internal production may legitimately remain unlinked.
 const linkedOP=structuredClone(op);
 op={...op,itensPedido:[]};await step(1);

@@ -139,3 +139,7 @@ Pedidos novos aparecem em **Aguardando libera??o** enquanto n?o houver OP identi
 Valida??o: `node scripts/check-order-release.mjs`, incluindo a chegada da OP, preserva??o de notas e repeti??o da captura.
 
 A captura prioriza a primeira página de pedidos e de OPs a cada minuto, sem reiniciar a paginação histórica. Os vínculos novos entram mesmo durante a leitura inicial de pedidos. Cada consulta continua respeitando o intervalo compartilhado de 22 segundos, o bloqueio de concorrência e a espera após falhas. O minuto é um intervalo de prioridade, não garantia de latência: depende do painel ativo, da resposta do ERP e da posição do registro nas páginas.
+
+## Mercadorias para revenda
+
+Pedidos totalmente liberados no Nomus, compostos apenas por produtos do tipo **Mercadoria para revenda** e sem OP confirmada entram automaticamente em **Preparar envio**, pelo atendimento de estoque. A conferência dos produtos e volumes continua obrigatória. Pedidos mistos, parcialmente liberados, sem classificação confirmada ou com OP permanecem no fluxo normal. Registros arquivados e etapas iniciadas são preservados.

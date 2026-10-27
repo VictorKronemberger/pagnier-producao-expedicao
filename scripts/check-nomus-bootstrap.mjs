@@ -97,7 +97,7 @@ console.log('OK full production capture: all batches, final operation only, canc
 
 // A saved order omitted from the list is checked directly; rejection is not deletion.
 const omitted=initialSync(empty);omitted.ordersComplete=true;omitted.opsComplete=true;
-omitted.orders[9]={code:'PV OMITTED',companyId:1,clientId:1,createdDate:'2026-10-19',items:[]};omitted.clients[1]='Fixture';omitted.products[1]={name:'Fixture product',unit:'UNID'};
+omitted.orders[9]={code:'PV OMITTED',companyId:1,clientId:1,createdDate:'2026-10-19',items:[]};omitted.clients[1]='Fixture';omitted.products[1]={name:'Fixture product',unit:'UNID',type:'',group:''};
 const omittedPaths=[];
 const rejected=await bootstrapNomus(omitted,'fixture',{refresh:true,now:()=>serverTime,fetcher:async url=>{omittedPaths.push(url);return url.endsWith('pedidos/9')?new Response('',{status:400}):Response.json([])}});
 assert(omittedPaths.some(p=>p.endsWith('pedidos/9')));assert.equal(rejected.orders[9].code,'PV OMITTED');assert.equal(rejected.orderReviewFailures[9].status,400);assert(publicSync(rejected,true).partial);assert(publicSync(rejected,true).snapshot.pedidos[0].pedidoConsultaFalhou);
