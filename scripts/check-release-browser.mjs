@@ -33,11 +33,11 @@ try{
  const waitForSave=async()=>{await pause(150);await until('[...document.querySelectorAll(".autosave-status")].every(el=>el.textContent==="Salvo")')};
  await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5173/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
 
- await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/%3Faba%3Drelease"});await until('document.querySelectorAll(".kanban-card").length===7');await waitForSave();
+ await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/%3Faba%3Drelease"});await until('document.querySelectorAll(".kanban-card").length===8');await waitForSave();
  const click=async selector=>{await evaluate('document.querySelector('+JSON.stringify(selector)+').click()');await pause(100)};
  const input=async(selector,value)=>{await evaluate('const el=document.querySelector('+JSON.stringify(selector)+');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(el,'+JSON.stringify(value)+');el.dispatchEvent(new Event("input",{bubbles:true}))');await pause(120)};
  const laneCount=key=>evaluate('document.querySelector('+JSON.stringify('[data-stage="'+key+'"] .list-count')+').textContent');
- assert.equal(await laneCount("backlog"),"1");assert.equal(await laneCount("queue"),"3");
+ assert.equal(await laneCount("backlog"),"2");assert.equal(await laneCount("queue"),"3");
  assert.equal(await laneCount("doing"),"2");assert.equal(await laneCount("shipping"),"1");
  assert.equal(await evaluate('document.querySelectorAll(".kanban-list").length'),5);
  assert(await evaluate('[...document.querySelectorAll(".stage-doing")].some(e=>e.textContent.includes("09008")&&e.textContent.includes("Impedimento registrado"))'));
@@ -76,8 +76,8 @@ try{
  await evaluate('[...document.querySelectorAll(".kanban-card")].find(e=>e.textContent.includes("09009")).querySelector(".card-next-action").click()');await until('!!document.querySelector(".product-conference")');await click('.close');
  // The same card changes columns when the ERP confirms release and its OP.
  waiting.liberacao="released";waiting.itens[0].status=2;waiting.ordens=[op(waiting.id)];waiting.vinculo="linked";
- await click('[aria-label="Recarregar quadro"]');await until('document.querySelectorAll(".stage-backlog").length===0');await waitForSave();assert(board.sequence.includes(waiting.id));assert.equal(await laneCount("queue"),"4");
- await send("Page.reload");await until('document.querySelectorAll(".kanban-card").length===7');await waitForSave();assert.equal(board.sequence.filter(id=>id===waiting.id).length,1);assert.equal(board.details[started.id].nota,"Manter orientação");
+ await click('[aria-label="Recarregar quadro"]');await until('document.querySelectorAll(".stage-backlog").length===1');await waitForSave();assert(board.sequence.includes(waiting.id));assert.equal(await laneCount("queue"),"4");
+ await send("Page.reload");await until('document.querySelectorAll(".kanban-card").length===8');await waitForSave();assert.equal(board.sequence.filter(id=>id===waiting.id).length,1);assert.equal(board.details[started.id].nota,"Manter orientação");
  assert.equal(board.details[legacy.id].nota,"Prioridade antiga");assert(board.sequence.includes(legacy.id));
  console.log("OK navegador: quadro com cinco colunas, bloqueados em Produzindo com aviso e conferência em Preparar envio preservando registros; Aguardando liberação ao lado de Na fila, pendentes sem OP visíveis e sem movimento manual, busca nas colunas, atendimento parcial, recuperação de status, catálogo completo, transição automática, menu superior e celular. APIs simuladas.");
 }finally{socket?.close();browser.kill()}

@@ -60,3 +60,24 @@ for(const response of [()=>new Response('',{status:503}),()=>Response.json({id:9
 }
 const unknown=[];await syncStep(focusedSeed,"dummy",{now:time,requestedOrder:"../../clientes/1",fetcher:async(url,opts)=>{unknown.push(url);return fetcher(url,opts)}});assert(!unknown[0].includes('../'));
 console.log("OK focused order: direct GET, catalog cursor preserved, per-order timestamp, cache interval, manual refresh and failed-response preservation.");
+
+// Released sales without an OP remain visible in the backlog, then enter the queue.
+for(const vinculo of ["none","unknown"]){
+ const sale={...group("new-sale","released",false),vinculo};
+ const board={sequence:[],details:{"new-sale":{nota:"Preserve notes",envio:{caixas:[]}}}};
+ assert(awaitsRelease(sale,board.details[sale.id]));
+ assert.equal(receiveOrders(board,[sale]),board);
+ const linked={...sale,ordens:[{id:"OP-new"}],vinculo:"linked"};
+ const queued=receiveOrders(board,[linked]);
+ assert(!awaitsRelease(linked,queued.details[sale.id]));
+ assert.deepEqual(queued.sequence,[sale.id]);
+ assert.equal(queued.details[sale.id].situacao,"Programado");
+ assert.equal(queued.details[sale.id].nota,"Preserve notes");
+ assert.deepEqual(queued.details[sale.id].envio,{caixas:[]});
+ assert.equal(receiveOrders(queued,[linked]),queued);
+}
+assert(awaitsRelease(group("unknown-no-op","unknown",false)));
+assert(!awaitsRelease(group("closed-no-op","closed",false)));
+assert(!awaitsRelease(noOP,{atendimentoEstoque:true}));
+assert(!awaitsRelease(noOP,{situacao:"Em acompanhamento"}));
+console.log("OK backlog: new sales without OP stay visible; linked OP enters queue; closed and started orders preserved.");

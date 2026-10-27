@@ -131,3 +131,9 @@ O arquivamento é decidido pelo usuário em **Outras ações → motivo do arqui
 Não há varredura de exclusões, consultas extras de confirmação ou arquivamento durante a sincronização. Evidências antigas de ausência são descartadas ao sincronizar, sem alterar o quadro. Cada rodada executa no máximo um GET normal ao ERP, preservando paginação, bloqueio entre sessões e espera em caso de falha. A atualização compartilhada do quadro continua ativa.
 
 O filtro de criação também se aplica a pedidos aguardando liberação: usa a data das OPs ou, quando não há OP, a data do pedido. Falhas de consulta preservam dados anteriores e não indicam exclusão. Arquivamentos e restaurações têm histórico cumulativo; motivos antigos ausentes aparecem como **Motivo não registrado**. Se um pedido existir apenas no histórico, a restauração fica desabilitada com explicação até ele voltar à base consultada.
+
+## Pedidos novos sem OP
+
+Pedidos novos aparecem em **Aguardando libera??o** enquanto n?o houver OP identificada, inclusive quando o pedido j? estiver liberado comercialmente no Nomus ou o v?nculo ainda estiver em consulta. Quando a captura identifica a OP e a libera??o comercial permite produ??o, o pedido entra automaticamente em **Na fila**. Pedidos encerrados sem OP n?o entram nessa espera; atendimentos por estoque e etapas j? iniciadas s?o preservados.
+
+Valida??o: `node scripts/check-order-release.mjs`, incluindo a chegada da OP, preserva??o de notas e repeti??o da captura.
