@@ -1069,8 +1069,11 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 @media(max-width:520px){.conference-box>summary{padding:16px}.conference-heading{align-items:flex-start}.conference-heading h3{font-size:16px}.conference-heading-icon{width:38px;height:38px}.conference-metrics{grid-template-columns:1.4fr 1fr 1fr;gap:10px}.conference-metrics strong{font-size:12px}.conference-metrics .conference-dimensions strong{font-size:11px}.conference-content{padding:0 16px 4px}.conference-content thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.conference-content tbody,.conference-content tr{display:block}.conference-content tr{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid light-dark(#e4ebe5,var(--night-border));padding:14px 0;gap:10px}.conference-content tr:last-child{border:0}.conference-content td{display:block;border:0;padding:0}.conference-content td:first-child{grid-column:1/-1}.conference-content td:not(:first-child){text-align:left}.conference-mobile-label{display:block;font-size:10px;color:light-dark(#748276,var(--night-muted));margin-bottom:5px}.conference-content th:first-child{width:auto}}
 @media(prefers-reduced-motion:reduce){.conference-chevron{transition:none}}
 
-/* SKU is the primary product identity throughout operations. */
-.product-identity{display:block;min-width:0;overflow-wrap:anywhere}
-.product-identity>strong{display:block!important;font-size:13px!important;font-weight:650!important;letter-spacing:.025em;color:light-dark(#24573e,#b9dec5);font-variant-numeric:tabular-nums}
-.product-identity>small{display:block!important;font-size:12px!important;font-weight:400!important;line-height:1.5;margin-top:4px;color:light-dark(#677c6e,var(--night-muted))}
-.conference-content td .product-identity>strong{font-size:13px}.packed-description .product-identity{margin-bottom:5px}
+/* Keep the code prominent and the descriptive name quiet, without competing headings. */
+.product-identity{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;max-width:100%;overflow-wrap:anywhere;line-height:1.4;font-family:Inter,Arial,Helvetica,sans-serif}
+.product-identity>.product-sku{display:inline-block!important;width:fit-content;max-width:100%;padding:3px 7px;border:1px solid light-dark(#dce8e0,#365345);border-radius:5px;background:light-dark(#eff5f1,#22392e);color:light-dark(#28533b,#c6e5d0);font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace!important;font-size:12px!important;font-weight:600!important;line-height:1.35!important;letter-spacing:.015em;font-variant-numeric:tabular-nums}
+.product-identity>.product-name{display:block!important;color:light-dark(#354c3f,var(--night-text));font-family:inherit!important;font-size:12px!important;font-weight:500!important;line-height:1.45!important;letter-spacing:0}
+.product-identity>small{display:block!important;margin:0!important;color:light-dark(#69776e,var(--night-muted));font-family:inherit!important;font-size:12px!important;font-weight:400!important;line-height:1.45!important;letter-spacing:0}
+.product-preview>div+div{margin-top:11px}
+.product-preview .product-identity>small{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.packed-description .product-identity{margin-bottom:7px}
