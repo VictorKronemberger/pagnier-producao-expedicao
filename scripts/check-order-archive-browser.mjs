@@ -53,7 +53,7 @@ try{
  const target=await(await fetch(`http://127.0.0.1:${debugPort}/json/new?about:blank`,{method:'PUT'})).json();
  const b=await connect(target,'Romulo');
 
- async function navigate(page,label){await page.evaluate(`document.querySelector('.app-navigation [aria-label="${label}"]').click()`)}
+ async function navigate(page,label){await page.evaluate(`(()=>{const button=[...document.querySelectorAll('.app-topbar button[aria-label]')].find(b=>b.getAttribute('aria-label')===${JSON.stringify(label)});if(!button)throw Error('Navigation target missing');const menu=button.closest('details');if(menu&&!menu.open)menu.querySelector('summary').click();button.click()})()`)}
  async function change(page,selector,value,event='change'){await page.evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});const prototype=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(prototype,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event(${JSON.stringify(event)},{bubbles:true}))})()`)}
  async function confirm(page){await page.evaluate('document.querySelector(".archive-dialog button[type=submit]").click()');await page.until('!document.querySelector(".archive-dialog")')}
  await navigate(a,'Produção');await a.until('!!document.querySelector(".card-open")');await a.evaluate('document.querySelector(".card-open").click()');await a.until('!!document.querySelector(".card-dialog")');

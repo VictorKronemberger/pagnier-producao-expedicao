@@ -181,3 +181,9 @@ Itens antigos com SKU vazio são completados apenas quando OP, produto e unidade
 Manual revisão 27 inclui orientação na imagem com dados fictícios. Validação: 55 testes automatizados, incluindo migração de catálogo, associações, estoque, caixas/bags, invoices, falhas e exports; verificação visual em desktop/celular e temas claro/escuro.
 
 Para completar os SKUs de uma base antiga, execute `npm run db:capture-nomus -- --skus` com o ambiente de produção configurado. A captura consulta o catálogo do Nomus por páginas usando somente GET, salva cada página e retoma do ponto salvo após falha da API. A trava compartilhada impede concorrência com a consulta automática. Produtos usados somente em OPs também são contemplados; o quadro operacional não é alterado. Na interface, o SKU fica em destaque e o nome aparece abaixo; produtos ainda sem código exibem o nome, sem aviso repetido.
+
+### Busca automática e manual — revisão 28
+
+Na montagem de caixas e bags, digitar SKU, nome ou OP abre sugestões selecionáveis. Clique no produto ou use as setas e Enter; Escape fecha a lista sem alterar o item. O manual mostra os passos sobre uma captura de demonstração, com destaque do SKU e dados fictícios.
+
+Validação em 27/10/2026: 55 verificações de regras/APIs, 20 cenários de navegador da versão atual e build Next.js aprovados. Foram atualizados roteiros antigos de navegação, confirmação de arquivamento, contagem de embalagens e seleção de quantidades; os testes preservam as verificações de persistência e usam ambientes isolados. Veja [operação e testes](docs/OPERACAO-E-TESTES.md).

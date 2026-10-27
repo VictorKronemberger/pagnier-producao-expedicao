@@ -1,3 +1,4 @@
+import {changeArchive} from '../lib/order-archive.mjs';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -26,7 +27,7 @@ try {
  async function respond(m){
   const u=new URL(m.request.url);let payload={},responseCode=200;
   if(u.pathname==='/api/chat/session')payload={employee,employees:[{name:'Victor',registered:true}]};
-  else if(u.pathname==='/api/board'){if(m.request.method==='PUT'){board=JSON.parse(m.request.postData).board;revision++;payload={revision,updatedAt:new Date().toISOString(),updatedBy:'Victor'}}else payload={snapshot,board,revision,updatedAt:null,updatedBy:null};}
+  else if(u.pathname==='/api/board'){if(m.request.method==='POST'){const input=JSON.parse(m.request.postData);assert.equal(input.action,'archive');assert.equal(input.orderId,order.id);assert.equal(input.revision,revision);board=changeArchive(board,order,input,'Victor',new Date().toISOString());revision++;payload={snapshot,board,revision,updatedAt:new Date().toISOString(),updatedBy:'Victor'}}else if(m.request.method==='PUT'){board=JSON.parse(m.request.postData).board;revision++;payload={revision,updatedAt:new Date().toISOString(),updatedBy:'Victor'}}else payload={snapshot,board,revision,updatedAt:null,updatedBy:null};}
   else if(u.pathname==='/api/nomus'){
  const input=m.request.postData?JSON.parse(m.request.postData):{};requests++;
  if(input.refresh){captures++;await pause(500);if(refreshMode==='updated')lastCapture='2026-10-25T12:01:22.000Z';}
@@ -66,16 +67,20 @@ try {
  for(let i=0;i<100&&board.details['PV TESTE'].situacao!=='Programado';i++)await pause(100);
  assert.equal(board.details['PV TESTE'].situacao,'Programado');
  await shot('archive-action');
- await evaluate('Array.from(document.querySelectorAll(".dialog-footer button")).find(b=>b.textContent.trim()==="Arquivar pedido").click()');
+ await evaluate('document.querySelector(".card-dialog .order-more-actions summary").click();document.querySelector(".card-dialog [data-archive-reason=manual]").click()');
+ await until('!!document.querySelector(".archive-dialog[open]")');assert(!board.details['PV TESTE'].arquivado);
+ await evaluate('document.querySelector(".archive-dialog button[type=submit]").click()');
  await until('!document.querySelector(".kanban-card")&&!document.querySelector(".card-dialog")');
  for(let i=0;i<100&&!board.details['PV TESTE'].arquivado;i++)await pause(100);
  assert.equal(board.details['PV TESTE'].arquivado,true);assert.equal(board.details['PV TESTE'].situacao,'Programado');assert(!board.details['PV TESTE'].envio);
  await navigate();await until('!!document.querySelector(".kanban")');assert.equal(await evaluate('document.querySelectorAll(".kanban-card").length'),0);
- await evaluate('Array.from(document.querySelectorAll("button")).find(b=>b.textContent.trim()==="Pedidos de venda").click()');
+ await evaluate('[...document.querySelectorAll(".app-navigation [aria-label]")].find(b=>b.getAttribute("aria-label")==="Pedidos de venda").click()');
  await until('!!document.querySelector(".sales-catalog")');assert.equal(await evaluate('document.querySelectorAll(".sales-order").length'),0);
  await evaluate('(()=>{const s=document.querySelector(".sales-results select");s.value="archived";s.dispatchEvent(new Event("change",{bubbles:true}))})()');
  await until('!!document.querySelector(".sales-order")');await evaluate('document.querySelector(".sales-order summary").click()');await shot('archived-orders');
- await evaluate('Array.from(document.querySelectorAll(".sales-order button")).find(b=>b.textContent.trim()==="Restaurar pedido").click()');
+ await evaluate('document.querySelector(".sales-order .order-more-actions summary").click();document.querySelector(".sales-order .order-more-actions button").click()');
+ await until('!!document.querySelector(".archive-dialog[open]")');
+ await evaluate('document.querySelector(".archive-dialog button[type=submit]").click()');
  for(let i=0;i<100&&board.details['PV TESTE'].arquivado;i++)await pause(100);
  assert.equal(board.details['PV TESTE'].arquivado,false);assert.equal(board.details['PV TESTE'].situacao,'Programado');
  await navigate();await until('!!document.querySelector(".kanban-card")');assert.equal(errors.length,0,errors.join('\n'));

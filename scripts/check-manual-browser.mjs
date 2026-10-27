@@ -81,6 +81,11 @@ try{
  for(let n=0;n<total;n++){
  await evaluate('document.querySelector("[data-manual-visual]").querySelectorAll("section>div [aria-pressed]")['+n+'].click()');
  assert(await evaluate('document.querySelector("[data-manual-visual]>figure figcaption p").textContent.length>20'));
+ if(topic==="boxes"&&n>=1&&n<=3){
+  assert.equal(await evaluate('document.querySelector("[data-manual-visual]>figure image").getAttribute("href")'),"/manual/buscar-produto.png");
+  assert.equal(await evaluate('fetch("/manual/buscar-produto.png").then(r=>r.status)'),200);
+  const shot=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/manual-product-search-"+n+".png"),Buffer.from(shot.data,"base64"));
+ }
  assert(await evaluate('(()=>{const f=document.querySelector("[data-manual-visual]>figure"),c=f.querySelector("figcaption"),r=f.getBoundingClientRect(),b=c.getBoundingClientRect();return b.left>=r.left&&b.right<=r.right&&b.bottom<=r.bottom&&b.top>=r.top})()'),topic+" caption stays inside image");
  assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),topic+" mobile width");
  assert(await evaluate('(()=>{const f=document.querySelector("[data-manual-visual]>figure");return f.querySelector("rect").getBoundingClientRect().bottom<f.querySelector("figcaption").getBoundingClientRect().top})()'),topic+" highlight is not covered");

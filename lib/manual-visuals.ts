@@ -1,5 +1,5 @@
 export type ManualVisual = {image:string; width:number; height:number; title:string; text:string; target:[number,number,number,number]};
-const sizes:Record<string,[number,number]>={"conferencia-sku":[1200,1100],"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
+const sizes:Record<string,[number,number]>={"buscar-produto":[1200,1200],"conferencia-sku":[1200,1100],"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
 const scenes:Record<string,Array<[string,string,string,[number,number,number,number]]>> = {
   "overview": [
     [
@@ -217,6 +217,39 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
         235,
         954,
         170
+      ]
+    ],
+    [
+      "buscar-produto",
+      "Digite para ver as opções",
+      "Busque pelo SKU, nome ou OP. As opções aparecem enquanto você digita, sem abrir outra lista.",
+      [
+        418,
+        899,
+        637,
+        42
+      ]
+    ],
+    [
+      "buscar-produto",
+      "Confira o SKU e clique no produto",
+      "O SKU diferencia produtos com nomes parecidos. Clique na opção correta para preencher o item da caixa ou da bag.",
+      [
+        418,
+        980,
+        637,
+        88
+      ]
+    ],
+    [
+      "buscar-produto",
+      "Selecione também pelo teclado",
+      "Use as setas para escolher e Enter para confirmar. Escape fecha as sugestões; pesquisar não altera o item já selecionado.",
+      [
+        418,
+        980,
+        637,
+        88
       ]
     ],
     [

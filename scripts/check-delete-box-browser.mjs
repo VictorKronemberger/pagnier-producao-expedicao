@@ -38,7 +38,7 @@ await clickText("Excluir caixa");assert.equal(await evaluate('document.querySele
 await type("EXCLUIR");await clickText("Confirmar exclusão");await until('window.qa.caixasEmMontagem.length===1');
 assert.equal(await evaluate('window.qa.caixasEmMontagem[0].id'),"b");
 await evaluate('document.querySelector("[data-assembly-step=outer]").click()');await pause(100);
-await evaluate('document.querySelector(".small-picker-option input").click()');await pause(100);await clickText("Adicionar à Caixa 40");
+await evaluate('document.querySelector(".small-picker-option input").click()');await pause(100);await clickText("Adicionar à Caixa 40 (1)");
 await evaluate('document.querySelector(".box-options").open=true;document.querySelector(".box-options .delete-box-trigger").click()');await pause(100);
 assert(await evaluate('document.querySelector(".delete-box-confirmation").textContent.includes("caixas menores dentro dela")'));
 await type("EXCLUIR");await clickText("Confirmar exclusão");

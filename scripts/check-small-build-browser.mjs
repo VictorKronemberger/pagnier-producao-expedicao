@@ -37,7 +37,7 @@ await clickText("Conferir e finalizar caixa menor");
 await until('window.qa.caixasEmMontagem[0].pronta===true');
 assert.equal(await evaluate('document.querySelectorAll(".small-build-ready .small-build-content-row").length'),1);
 assert.equal(await evaluate('document.querySelectorAll(".small-build-focus .packed-quantity input").length'),0);
-assert.equal(await evaluate('document.querySelector(".small-build-content-row strong").textContent'),"35 UNID");
+assert.equal(await evaluate('document.querySelector(".small-build-content-row>strong").textContent'),"35 UNID");
 await clickText("Multiplicar caixa");
 await until('window.qa.caixasEmMontagem.length===3');
 assert.equal(await evaluate('window.qa.caixasEmMontagem[2].itens[0].quantidade'),"35");

@@ -36,7 +36,7 @@ await clickText("Multiplicar caixa");
 await until('document.querySelectorAll(".small-progress-ready").length===3');
 assert(await evaluate('document.querySelector(".small-progress-product").textContent.includes("Faltam 120 UNID")'));
 await clickText("Distribuir nas Caixas 40");await clickText("Nova Caixa 40");
-await evaluate('document.querySelector(".small-picker-option input").click()');await pause(100);await clickText("Adicionar à Caixa 40");
+await evaluate('document.querySelector(".small-picker-option input").click()');await pause(100);await clickText("Adicionar à Caixa 40 (1)");
 await evaluate('document.querySelector("[data-assembly-step=small]").click()');await pause(100);
 assert.equal(await evaluate('document.querySelectorAll(".small-progress-ready").length'),3);
 assert(await evaluate('document.querySelector(".small-progress").textContent.includes("Dentro de CX-001")'));

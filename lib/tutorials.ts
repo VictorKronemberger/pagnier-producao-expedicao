@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"27",updatedAt:"27/10/2026"};
+export const manualEdition = {revision:"28",updatedAt:"27/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -275,6 +275,11 @@ export const tutorials = [
         "title": "Veja qual montagem se aplica",
         "short": "Escolha Com bags para artesanatos, Com caixas menores ou montagem direta. O modo misto combina embalagens e avulsos.",
         "text": "Na modalidade Com bags, crie Nova bag, selecione os artesanatos liberados e informe as quantidades. Confira e finalize cada bag antes de distribuir nas Caixas 40. O modo misto permite caixas menores, bags e produtos avulsos; o tipo de cada embalagem permanece ao salvar, copiar ou retirar para ajuste. Quando todos os produtos forem de 250 g, 500 g ou 1 kg, continua a montagem direta automática."
+      },
+      {
+        "title": "Busque e selecione sem abrir outra lista",
+        "short": "Digite SKU, nome ou OP e clique na sugestão. As setas e Enter também selecionam o produto.",
+        "text": "Em Adicionar produto, digite no campo de busca. As sugestões aparecem automaticamente com SKU, nome e OP. Confira o SKU antes de clicar, especialmente quando os nomes forem parecidos. Use as setas e Enter para escolher pelo teclado; Escape fecha a lista. A pesquisa não muda o item salvo até você selecionar uma opção. Depois informe a quantidade. O mesmo fluxo atende caixas maiores, caixas menores e bags."
       },
       {
         "title": "Monte a Caixa 40 com produtos diretos",

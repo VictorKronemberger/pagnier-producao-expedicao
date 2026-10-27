@@ -30,7 +30,7 @@ const failures=[];
 async function check(name,fn){try{await fn();console.log("PASS",name)}catch(e){failures.push(name+": "+e.message);console.error("FAIL",name,e.message)}}
 await reset("capacity");
 await evaluate('document.querySelector(".small-picker-option input").click()');await pause(100);
-await clickText("Adicionar à Caixa 40");
+await clickText("Adicionar à Caixa 40 (1)");
 await check("failed placement preserves selection and data",async()=>{
  assert(await evaluate('document.querySelector(".dialog-error").textContent.includes("limite")'));
  assert.equal(await evaluate('window.qa.caixasEmMontagem.length'),2);
@@ -53,7 +53,7 @@ await check("failed finalization never announces success",async()=>{
 });
 await reset("flow");
 await evaluate('document.querySelector(".small-picker-option input").click()');await pause(100);
-await clickText("Adicionar à Caixa 40");
+await clickText("Adicionar à Caixa 40 (1)");
 await check("placement moves exact box once",async()=>{assert.equal(await evaluate('window.qa.caixasEmMontagem.length'),1);assert.equal(await evaluate('window.qa.caixas[0].itens.length'),1);assert.equal(await evaluate('window.qa.caixas[0].caixasInternas[0].id'),"a")});
 await clickText("Finalizar Caixa 40");
 await evaluate('document.querySelector("[data-assembly-step=measure]").click()');await pause(100);
@@ -65,7 +65,7 @@ await check("withdrawal preserves quantities and clears obsolete weight",async()
 await clickText("Conferir e finalizar caixa menor");
 await clickText("Distribuir nas Caixas 40");
 await evaluate('document.querySelector(".small-picker-option input[value=a]").click()');await pause(100);
-await clickText("Adicionar à Caixa 40");
+await clickText("Adicionar à Caixa 40 (1)");
 await check("repeated distribution preserves all item IDs without duplication",async()=>{assert.equal(await evaluate('window.qa.caixas[0].itens.length'),1);assert.equal(await evaluate('window.qa.caixasEmMontagem.length'),1);assert.equal(await evaluate('window.qa.caixas[0].itens[0].id'),"item-a")});
 assert.deepEqual(failures,[]);
 console.log("OK operations: failure paths, successful assembly, weighing, withdrawal and redistribution.");
