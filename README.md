@@ -146,6 +146,8 @@ Pedidos totalmente liberados no Nomus, compostos apenas por produtos do tipo **M
 
 ## Layout do packing list
 
-O bloco de informações complementares fica aberto antes do destinatário, com os campos de comprador/importador disponíveis. A aba principal do Excel reúne as partes, totais, produtos e resumo das caixas; Produtos e Caixas mantêm as fontes editáveis das fórmulas. A identificação da caixa é mesclada por grupo e a quantidade embalada inclui sua unidade. OP, nome interno do produto, SKU, lote, validade, caixa menor, conteúdo por embalagem e responsáveis internos não aparecem na exportação. Os registros no painel são preservados. O PDF segue a mesma ordem de partes e os mesmos campos documentais.
+O bloco de informações complementares fica aberto antes do destinatário, com os campos de comprador/importador disponíveis. A aba principal do Excel reúne as partes, totais, produtos e informações junto de cada caixa; Produtos e Caixas mantêm as fontes editáveis das fórmulas. A identificação da caixa é mesclada por grupo e as unidades embaladas aparecem uma vez por item. OP, nome interno do produto, SKU, lote, validade, caixa menor, conteúdo por embalagem e responsáveis internos não aparecem na exportação. Os registros no painel são preservados. O PDF segue a mesma ordem de partes e os mesmos campos documentais.
 
 Validação: `node scripts/check-packing-excel.mjs`, `node scripts/check-packing.mjs`, `npm run check` e `npm run build`.
+
+O packing list apresenta países, Incoterm, pagamento e campos de transporte em blocos separados. Dimensões, pesos líquido/bruto e unidades ficam junto de cada caixa. A coluna duplicada de quantidade da OP foi retirada; permanece a quantidade de unidades embaladas. Os valores comerciais e de destino vêm do envio, sem fixar um país ou condição para todos os documentos.
