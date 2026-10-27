@@ -11,7 +11,7 @@ import {packingBlob} from "../lib/packing-pdf.mjs";
 export default function PackingEditor({value,ops,onChange,canExport,disabled,onBoxes,onFields,mode="all"}:{mode?:"all"|"fields"|"review";onFields?:()=>void;value:Shipment;ops:ShippingOP[];onChange:(p:Packing)=>void;canExport:boolean;disabled:boolean;onBoxes?:()=>void}){
  const p={...emptyPacking(),...value.packing},report=inspectPacking(value,ops),physical=analyzeShipment(value,ops);
  const [reviewed,setReviewed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
- const fingerprint=JSON.stringify({value,ops:ops.map(({id,produto,quantidade,unidade})=>({id,produto,quantidade,unidade}))});
+ const fingerprint=JSON.stringify({value,ops:ops.map(({id,sku,produto,quantidade,unidade})=>({id,sku,produto,quantidade,unidade}))});
  useEffect(()=>setReviewed(false),[fingerprint]);
  function field(key:keyof Packing,label:string,type="text",multiline=false){
  const required=["invoiceNumero","invoiceData","exportadorNome","exportadorEndereco","destinatarioNome","destinatarioEndereco","paisOrigem","paisDestino","assinante","assinaturaData"].includes(key);

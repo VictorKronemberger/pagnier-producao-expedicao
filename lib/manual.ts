@@ -1,6 +1,11 @@
 export const manual = [
 {
   "category": "production",
+  "title": "SKU: identificação principal do produto",
+  "text": "O código/SKU aparece em destaque e o nome como informação de apoio. Pesquise por SKU no quadro, nos pedidos, na conferência e na seleção de produtos. Ele acompanha caixas, bags, packing lists e invoices. No Excel do packing list, edite o código na coluna SKU da aba Produtos; a aba principal o mostra acima da descrição. Zeros iniciais são preservados. SKU não informado significa que o código ainda não está disponível; aguarde a consulta e confira o cadastro no Nomus. Campos já preenchidos manualmente são mantidos."
+},
+{
+  "category": "production",
   "title": "Como consultar o histórico do pedido",
   "text": "Abra o cartão e expanda Histórico do pedido. Os registros mostram funcionário, data e hora, com os mais recentes primeiro. Expanda cada registro para comparar Antes e Depois. O histórico inclui alterações salvas de etapas, responsáveis, orientações, caixas e bags, produtos, pesos, medidas, conferências, documentos, despacho e arquivamento. Em envios agrupados, alterações compartilhadas aparecem nos pedidos envolvidos; orientações individuais ficam no próprio pedido. O funcionário registrado é o da sessão de acesso. Alterações ainda não salvas e tentativas que falharam não entram. O registro começa nesta atualização, sem reconstruir mudanças antigas. Atualizações do Nomus continuam em Novidades neste pedido."
 },

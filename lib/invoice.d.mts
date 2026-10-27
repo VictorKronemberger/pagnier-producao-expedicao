@@ -20,3 +20,5 @@ export function invoiceInScope(invoice:Invoice,codes?:Record<string,boolean>):bo
 
 export function invoiceSourceStatus(invoice:Invoice,orders:any[],shipment:Shipment|undefined):{linked:boolean;changed:boolean;fingerprint:string;fromBoxes:boolean;packagesTotal:string;rows:any[];physical:string};
 export function previewInvoiceSources(invoice:Invoice,orders:any[],shipment:Shipment|undefined,idFactory:()=>string):ReturnType<typeof invoiceSourceStatus>&{next:Invoice;changes:{product:string;before:string;after:string;note:string}[];removedDuplicates:number};
+
+export function fillInvoiceCodes(invoice:Invoice,orders:any[],shipment?:Shipment):Invoice;

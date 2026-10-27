@@ -1,2 +1,2 @@
 export function isInternal(op:{unidade?:string;nome?:string;produto?:string}):boolean;
-export function groupInternal<T extends {produto:string;criacao?:string;nome:string}>(ops:T[]):{product:string;orders:T[]}[];
+export function groupInternal<T extends {sku?:string;produto:string;criacao?:string;nome:string}>(ops:T[]):{product:string;sku:string;key:string;orders:T[]}[];

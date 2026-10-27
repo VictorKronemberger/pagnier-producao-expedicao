@@ -1,5 +1,7 @@
 "use client";
+import ProductIdentity from "./product-identity";
 import {Box,Package,ClipboardCheck,ChevronDown,Ruler,ShoppingBag} from "lucide-react";
+import {sourceProductSku} from "../lib/product-code.mjs";
 import {isMounted} from "../lib/ready-boxes.mjs";
 import {inspectBoxReview,confirmBoxReview} from "../lib/box-review.mjs";
 import {weightText} from "../lib/packing-list.mjs";
@@ -24,9 +26,9 @@ export default function BoxConference({value,ops,person,disabled,onChange,onDocu
  <span className="conference-expand"><span>Conteúdo</span><ChevronDown size={17} className="conference-chevron" aria-hidden="true"/></span>
  </summary>
  <div className="conference-content">
- <table><caption className="conference-table-caption">Conteúdo de {b.codigo}</caption><thead><tr><th scope="col">Produto / embalagem</th><th scope="col">Quantidade</th><th scope="col">Embalagens</th></tr></thead>
+ <table><caption className="conference-table-caption">Conteúdo de {b.codigo}</caption><thead><tr><th scope="col">SKU / produto</th><th scope="col">Quantidade</th><th scope="col">Embalagens</th></tr></thead>
  <tbody>{b.itens.map(i=>{const inner=b.caixasInternas?.find(inner=>inner.id===i.caixaInternaId);return <tr key={i.id}>
- <td><strong>{i.produto||"Produto a selecionar"}</strong><span className="conference-package" title={inner?.codigo}>{i.caixaInternaId?<>{inner?.tipo==="bag"?<ShoppingBag size={13} aria-hidden="true"/>:<Package size={13} aria-hidden="true"/>}{inner?.tipo==="bag"?"Bag":"Caixa menor"} · {inner?.codigo?innerLabel(inner.codigo):"Embalagem a revisar"}</>:<><Box size={13} aria-hidden="true"/>Direto na caixa maior</>}</span></td>
+ <td><ProductIdentity sku={sourceProductSku(i,ops)} name={i.produto}/><span className="conference-package" title={inner?.codigo}>{i.caixaInternaId?<>{inner?.tipo==="bag"?<ShoppingBag size={13} aria-hidden="true"/>:<Package size={13} aria-hidden="true"/>}{inner?.tipo==="bag"?"Bag":"Caixa menor"} · {inner?.codigo?innerLabel(inner.codigo):"Embalagem a revisar"}</>:<><Box size={13} aria-hidden="true"/>Direto na caixa maior</>}</span></td>
  <td><span className="conference-mobile-label">Quantidade</span><span className="conference-quantity">{i.quantidade||"—"} <small>{i.unidade}</small></span></td>
  <td><span className="conference-mobile-label">Embalagens</span><span className="conference-count">{i.unidadesEmbaladas||"—"}</span></td>
  </tr>})}</tbody></table>

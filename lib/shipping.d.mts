@@ -1,4 +1,4 @@
-export type ShippingOP={quantidadeProduzida?:string|null;producaoConsultadaEm?:string;operacaoProducao?:string;motivoProducao?:string;validadeLote?:string;estoque?:boolean;id:string;nome:string;produto:string;quantidade:string;unidade:string};
+export type ShippingOP={sku?:string;productId?:number;quantidadeProduzida?:string|null;producaoConsultadaEm?:string;operacaoProducao?:string;motivoProducao?:string;validadeLote?:string;estoque?:boolean;id:string;nome:string;produto:string;quantidade:string;unidade:string};
 export type Packing=Record<"invoiceNumero"|"invoiceData"|"exportadorNome"|"exportadorEndereco"|"exportadorRef"|"destinatarioNome"|"destinatarioEndereco"|"destinatarioRegistro"|"contatoNome"|"contatoTelefone"|"contatoFax"|"contatoEmail"|"compradorNome"|"compradorEndereco"|"compradorRegistro"|"compradorContato"|"pedidoComprador"|"outrasReferencias"|"paisOrigem"|"paisDestino"|"termosEntrega"|"termosPagamento"|"preTransporte"|"localRecebimento"|"vooNavio"|"portoEmbarque"|"portoDesembarque"|"destinoFinal"|"pallets"|"assinante"|"assinaturaData",string>;
 export const packingFields:Record<string,number>;
 export function emptyPacking():Packing;

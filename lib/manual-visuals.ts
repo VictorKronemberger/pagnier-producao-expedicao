@@ -1,5 +1,5 @@
 export type ManualVisual = {image:string; width:number; height:number; title:string; text:string; target:[number,number,number,number]};
-const sizes:Record<string,[number,number]>={"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
+const sizes:Record<string,[number,number]>={"conferencia-sku":[1200,1100],"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
 const scenes:Record<string,Array<[string,string,string,[number,number,number,number]]>> = {
   "overview": [
     [
@@ -283,6 +283,17 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
         219,
         328,
         48
+      ]
+    ],
+    [
+      "conferencia-sku",
+      "Confira primeiro o SKU",
+      "O código em destaque identifica o produto. O nome fica abaixo como apoio. Compare o SKU e a quantidade com o conteúdo físico da caixa.",
+      [
+        112,
+        288,
+        475,
+        70
       ]
     ]
   ],

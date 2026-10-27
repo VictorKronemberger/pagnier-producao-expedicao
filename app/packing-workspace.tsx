@@ -32,7 +32,7 @@ export default function PackingWorkspace({readyEntries=[],onDelete,groups,board,
  const value=resolved?board.details[resolved]?.envio:undefined;
  const ops=shipmentOps(value,resolved??"",groups);
  const documents=groups.filter(g=>shipmentOwner(board,g.id)===g.id&&!!board.details[g.id]?.envio&&!board.details[g.id]?.envio?.packingExcluido);
- const matches=(g:Group)=>[g.codigo,g.cliente,board.details[g.id]?.envio?.packing?.invoiceNumero,board.details[g.id]?.envio?.packing?.destinatarioNome,board.details[g.id]?.envio?.agrupamento?.titularNome,...(board.details[g.id]?.envio?.agrupamento?.pedidos??[])].join(" ").toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"));
+ const matches=(g:Group)=>[g.codigo,g.cliente,board.details[g.id]?.envio?.packing?.invoiceNumero,board.details[g.id]?.envio?.packing?.destinatarioNome,board.details[g.id]?.envio?.agrupamento?.titularNome,...(board.details[g.id]?.envio?.agrupamento?.pedidos??[]),...shipmentOps(board.details[g.id]?.envio,g.id,groups).map(o=>o.sku),...(board.details[g.id]?.envio?.caixas??[]).flatMap(b=>b.itens.map(i=>i.sku))].join(" ").toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"));
  const allEntries=(creating?groups.filter(g=>shipmentOwner(board,g.id)===g.id&&(!board.details[g.id]?.envio||board.details[g.id]?.envio?.packingExcluido)):documents).filter(matches);
  function open(id:string){setDeleted("");setDeleteError("");onSelect(id);const shipment=board.details[id]?.envio;onSection(creating?"orders":packingWorkflow(shipment,shipmentOps(shipment,id,groups)).next);setCreating(false)}
  async function remove(id:string){

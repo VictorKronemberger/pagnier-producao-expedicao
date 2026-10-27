@@ -40,6 +40,7 @@ const unitTests=["check-resale-intake.mjs","check-delete-shipping-box.mjs","chec
  "check-product-document-reuse.mjs",
  "check-product-lots.mjs",
  "check-product-weight.mjs",
+ "check-product-codes.mjs",
  "check-production-fulfilled.mjs",
  "check-production-quantity.mjs",
  "check-queue.mjs",

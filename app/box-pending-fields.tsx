@@ -1,4 +1,5 @@
 "use client";
+import ProductIdentity from "./product-identity";
 import {useState} from "react";
 import ImportantField from "./important-field";
 import {decimal,isDecimalDraft,type ShippingBox,type ShippingItem} from "../lib/shipping.mjs";
@@ -16,7 +17,7 @@ export default function BoxPendingFields({box,issues,onSave}:{box:ShippingBox;is
  return <section className="box-pending-fields" aria-label={"Preencher pendências de "+box.codigo}>
  <h5>Preencher dados dos produtos</h5><p className="check-help">Confira os campos abaixo. Ao salvar, finalize e pese esta caixa novamente.</p>
  {rows.map(({item,index,issues:pending})=>{const current={...item,...patches[item.id]},preview=updatePackingItem(item,patches[item.id]??{});return <article className="packed-item" key={item.id}>
- <strong>{item.produto||"Produto a identificar"}</strong><p className="check-help">Item {index+1} · {item.opId}{item.caixaInternaId?" · "+(box.caixasInternas?.find(inner=>inner.id===item.caixaInternaId)?.codigo||"Caixa menor"):""}</p>
+ <ProductIdentity sku={item.sku} name={item.produto}/><p className="check-help">Item {index+1} · {item.opId}{item.caixaInternaId?" · "+(box.caixasInternas?.find(inner=>inner.id===item.caixaInternaId)?.codigo||"Caixa menor"):""}</p>
  <ul className="box-pending-messages">{pending.map(issue=><li key={issue}>{issue.slice(issue.indexOf(":")+1).trim()}</li>)}</ul>
  <div className="shipping-grid">
  <ImportantField label="Unidades embaladas" value={current.unidadesEmbaladas} valid={/^\d{1,6}$/.test(current.unidadesEmbaladas??"")&&Number(current.unidadesEmbaladas)>0}><input aria-label={"Unidades embaladas do item "+(index+1)+" de "+box.codigo} inputMode="numeric" maxLength={6} value={current.unidadesEmbaladas??""} onChange={e=>{if(/^\d{0,6}$/.test(e.target.value))patch(item.id,{unidadesEmbaladas:e.target.value})}}/></ImportantField>

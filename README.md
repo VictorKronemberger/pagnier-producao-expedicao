@@ -146,7 +146,7 @@ Pedidos totalmente liberados no Nomus, compostos apenas por produtos do tipo **M
 
 ## Layout do packing list
 
-O bloco de informações complementares fica aberto antes do destinatário, com os campos de comprador/importador disponíveis. A aba principal do Excel reúne as partes, totais, produtos e informações junto de cada caixa; Produtos e Caixas mantêm as fontes editáveis das fórmulas. A identificação da caixa é mesclada por grupo e as unidades embaladas aparecem uma vez por item. OP, nome interno do produto, SKU, lote, validade, caixa menor, conteúdo por embalagem e responsáveis internos não aparecem na exportação. Os registros no painel são preservados. O PDF segue a mesma ordem de partes e os mesmos campos documentais.
+O bloco de informações complementares fica aberto antes do destinatário, com os campos de comprador/importador disponíveis. A aba principal do Excel reúne as partes, totais, produtos e informações junto de cada caixa; Produtos e Caixas mantêm as fontes editáveis das fórmulas. A identificação da caixa é mesclada por grupo e as unidades embaladas aparecem uma vez por item. OP, nome interno do produto, lote, validade, caixa menor, conteúdo por embalagem e responsáveis internos não aparecem na exportação. Os registros no painel são preservados. O PDF segue a mesma ordem de partes e os mesmos campos documentais.
 
 Validação: `node scripts/check-packing-excel.mjs`, `node scripts/check-packing.mjs`, `npm run check` e `npm run build`.
 
@@ -171,3 +171,11 @@ O cartão apresenta Histórico do pedido recolhido por padrão. A equipe pode co
 O servidor usa o funcionário autenticado e grava o evento na mesma transação do quadro, com controle de revisão e marca única de gravação. Falhas e conflitos não geram eventos indevidos. Os eventos ficam em registros separados da tabela production_board, sem migração de esquema, com paginação e acesso limitado ao escopo atual dos pedidos. O painel não oferece alteração ou exclusão desses registros. Nenhuma gravação é realizada no Nomus.
 
 Manual revisão 26 inclui a orientação sobre a imagem do histórico, com dados fictícios. Validação: 54/54 verificações automatizadas, incluindo PostgreSQL e SQLite/Turso isolados; build Next.js e teste de navegador do histórico em desktop/celular, com erro/repetição, paginação e atualização após salvar.
+
+### SKU como identificação principal
+
+O catálogo e as OPs preservam o código/SKU retornado pelo Nomus, sem substituir o código por IDs internos. A consulta normal completa caches antigos sem código, mantém o limite de uma leitura por rodada e preserva dados após falhas. O SKU aparece antes do nome em pedidos, produção, conferência, caixas/bags, pendências e documentação; buscas aceitam o código.
+
+Itens antigos com SKU vazio são completados apenas quando OP, produto e unidade correspondem; códigos já informados são preservados. Produtos de revenda com o mesmo nome e SKUs distintos não são somados entre si. Invoices aproveitam o SKU como referência, com ou sem caixas. O packing list em PDF mostra o SKU antes da descrição; no Excel, a coluna SKU da aba Produtos alimenta a descrição na aba principal, preservando zeros iniciais e sem congelar células. A exportação do quadro também inclui os SKUs.
+
+Manual revisão 27 inclui orientação na imagem com dados fictícios. Validação: 55 testes automatizados, incluindo migração de catálogo, associações, estoque, caixas/bags, invoices, falhas e exports; verificação visual em desktop/celular e temas claro/escuro.

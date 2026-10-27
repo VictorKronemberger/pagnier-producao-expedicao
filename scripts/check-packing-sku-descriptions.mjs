@@ -22,7 +22,7 @@ for(const [sku,description] of cases){
  assert(JSON.stringify(packingDefinition(shipment,ops)).includes(description));
  const wb=await packingWorkbook(shipment,ops);
  assert.equal(wb.getWorksheet("Produtos").getCell("B2").value,description);
- assert(!JSON.stringify(wb.getWorksheet("Produtos").model).includes(sku));
+ assert.equal(wb.getWorksheet("Produtos").getCell("H2").value,sku);assert(JSON.stringify(packingDefinition(shipment,ops)).includes(sku));
  assert.equal(JSON.stringify(shipment),before);assert.equal(boxReviewKey(shipment,ops),review);
 }
 for(const sku of [undefined,"","UNKNOWN","KUTP","KUTP2900-extra","__proto__","constructor","toString"]){assert.equal(skuPackingDescription(sku),null)}

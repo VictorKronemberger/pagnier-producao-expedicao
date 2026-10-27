@@ -1,3 +1,4 @@
+import ProductIdentity from "./product-identity";
 import {Check,Package} from "lucide-react";
 import {smallBoxProgress} from "../lib/small-box-progress.mjs";
 import {smallBoxQuantity} from "../lib/small-box-search.mjs";
@@ -18,7 +19,7 @@ export default function SmallBoxProgress({shipment,ops,onOpen}:{shipment:Shipmen
   <section className="small-progress-panel" aria-label="Caixas menores já montadas">
    <header><div><h4>{hasBags?"Bags e caixas já montadas":"Caixas menores já montadas"}</h4><p>Prontas para distribuir ou já colocadas nas Caixas 40.</p></div><span>{ready.length} {ready.length===1?"caixa":"caixas"}</span></header>
    <div className="small-progress-list">{ready.map(box=><div className="small-progress-ready" key={box.outerId+":"+box.id}>
-    <Package size={17}/><div><strong>{box.codigo}</strong><small>{box.location}</small><details><summary>Ver produtos</summary>{box.itens.map(item=><p key={item.id}>{item.produto} · {smallBoxQuantity([item])}</p>)}</details></div><b>{smallBoxQuantity(box.itens)}</b><button type="button" className="text-action" onClick={()=>onOpen(box.id,box.outerId)}>{hasBags?"Ver embalagem":"Ver caixa"}</button>
+    <Package size={17}/><div><strong>{box.codigo}</strong><small>{box.location}</small><details><summary>Ver produtos</summary>{box.itens.map(item=><p key={item.id}><ProductIdentity sku={item.sku} name={item.produto}/>{smallBoxQuantity([item])}</p>)}</details></div><b>{smallBoxQuantity(box.itens)}</b><button type="button" className="text-action" onClick={()=>onOpen(box.id,box.outerId)}>{hasBags?"Ver embalagem":"Ver caixa"}</button>
    </div>)}</div>
    {!ready.length&&<p className="small-progress-empty">{hasBags?"Nenhuma embalagem finalizada ainda.":"Nenhuma caixa menor finalizada ainda."}</p>}
   </section>

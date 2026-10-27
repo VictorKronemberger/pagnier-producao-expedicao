@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"26",updatedAt:"27/10/2026"};
+export const manualEdition = {revision:"27",updatedAt:"27/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -45,6 +45,11 @@ export const tutorials = [
         "title": "Siga a ordem da operação",
         "text": "Localize o pedido → acompanhe a produção, quando houver → confira os produtos → monte as caixas → revise os volumes → prepare os documentos → registre a saída.",
         "short": "Encontre o pedido. Depois acompanhe a produção, confira, embale, prepare os documentos e registre o envio."
+      },
+      {
+        "title": "Identifique pelo SKU",
+        "short": "Use o SKU em destaque para identificar o produto; o nome aparece como apoio.",
+        "text": "O SKU é capturado do cadastro do produto no Nomus e acompanha pedidos, OPs, caixas, bags e documentos. As buscas aceitam o código completo. SKU não informado indica que ainda não há código disponível. Campos vazios dos registros existentes são completados quando a origem é confirmada; códigos preenchidos manualmente são preservados."
       },
       {
         "title": "Entenda o quadro de produção",
