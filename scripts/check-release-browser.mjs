@@ -59,7 +59,7 @@ try{
  assert(await evaluate('[...document.querySelectorAll(".release-notice[open]")].some(e=>e.innerText.includes("Produto pendente QA")&&e.innerText.includes("00030"))'));
  await input('.search input',"9001");assert.equal(await laneCount("backlog"),"1");assert.equal(await laneCount("queue"),"0");
  await input('.search input',"9002");assert.equal(await laneCount("backlog"),"0");assert.equal(await laneCount("queue"),"1");await click('.search-clear');
- assert(await evaluate('Math.abs(document.querySelector(".production-view-switch").getBoundingClientRect().top-document.querySelector(".board-tools").getBoundingClientRect().top)<10'));
+ assert(await evaluate('Math.abs(document.querySelector(".production-view-menu").getBoundingClientRect().top-document.querySelector(".board-tools").getBoundingClientRect().top)<10'));
  assert(await evaluate('document.querySelector(".kanban-list:last-child").getBoundingClientRect().right>innerWidth-40'));
  writeFileSync(".sites-runtime/quadro-liberacao-desktop.png",Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  await send("Emulation.setDeviceMetricsOverride",{width:390,height:844,deviceScaleFactor:1,mobile:true});await pause(350);

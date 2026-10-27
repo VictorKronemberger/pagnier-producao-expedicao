@@ -1,0 +1,15 @@
+.menu{position:relative;flex-shrink:0;min-width:0;color:light-dark(#53685c,var(--night-muted));font-size:12px}
+.menu>summary{display:flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:8px 10px;border:0;border-radius:8px;list-style:none;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.menu>summary::-webkit-details-marker{display:none}
+.menu>summary:hover,.menu[open]>summary{background:light-dark(#edf3ee,var(--night-raised));color:light-dark(#24583d,var(--night-text))}
+.menu>summary:focus-visible,.panel button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.panel{position:absolute;top:calc(100% + 8px);right:0;z-index:90;width:230px;max-width:calc(100vw - 28px);padding:6px;border:1px solid light-dark(#e2e9e3,var(--night-border));border-radius:12px;background:light-dark(#fff,var(--night-surface));box-shadow:0 12px 36px #12351d17;color:light-dark(#364e40,var(--night-text));text-align:left}
+.panel[data-align=start]{left:0;right:auto}
+.panel button{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;min-height:38px;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:inherit;font-size:12px;text-align:left;white-space:nowrap}
+.panel button:hover:not(:disabled),.panel button[aria-current=page],.panel button[aria-pressed=true]{background:light-dark(#f0f5f1,var(--night-raised));color:light-dark(#24583d,var(--night-text))}
+.panel button:disabled{opacity:.45}.panel button>svg{flex-shrink:0}
+.panel :global(.menu-divider){border:0;border-top:1px solid light-dark(#e9eeea,var(--night-border));margin:5px 4px}
+.panel :global(.menu-caption){display:flex;align-items:center;gap:8px;padding:10px;font-size:11px;color:light-dark(#7b8b80,var(--night-muted))}
+.panel :global(.menu-count){margin-left:auto;padding:2px 6px;border-radius:4px;background:light-dark(#eaf2eb,var(--night-raised));font-size:10px}
+@media(max-width:640px){.menu>summary{min-height:40px}.panel button{min-height:42px}}
+@media print{.menu{display:none}}

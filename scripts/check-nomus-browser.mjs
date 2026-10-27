@@ -118,7 +118,7 @@ try {
  refreshMode='cooldown';await evaluate('document.querySelector(".nomus-refresh").click()');await until('document.querySelector(".nomus-capture-notice")?.textContent.includes("Aguarde alguns segundos")');
  assert(compactReplies>0,'browser sends the known revision and accepts responses without snapshot');
  assert(await evaluate('!!document.querySelector(".kanban-card")'),'unchanged response preserves orders');
- await evaluate(`document.querySelector('.app-navigation button[aria-label="Pendências"]').click()`);await until('!!document.querySelector(".cancelled-category")');
+ await evaluate(`document.querySelector('.app-more-menu>summary').click();document.querySelector('.app-more-menu button[aria-label="Pendências"]').click()`);await until('!!document.querySelector(".cancelled-category")');
  assert.equal(await evaluate('document.querySelector(".pending-category h3 b").textContent'),'2');
  assert.equal(await evaluate('document.querySelector(".cancelled-category h3 b").textContent'),'2');
  assert.equal(await evaluate('document.querySelectorAll(".pending-category:first-of-type .unlinked-grid article").length'),2);

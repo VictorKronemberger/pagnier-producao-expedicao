@@ -32,7 +32,7 @@ try {
  async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value}
  async function until(expression){for(let i=0;i<100;i++){if(await evaluate(expression))return;await pause(100)}throw Error('Timeout: '+expression)}
  const theme=()=>evaluate('document.documentElement.dataset.theme');
- const toggle=()=>evaluate('document.querySelector(".theme-toggle").click()');
+ const toggle=()=>evaluate('(()=>{const menu=document.querySelector(".account-menu");if(menu&&!menu.open)menu.querySelector("summary").click();document.querySelector(".theme-toggle").click()})()');
  async function shot(name){await pause(100);const r=await send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(dir,name+'.png'),Buffer.from(r.data,'base64'))}
  async function navigate(){await send('Page.navigate',{url:base});await until('!!document.querySelector(".theme-toggle")');await pause(150)}
  await send('Page.enable');await send('Runtime.enable');await send('Fetch.enable',{patterns:[{urlPattern:base+'/api/*',requestStage:'Request'}]});
@@ -54,6 +54,29 @@ try {
  await evaluate('window.dispatchEvent(new StorageEvent("storage",{key:"pagnier-theme",newValue:"light"}))');await until('document.documentElement.dataset.theme==="light"');
  await toggle();await until('document.documentElement.dataset.theme==="dark"');
  employee='Victor';await navigate();await until('!!document.querySelector(".kanban-card")');
+ // Secondary controls stay collapsed, but remain keyboard accessible.
+ assert.equal(await evaluate('document.querySelectorAll(".app-navigation>button").length'),4);
+ assert.equal(await evaluate('document.querySelectorAll(".app-topbar details[open]").length'),0);
+ await evaluate('document.querySelector(".app-more-menu>summary").focus()');
+ await send('Input.dispatchKeyEvent',{type:'keyDown',key:' ',code:'Space',windowsVirtualKeyCode:32});
+ await send('Input.dispatchKeyEvent',{type:'keyUp',key:' ',code:'Space',windowsVirtualKeyCode:32});
+ await until('document.querySelector(".app-more-menu").open');
+ await shot('navigation-menu-dark');
+ await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+ await until('!document.querySelector(".app-more-menu").open');
+ assert(await evaluate('document.activeElement===document.querySelector(".app-more-menu>summary")'));
+ await evaluate('document.querySelector(".workspace-actions-menu>summary").click()');
+ assert(await evaluate('document.querySelector(".workspace-actions-menu").innerText.includes("Exportar planilha")'));
+ await evaluate('document.querySelector(".workspace-actions-menu>summary").click()');
+ await evaluate('document.querySelector(".production-view-menu>summary").click();document.querySelectorAll(".production-view-menu button")[1].click()');
+ await until('!!document.querySelector(".internal-panel")');
+ await evaluate('document.querySelector(".production-view-menu>summary").click();document.querySelectorAll(".production-view-menu button")[0].click()');
+ await until('!!document.querySelector(".kanban-card")');
+ await toggle();await until('document.documentElement.dataset.theme==="light"');
+ await evaluate('document.querySelector(".account-menu").removeAttribute("open")');
+ await evaluate('document.activeElement?.blur()');await shot('minimal-header-desktop');
+ await toggle();await until('document.documentElement.dataset.theme==="dark"');
+ await evaluate('document.querySelector(".account-menu").removeAttribute("open")');
  assert.equal(await theme(),'dark');assert.equal(await evaluate('getComputedStyle(document.querySelector(".app-brand img")).backgroundColor'),'rgba(0, 0, 0, 0)');assert.equal(await evaluate('getComputedStyle(document.querySelector(".app-brand img")).filter'),'brightness(0) invert(1)');await shot('board-dark');
  assert.equal(await evaluate('getComputedStyle(document.querySelector(".kanban-card")).backgroundColor'),'rgb(25, 37, 31)');
  await evaluate('document.querySelector(".card-open").click()');await until('!!document.querySelector(".card-dialog")');await shot('dialog-dark');
@@ -63,8 +86,10 @@ try {
  await evaluate(`document.querySelector('[aria-label="Fechar mensagens"]').click()`);
  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await shot('mobile-dark');
  assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'no page overflow on mobile');
+ await evaluate('document.querySelector(".account-menu>summary").click()');
  assert(await evaluate('(()=>{const r=document.querySelector(".theme-toggle").getBoundingClientRect();return r.x>=0&&r.right<=innerWidth&&r.height>=38})()'),'theme control remains reachable');
- await toggle();await until('document.documentElement.dataset.theme==="light"');await shot('mobile-light');
+ await toggle();await until('document.documentElement.dataset.theme==="light"');await shot('account-menu-mobile');await evaluate('document.querySelector(".account-menu").removeAttribute("open")');await shot('mobile-light');
+ await evaluate('document.querySelector(".app-more-menu>summary").click()');assert(await evaluate('(()=>{const r=document.querySelector(".app-more-menu>div").getBoundingClientRect();return r.x>=0&&r.right<=innerWidth})()'));await shot('navigation-menu-mobile');await evaluate('document.querySelector(".app-more-menu").removeAttribute("open")');
  await toggle();await until('document.documentElement.dataset.theme==="dark"');
  await send('Emulation.setEmulatedMedia',{media:'print'});
  assert.equal(await evaluate('getComputedStyle(document.documentElement).colorScheme'),'light');
