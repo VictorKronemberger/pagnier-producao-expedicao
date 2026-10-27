@@ -1,0 +1,22 @@
+.guide{margin:20px 0 26px;min-width:0}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.toolbar>span{font-size:11px;letter-spacing:.08em;color:light-dark(#526c5d,#b5ccbe);font-weight:650}
+.toolbar button,.dialogTop button{display:flex;align-items:center;gap:7px;min-height:44px;padding:8px;font-size:12px;border-radius:8px}
+.photo{position:relative;margin:0;height:clamp(360px,52vh,520px);overflow:hidden;border:1px solid #d0dfd5;border-radius:16px;background:#eef3ef;color:#1b3828;isolation:isolate}
+.photo svg{width:100%;height:100%;display:block}
+.callout{position:absolute;bottom:16px;left:16px;right:16px;display:flex;gap:12px;align-items:flex-start;background:#fff;box-shadow:0 5px 25px #183d2424;border:1px solid #b9d5c4;border-radius:12px;padding:17px}
+.number{display:grid;place-items:center;flex:none;width:29px;height:29px;border-radius:50%;background:#176c4a;color:white;font-size:14px;font-weight:700}
+.callout strong{display:block;font-size:17px;line-height:1.35;color:#143f2b}
+.callout p{font-size:14px;line-height:1.55;margin:7px 0 0;color:#3c5847}
+.controls{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px}
+.controls button{display:grid;place-items:center;min-width:40px;min-height:44px;border:1px solid light-dark(#d7e2d9,#3e584a);border-radius:10px;font-size:13px}
+.controls button:disabled{opacity:.3;cursor:default}
+.dots{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.dots button{min-width:36px;border-color:transparent}
+.dots button[aria-pressed=true]{background:#176c4a;color:white}
+.example{display:block;text-align:center;font-size:10px;color:light-dark(#6b7d71,#b5ccbe);margin-top:10px}
+.dialog{padding:18px;border:1px solid #a8c3b1;border-radius:18px;width:min(960px,calc(100vw - 24px));max-height:94dvh;overflow:auto;background:light-dark(#fff,#18281f);color:inherit}
+.dialog::backdrop{background:#0a2019b8;backdrop-filter:blur(4px)}
+.dialogTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:14px}
+.dialog .photo{max-width:850px;height:min(74vh,760px);margin:auto}
+@media(max-width:520px){.photo{height:390px}.photo svg{height:68%;position:absolute;top:0}.callout{bottom:10px;left:10px;right:10px;padding:13px;gap:8px}.callout strong{font-size:15px}.callout p{font-size:13px;line-height:1.5}.number{width:25px;height:25px;font-size:12px}.toolbar>span{font-size:10px}.toolbar button{font-size:11px}.controls{gap:4px}.dots{gap:1px}.dots button{min-width:30px}.dialog{padding:10px}.dialog .photo{height:500px}}

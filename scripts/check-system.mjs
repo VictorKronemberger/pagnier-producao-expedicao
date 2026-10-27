@@ -4,6 +4,7 @@ import {mkdirSync,writeFileSync} from "node:fs";
 const unitTests=["check-resale-intake.mjs","check-delete-shipping-box.mjs","check-small-box-progress.mjs",
  "check-allocation.mjs",
  "check-assembly-flow.mjs",
+ "check-bags.mjs",
  "check-small-box-search.mjs",
  "check-assembly-modes.mjs",
  "check-box-models-api.mjs",

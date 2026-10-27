@@ -157,3 +157,9 @@ Pedidos totalmente liberados e sem OP, cujos itens estejam classificados no Nomu
 O cabeçalho mantém Produção, Pedidos, Packing lists e Invoices visíveis. Pendências, Arquivados, modelos de caixas e Manual ficam em Mais; o tema e a saída ficam no menu da conta. A barra de produção mantém busca e filtros, com recarga/exportação no menu de ações e seleção de produção interna recolhida. Os menus fecham com Escape, clique externo ou saída do foco. Validação visual com dados fictícios: `node scripts/check-theme-browser.mjs` após o build, em desktop/celular, nos temas claro/escuro.
 
 Revisão de 27/10/2026: 51/51 verificações automatizadas aprovadas, build Next.js aprovado e testes de navegador do manual e de duas sessões aprovados. A revisão corrigiu o indicador que ocultava a espera de gravação como se estivesse salvo. Manual revisão 24: menus recolhidos, revenda automática, consulta versus recarga do quadro, layout do packing list, Excel sem congelamento e exclusão de caixas. A imagem do quadro usa apenas pedidos fictícios. A auditoria foi feita com fixtures/APIs simuladas e bancos isolados; não realizou gravações no ERP nem publicação na Vercel.
+
+### Manual visual e montagem em bags
+
+O manual revisão 25 apresenta os 13 capítulos com explicações sobre as imagens, destaques numerados e ampliação. Procedimentos completos, responsabilidades e exemplos continuam recolhidos. As capturas novas usam dados fictícios.
+
+Montar caixas oferece Com bags para artesanatos, além de caixas menores e montagem direta. Bags mantêm tipo próprio ao salvar, copiar, distribuir nas Caixas 40 e retirar para ajustes. Modo misto permite combinar embalagens sem alterar o tipo das existentes. A montagem direta automática para os tamanhos já definidos permanece. A conferência física continua obrigatória.

@@ -1,10 +1,10 @@
 "use client";
 import {useId,useState} from "react";
 import {Trash2} from "lucide-react";
-export default function DeleteBoxAction({name,description,onConfirm}:{name:string;description:string;onConfirm:(confirmation:string)=>boolean}) {
+export default function DeleteBoxAction({name,description,onConfirm,label="Excluir caixa"}:{name:string;description:string;label?:string;onConfirm:(confirmation:string)=>boolean}) {
  const [open,setOpen]=useState(false),[confirmation,setConfirmation]=useState("");
  const id=useId();
- if(!open)return <button type="button" className="text-action delete-box-trigger" onClick={()=>{setConfirmation("");setOpen(true)}}><Trash2 size={14}/>Excluir caixa</button>;
+ if(!open)return <button type="button" className="text-action delete-box-trigger" onClick={()=>{setConfirmation("");setOpen(true)}}><Trash2 size={14}/>{label}</button>;
  return <section className="delete-box-confirmation" aria-label={"Excluir "+name}>
   <strong>Excluir {name}?</strong><p>{description}</p>
   <label htmlFor={id}>Digite <b>EXCLUIR</b> para confirmar</label>

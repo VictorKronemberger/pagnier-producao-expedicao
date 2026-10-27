@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"24",updatedAt:"27/10/2026"};
+export const manualEdition = {revision:"25",updatedAt:"27/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -229,7 +229,7 @@ export const tutorials = [
       },
       {
         "title": "Leia as quatro quantidades",
-        "short": "Atendido pela produção é o produzido confirmado. Na OP é o programado. Em Caixas 40 é o embalado. Falta embalar é OP menos caixas.",
+        "short": "Produzido é a quantidade confirmada pela produção. Na OP é o programado. Em Caixas 40 é o embalado. Falta embalar é OP menos caixas.",
         "text": "A quantidade produzida vem da última operação do roteiro da OP no Nomus; etapas intermediárias não são somadas. Produção pendente significa zero confirmado; parcial significa menos que a OP; concluída significa igual ou maior. Consultando Nomus ou Sem confirmação não permite concluir se houve produção. Abra Detalhes para ver operação e horário da consulta. Falta embalar continua sendo o saldo da OP menos Caixas 40, não o saldo do que já foi produzido. Pedidos separados do estoque mostram No pedido e não têm essa coluna de produção."
       },
       {
@@ -263,8 +263,8 @@ export const tutorials = [
     "steps": [
       {
         "title": "Veja qual montagem se aplica",
-        "short": "Se todos os itens forem de 250 g, 500 g ou 1 kg, monte diretamente a Caixa 40. Nos demais envios, escolha a modalidade.",
-        "text": "O painel verifica todos os itens do envio, inclusive pedidos agrupados e itens ainda sem OP. Quando todos têm peso explícito de 250 g, 500 g ou 1 kg, dispensa a etapa de caixas menores. Se houver outro tamanho ou descrição incerta, escolha Sem caixas menores ou Com caixas menores; o modo misto permite ambos. Menores já cadastradas são preservadas para revisão."
+        "short": "Escolha Com bags para artesanatos, Com caixas menores ou montagem direta. O modo misto combina embalagens e avulsos.",
+        "text": "Na modalidade Com bags, crie Nova bag, selecione os artesanatos liberados e informe as quantidades. Confira e finalize cada bag antes de distribuir nas Caixas 40. O modo misto permite caixas menores, bags e produtos avulsos; o tipo de cada embalagem permanece ao salvar, copiar ou retirar para ajuste. Quando todos os produtos forem de 250 g, 500 g ou 1 kg, continua a montagem direta automática."
       },
       {
         "title": "Monte a Caixa 40 com produtos diretos",
@@ -273,7 +273,7 @@ export const tutorials = [
       },
       {
         "title": "Acomode caixas menores, quando houver",
-        "short": "Prepare e finalize cada caixa menor. Em Montar Caixa 40, escolha a maior e use Colocar nesta caixa.",
+        "short": "Prepare e finalize cada caixa menor ou bag. Em Montar Caixa 40, selecione as embalagens e adicione ao volume.",
         "text": "Na modalidade Com caixas menores, abra Caixas menores → Nova caixa menor, adicione os produtos e use Conferir e finalizar caixa menor. Depois, em Montar Caixa 40, crie ou selecione a maior, escolha uma das Caixas menores prontas e clique em Colocar nesta caixa. Somente o modo misto permite misturar menores e produtos avulsos."
       },
       {

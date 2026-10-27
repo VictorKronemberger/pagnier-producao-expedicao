@@ -9,7 +9,7 @@ import path from "node:path";
 const dir=path.resolve(".sites-runtime/manual-process-qa");mkdirSync(dir,{recursive:true});
 const port=5181,base="http://127.0.0.1:"+port;
 const server=spawn(process.execPath,["node_modules/next/dist/bin/next","start","--hostname","127.0.0.1","--port",String(port)],{windowsHide:true,stdio:"ignore",env:{...process.env,DATABASE_PROVIDER:"neon",DATABASE_URL:"",TURSO_DATABASE_URL:"",TURSO_AUTH_TOKEN:"",NOMUS_API_KEY:""}});
-const browser=spawn("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",["--headless","--disable-gpu","--no-first-run","--remote-debugging-port=9229","--user-data-dir="+dir,"about:blank"],{windowsHide:true,stdio:"ignore"});
+const browser=spawn("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",["--headless","--disable-gpu","--no-first-run","--remote-debugging-port=9229","--user-data-dir="+path.join(dir,"profile-"+process.pid),"about:blank"],{windowsHide:true,stdio:"ignore"});
 const pdfDir=path.resolve(".sites-runtime/packing-download-qa");mkdirSync(pdfDir,{recursive:true});const invoice="QA-"+Date.now();
 let clientReads=0;let socket;let rejectNextConfirmation=false;const confirmations=[];const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const snapshot={consultadoEm:"2026-10-25",ordensConsultadas:3,grupos:[
@@ -50,7 +50,7 @@ try{
  await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:base+"/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
 
 
- await send("Page.navigate",{url:base});await until('!!document.querySelector(".kanban")');
+ await send("Page.navigate",{url:base});await until('!!document.querySelector(".kanban")');await pause(1200);
  await send("Page.navigate",{url:base+"/?aba=help"});await until('document.querySelectorAll("[data-manual-category]").length===6');
  assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial,.manual-note").length'),0);
  assert.equal(await evaluate('!!document.querySelector(".industrial-flow,.pop-metadata,.manual-index")'),false);
@@ -66,10 +66,34 @@ try{
  assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),1);
  assert.equal(await evaluate('document.querySelector(".manual-full-details").open'),false);
  assert.equal(await evaluate('document.querySelector(".pop-metadata").getClientRects().length'),0);
- assert.equal(await evaluate('document.querySelectorAll(".manual-short-steps>li").length'),8);
+ assert.equal(await evaluate('document.querySelectorAll(".manual-short-steps>li").length'),0);
+ assert.equal(await evaluate('document.querySelector("[data-manual-visual]").dataset.manualVisual'),"boxes");
  for(const [name,width,height,mobile] of [["desktop",1280,900,false],["mobile",390,844,true]]){
- await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile});await evaluate('document.querySelector(".manual-reading-area").scrollIntoView({block:"start"})');await pause(120);assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));const shot=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/manual-leve-leitura-"+name+".png"),Buffer.from(shot.data,"base64"));
+ await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile});await evaluate('document.querySelector("[data-manual-visual]").scrollIntoView({block:"start"})');await pause(120);assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'));const shot=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/manual-leve-leitura-"+name+".png"),Buffer.from(shot.data,"base64"));
  }
+
+ // Each chapter offers annotated photos; complete prose stays collapsed.
+ for(const topic of ["overview","orders","production","conference","boxes","packing","reuse","document","invoices","dispatch","cleanup","handoff","recovery"]){
+ await evaluate('document.querySelector("[data-manual-outline='+topic+']").click()');
+ await until('document.querySelector("[data-manual-visual]")?.dataset.manualVisual==="'+topic+'"');
+ const total=await evaluate('document.querySelector("[data-manual-visual]").querySelectorAll("section>div [aria-pressed]").length');
+ assert(total>=3,topic+" visual steps");
+ for(let n=0;n<total;n++){
+ await evaluate('document.querySelector("[data-manual-visual]").querySelectorAll("section>div [aria-pressed]")['+n+'].click()');
+ assert(await evaluate('document.querySelector("[data-manual-visual]>figure figcaption p").textContent.length>20'));
+ assert(await evaluate('(()=>{const f=document.querySelector("[data-manual-visual]>figure"),c=f.querySelector("figcaption"),r=f.getBoundingClientRect(),b=c.getBoundingClientRect();return b.left>=r.left&&b.right<=r.right&&b.bottom<=r.bottom&&b.top>=r.top})()'),topic+" caption stays inside image");
+ assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),topic+" mobile width");
+ assert(await evaluate('(()=>{const f=document.querySelector("[data-manual-visual]>figure");return f.querySelector("rect").getBoundingClientRect().bottom<f.querySelector("figcaption").getBoundingClientRect().top})()'),topic+" highlight is not covered");
+ }
+ }
+ await evaluate('document.querySelector("[data-manual-outline=boxes]").click()');
+ await evaluate('document.querySelector("[data-manual-visual]>div button").click()');await until('!!document.querySelector("dialog[open]")');
+ const zoom=await send("Page.captureScreenshot",{format:"png"});writeFileSync(path.resolve(".sites-runtime/manual-visual-zoom.png"),Buffer.from(zoom.data,"base64"));
+ assert(await evaluate('document.querySelector("dialog[open]").contains(document.activeElement)'));
+ await send("Input.dispatchKeyEvent",{type:"keyDown",key:"Escape",code:"Escape",windowsVirtualKeyCode:27});
+ await send("Input.dispatchKeyEvent",{type:"keyUp",key:"Escape",code:"Escape",windowsVirtualKeyCode:27});
+ await until('!document.querySelector("dialog[open]")');
+ assert(await evaluate('document.activeElement.textContent.includes("Ampliar")'));
  await evaluate('document.querySelector(".manual-full-details summary").click()');assert(await evaluate('document.querySelector(".manual-full-details").textContent.includes("POP-05")'));assert(await evaluate('document.querySelector(".pop-metadata").getClientRects().length>0'));
  await evaluate('document.querySelector("#tutorial-boxes [data-manual-next=packing]").click()');await until('!!document.querySelector("#tutorial-packing")');assert.equal(await evaluate('document.querySelector(".manual-full-details").open'),false);
  const search=async text=>evaluate(`const el=document.querySelector('[aria-label="Buscar no manual"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(el,${JSON.stringify(text)});el.dispatchEvent(new Event("input",{bubbles:true}));`);

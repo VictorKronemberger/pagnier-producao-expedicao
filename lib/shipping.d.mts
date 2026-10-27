@@ -2,7 +2,7 @@ export type ShippingOP={quantidadeProduzida?:string|null;producaoConsultadaEm?:s
 export type Packing=Record<"invoiceNumero"|"invoiceData"|"exportadorNome"|"exportadorEndereco"|"exportadorRef"|"destinatarioNome"|"destinatarioEndereco"|"destinatarioRegistro"|"contatoNome"|"contatoTelefone"|"contatoFax"|"contatoEmail"|"compradorNome"|"compradorEndereco"|"compradorRegistro"|"compradorContato"|"pedidoComprador"|"outrasReferencias"|"paisOrigem"|"paisDestino"|"termosEntrega"|"termosPagamento"|"preTransporte"|"localRecebimento"|"vooNavio"|"portoEmbarque"|"portoDesembarque"|"destinoFinal"|"pallets"|"assinante"|"assinaturaData",string>;
 export const packingFields:Record<string,number>;
 export function emptyPacking():Packing;
-export type InnerBox={id:string;codigo:string};
+export type InnerBox={id:string;codigo:string;tipo?:"bag"};
 export type ShippingItem={origemLote?:string;origemValidade?:string;caixaInternaId?:string;origemPeso?:string;conteudoPorEmbalagem:string;descricaoDocumento:string;sku:string;hsCode:string;tipoEmbalagem:string;unidadesEmbaladas:string;pesoUnitarioKg:string;id:string;opId:string;produto:string;unidade:string;quantidade:string;lote:string;validade:string};
 export type ShippingBox={montada?:boolean;caixasInternas?:InnerBox[];modeloNome?:string;pesoMaximoKg?:string;taraKg?:string;id:string;codigo:string;embalagem:string;lacre:string;comprimentoCm:string;larguraCm:string;alturaCm:string;pesoBrutoKg:string;pesoLiquidoKg:string;observacoes:string;itens:ShippingItem[]};
 export type PreparedBox=InnerBox&{pronta?:boolean;itens:ShippingItem[]};
@@ -12,7 +12,7 @@ export const MODES:string[];
 export function emptyShipment():Shipment;
 export function newBox(boxes:ShippingBox[],id:string):ShippingBox;
 export function newItem(id:string):ShippingItem;
-export function newInnerBox(box:ShippingBox,id:string):InnerBox;
+export function newInnerBox(box:ShippingBox,id:string,tipo?:"bag"):InnerBox;
 export function isDecimalDraft(v:unknown):boolean;
 export function decimal(v:unknown):number|null;
 export function validDate(v:string):boolean;
