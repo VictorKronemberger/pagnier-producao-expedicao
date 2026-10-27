@@ -143,3 +143,9 @@ A captura prioriza a primeira página de pedidos e de OPs a cada minuto, sem rei
 ## Mercadorias para revenda
 
 Pedidos totalmente liberados no Nomus, compostos apenas por produtos do tipo **Mercadoria para revenda** e sem OP confirmada entram automaticamente em **Preparar envio**, pelo atendimento de estoque. A conferência dos produtos e volumes continua obrigatória. Pedidos mistos, parcialmente liberados, sem classificação confirmada ou com OP permanecem no fluxo normal. Registros arquivados e etapas iniciadas são preservados.
+
+## Layout do packing list
+
+O bloco de informações complementares fica aberto antes do destinatário, com os campos de comprador/importador disponíveis. A aba principal do Excel reúne as partes, totais, produtos e resumo das caixas; Produtos e Caixas mantêm as fontes editáveis das fórmulas. A identificação da caixa é mesclada por grupo e a quantidade embalada inclui sua unidade. OP, nome interno do produto, SKU, lote, validade, caixa menor, conteúdo por embalagem e responsáveis internos não aparecem na exportação. Os registros no painel são preservados. O PDF segue a mesma ordem de partes e os mesmos campos documentais.
+
+Validação: `node scripts/check-packing-excel.mjs`, `node scripts/check-packing.mjs`, `npm run check` e `npm run build`.

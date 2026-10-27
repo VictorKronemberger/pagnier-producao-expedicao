@@ -34,29 +34,30 @@ export default function PackingEditor({value,ops,onChange,canExport,disabled,onB
  <div className="shipment-title"><FileText size={20}/><div><h3>{mode==="fields"?"Dados do documento":"Revisão do packing list"}</h3></div></div>
  {mode!=="review"&&<fieldset disabled={disabled||busy} className="packing-document-fields">
  <FillingGuide/>
- <p className="check-help">Preencha os campos abaixo. As informações opcionais ficam ao final.</p>
+ <p className="check-help">Preencha os campos abaixo. Confira as informações complementares antes do destinatário.</p>
  <section className="pl-form-section" aria-label="Identificação do documento"><h4>1. Identificação do documento</h4><div className="shipping-grid">
  {field("invoiceNumero","Número da invoice")}{field("invoiceData","Data da invoice","date")}
  </div></section>
  <section className="pl-form-section" aria-label="Exportador"><h4>2. Exportador</h4><div className="shipping-grid">
  {field("exportadorNome","Nome do exportador")}{field("paisOrigem","País de origem das mercadorias")}{field("exportadorEndereco","Endereço do exportador","text",true)}
  </div></section>
+ <details className="pl-optional-fields" open><summary>Informações complementares · opcionais</summary>
+ <h4>Referências e registros</h4><div className="shipping-grid">
+ {field("pedidoComprador","Pedido do comprador / data")}{field("outrasReferencias","Outras referências")}{field("exportadorRef","Registro / referência do exportador")}{field("destinatarioRegistro","Registros do destinatário (EORI / VAT / outros)","text",true)}
+ </div><h4>Contato do destinatário</h4><div className="shipping-grid">
+ {field("contatoNome","Contato do destinatário")}{field("contatoTelefone","Telefone do destinatário")}{field("contatoFax","Fax do destinatário")}{field("contatoEmail","E-mail do destinatário","email")}
+ </div><h4>Comprador / importador</h4><div className="shipping-grid">
+ {field("compradorNome","Nome do comprador / importador")}{field("compradorEndereco","Endereço do comprador / importador","text",true)}{field("compradorRegistro","Registros do comprador","text",true)}{field("compradorContato","Contato do comprador","text",true)}
+ </div><h4>Transporte e condições comerciais</h4><div className="shipping-grid">
+ {field("preTransporte","Pré-transporte")}{field("localRecebimento","Local de recebimento pelo transportador")}{field("vooNavio","Navio / voo")}{field("portoEmbarque","Porto / aeroporto de embarque")}{field("portoDesembarque","Porto / aeroporto de desembarque")}{field("destinoFinal","Destino final")}{field("termosEntrega","Condições de entrega","text",true)}{field("termosPagamento","Condições de pagamento","text",true)}{field("pallets","Número de pallets")}
+ </div></details>
  <section className="pl-form-section" aria-label="Destinatário e entrega"><h4>3. Destinatário e entrega</h4><p className="check-help">Confira os dados trazidos da seleção do destinatário.</p><div className="shipping-grid">
  {field("destinatarioNome","Nome do destinatário")}{field("paisDestino","País de destino das mercadorias")}{field("destinatarioEndereco","Endereço de entrega","text",true)}
  </div></section>
  <section className="pl-form-section" aria-label="Responsável pela revisão"><h4>4. Responsável pela revisão</h4><div className="shipping-grid">
  {field("assinante","Responsável pela revisão")}{field("assinaturaData","Data da revisão","date")}
  </div></section>
- <details className="pl-optional-fields"><summary>Informações complementares · opcionais</summary>
- <h4>Referências e registros</h4><div className="shipping-grid">
- {field("pedidoComprador","Pedido do comprador / data")}{field("outrasReferencias","Outras referências")}{field("exportadorRef","Registro / referência do exportador")}{field("destinatarioRegistro","Registros do destinatário (EORI / VAT / outros)","text",true)}
- </div><h4>Contato do destinatário</h4><div className="shipping-grid">
- {field("contatoNome","Contato do destinatário")}{field("contatoTelefone","Telefone do destinatário")}{field("contatoFax","Fax do destinatário")}{field("contatoEmail","E-mail do destinatário","email")}
- </div><h4>Comprador diferente do destinatário</h4><div className="shipping-grid">
- {field("compradorNome","Nome do comprador")}{field("compradorEndereco","Endereço do comprador","text",true)}{field("compradorRegistro","Registros do comprador","text",true)}{field("compradorContato","Contato do comprador","text",true)}
- </div><h4>Transporte e condições comerciais</h4><div className="shipping-grid">
- {field("preTransporte","Pré-transporte")}{field("localRecebimento","Local de recebimento pelo transportador")}{field("vooNavio","Navio / voo")}{field("portoEmbarque","Porto / aeroporto de embarque")}{field("portoDesembarque","Porto / aeroporto de desembarque")}{field("destinoFinal","Destino final")}{field("termosEntrega","Condições de entrega","text",true)}{field("termosPagamento","Condições de pagamento","text",true)}{field("pallets","Número de pallets")}
- </div></details>
+
  </fieldset>}
  {mode!=="fields"&&<>
  {mode==="review"&&<div className="pl-review-summary"><div><small>Destinatário</small><strong>{p.destinatarioNome||"A preencher"}</strong><span>{p.destinatarioEndereco||"Endereço a preencher"}</span><span>{p.paisDestino}</span></div><div><small>Documento e revisão</small><strong>{p.invoiceNumero||"Invoice sem número"}</strong><span>{p.invoiceData?"Data: "+p.invoiceData.split("-").reverse().join("/"):"Data a preencher"}</span><span>{p.assinante?"Responsável: "+p.assinante:"Responsável a definir"}</span><button className="text-action" onClick={onFields}>Editar dados do documento</button></div></div>}
