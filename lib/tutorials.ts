@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"23",updatedAt:"20/10/2026"};
+export const manualEdition = {revision:"24",updatedAt:"27/10/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -49,7 +49,12 @@ export const tutorials = [
       {
         "title": "Entenda o quadro de produção",
         "short": "Aguardando liberação → Na fila → Produzindo → Preparar envio → Pronto para envio → Enviados.",
-        "text": "Aguardando liberação reúne os pedidos pendentes no Nomus. Liberados com OP vão para Na fila; pedidos parcialmente liberados mostram os itens pendentes no cartão. Use os atalhos para iniciar e concluir a produção. O menu superior leva a Pedidos de venda, Packing lists, Invoices, Pendências, Caixas e Manual. No celular, deslize o menu."
+        "text": "Aguardando liberação reúne pedidos ainda não prontos para entrar no fluxo. Produtos de fabricação liberados com OP vão para Na fila. Pedidos somente de revenda, totalmente liberados e sem OP confirmada, vão direto para Preparar envio. Liberações parciais mantêm os itens pendentes identificados no cartão. No topo ficam Produção, Pedidos, Packing lists e Invoices; Mais reúne Pendências, Arquivados, Modelos de caixas e Manual."
+      },
+      {
+        "title": "Encontre as ações recolhidas",
+        "short": "Mais abre as telas de apoio. Seu nome abre tema e saída; os três pontos abrem recarga e exportação.",
+        "text": "A busca e Filtros ficam visíveis. Clique em Pedidos de clientes para alternar para Interna em KG. Os menus funcionam no computador e no celular; Escape fecha o menu e devolve o foco ao controle."
       },
       {
         "title": "Use o cartão do pedido",
@@ -63,8 +68,8 @@ export const tutorials = [
       },
       {
         "title": "Confirme o salvamento",
-        "text": "Aguarde Salvo antes de sair, exportar ou excluir. Consulte Pendências e ajuda se houver falha ou conflito entre sessões.",
-        "short": "Antes de sair, espere aparecer Salvo."
+        "text": "Aguarde o sinal de confirmação de salvamento antes de sair, exportar ou excluir. Passe o mouse no sinal para ler Salvo. Aguardando gravação e Salvando indicam que ainda há trabalho pendente. Não salvo ou Sem sincronização exige conferir o aviso antes de continuar.",
+        "short": "Espere a confirmação de salvamento. Aguardando gravação, Salvando e falhas continuam visíveis."
       },
       {
         "title": "Saiba de onde vêm os dados",
@@ -141,13 +146,13 @@ export const tutorials = [
       },
       {
         "title": "Verifique os vínculos",
-        "text": "Uma OP comum deve estar vinculada ao pedido e ao item correto no Nomus. Se faltar vínculo, consulte Pendências. Não associe somente por semelhança de produto ou cliente.",
-        "short": "Confira se a OP está ligada ao pedido correto. Se faltar vínculo, abra Pendências."
+        "text": "Produtos de fabricação precisam da OP ligada ao pedido e ao item correto no Nomus. Para falhas de vínculo, abra Mais → Pendências. Artesanatos e outros produtos de revenda podem seguir sem OP quando classificados e liberados. Não associe OPs por semelhança de nome.",
+        "short": "Confira o vínculo quando houver produção. Revenda liberada pode seguir sem OP."
       },
       {
         "title": "Identifique o que já existe",
-        "text": "Se o pedido já tiver caixas ou documento, retome o cadastro existente. Se os produtos saem do estoque, use Separar do estoque no catálogo: o pedido entra em Preparar envio sem OP. Aguarde a confirmação de vínculo e os itens completos no Nomus antes dessa ação.",
-        "short": "Se já houver caixas ou documento, abra o cadastro existente."
+        "text": "Retome caixas e documentos existentes. Pedidos compostos apenas por Mercadoria para revenda ou Produtos para revenda entram automaticamente em Preparar envio quando todos os itens estão liberados ou atendidos parcialmente, seus dados estão completos e a ausência de OP está confirmada. Pedidos mistos seguem o fluxo de produção. Separar do estoque continua disponível para os demais atendimentos confirmados de estoque. Essa escolha não registra baixa no Nomus.",
+        "short": "Revenda liberada segue para Preparar envio. Se já houver caixas ou documentos, continue no mesmo cadastro."
       }
     ],
     "done": "Cliente, pedido e origem dos produtos foram conferidos.",
@@ -190,8 +195,8 @@ export const tutorials = [
       },
       {
         "title": "Arquive pedidos antigos",
-        "short": "Abra Outras ações, escolha o motivo e confirme. Consulte o histórico ou restaure um pedido disponível na aba Arquivados.",
-        "text": "No cartão ou em Pedidos de venda, abra Outras ações e escolha um dos motivos de arquivamento listados. Na janela seguinte, preencha a observação se necessário e confirme. O arquivamento é manual e vale para toda a equipe; não depende de concluir produção, conferência ou documentos. Os dados ficam preservados. Para consultar ou restaurar, abra Arquivados no menu principal. Restaurar mantém a etapa anterior e fica disponível enquanto o pedido estiver na base consultada. O histórico registra cada arquivamento e restauração. Nenhuma dessas ações altera o Nomus."
+        "short": "Arquive em Outras ações e consulte ou restaure em Mais → Arquivados.",
+        "text": "No cartão ou em Pedidos, abra Outras ações e escolha o motivo de arquivamento. Preencha a observação quando necessária e confirme. O arquivamento é manual e compartilhado, preserva os dados e não depende de concluir as etapas. Consulte o histórico ou restaure em Mais → Arquivados, enquanto o pedido estiver disponível na base consultada. Nenhuma dessas ações altera o Nomus."
       }
     ],
     "done": "Os produtos estão disponíveis para conferência e as diferenças foram verificadas.",
@@ -289,7 +294,7 @@ export const tutorials = [
       {
         "title": "Pese e meça as caixas montadas",
         "short": "Em Caixas 40 montadas, selecione cada caixa e informe dimensões em cm e peso bruto real em kg.",
-        "text": "Pese a caixa pronta, incluindo produtos, embalagens e proteções. Registre dimensões externas em cm e peso bruto em kg; a conversão para lb é automática. O peso líquido soma os produtos. Limite de peso e tara ficam recolhidos; a tara inclui embalagens vazias e proteções. Caixa 40 é o nome do modelo, não uma medida. Cadastros de modelos ficam no menu Configurações de caixas, fora da montagem. Mudanças físicas no conteúdo exigem nova pesagem."
+        "text": "Pese a caixa pronta, incluindo produtos, embalagens e proteções. Registre dimensões externas em cm e peso bruto em kg; a conversão para lb é automática. O peso líquido soma os produtos. Limite de peso e tara ficam recolhidos; a tara inclui embalagens vazias e proteções. Caixa 40 é o nome do modelo, não uma medida. Cadastros de modelos ficam em Mais → Modelos de caixas, fora da montagem. Mudanças físicas no conteúdo exigem nova pesagem."
       },
       {
         "title": "Confirme a conferência física",
@@ -401,13 +406,13 @@ export const tutorials = [
       },
       {
         "title": "Etapa 2 — Itens e caixas",
-        "short": "Confira descrição documental, HS Code, embalagem, lote e validade dos produtos.",
+        "short": "Confira descrição documental, HS Code, embalagem, unidades e pesos. Lote e validade continuam no cadastro interno.",
         "text": "As caixas precisam da conferência física na Expedição. Se faltar essa confirmação, use o atalho para conferir. Para ajustes físicos, volte à montagem; depois pese e confira novamente. Dados documentais não substituem a contagem física. Se a mesma OP estiver em várias caixas, use Completar dados repetidos para aproveitar apenas os campos documentais vazios. Correções existentes, quantidades, pesos, lotes e validades são preservados; dados divergentes não são propagados."
       },
       {
         "title": "Etapa 3 — Dados do documento",
-        "short": "Preencha invoice, datas, exportador, destinatário, países e responsável pela revisão.",
-        "text": "Use Preencher ou Revisar para localizar campos pendentes. Comprador diferente, referências, transporte e condições comerciais devem corresponder ao envio; dados opcionais podem ficar vazios quando não se aplicarem."
+        "short": "Confira invoice, países, comprador/importador, destinatário, transporte e condições reais do envio.",
+        "text": "Informações complementares aparece antes de Destinatário e entrega. Preencha comprador/importador diferente, referências e contatos quando aplicáveis. Confira países de origem e destino, Incoterm, pagamento, pré-transporte, local de recebimento, voo/navio, portos e destino final. Cada envio usa seus próprios dados; os exemplos não são padrões. Opcionais sem aplicação podem ficar vazios. O responsável pela revisão fica registrado internamente."
       },
       {
         "title": "Etapa 4 — Revisar e baixar",
@@ -416,8 +421,8 @@ export const tutorials = [
       },
       {
         "title": "Se precisar de planilha, baixe o Excel",
-        "short": "Clique em Baixar Excel editável na etapa Revisar e baixar.",
-        "text": "O arquivo .xlsx tem quatro abas: Packing list (referências e totais), Produtos (uma linha por produto em cada caixa), Caixas (medidas e pesos) e Guia e pendências. Após salvar e conferir fisicamente as caixas, é possível baixar a cópia editável mesmo com pendências documentais. Elas são listadas na planilha. O Excel não exige a confirmação de emissão do PDF."
+        "short": "Baixar Excel editável gera quatro abas, todas sem linhas ou colunas congeladas.",
+        "text": "A aba Packing list reúne dados das partes, transporte, condições comerciais, totais e produtos por caixa. Dimensões, pesos e unidades aparecem junto de cada caixa. Produtos e Caixas alimentam as fórmulas da principal; Guia e pendências reúne as orientações. Não há coluna duplicada de quantidade. OP, SKU, lote, validade e nomes internos dos funcionários não integram esse layout de exportação. Após salvar e conferir as caixas, o Excel pode ser baixado com pendências documentais sinalizadas; o PDF final exige resolvê-las e confirmar a revisão."
       },
       {
         "title": "Mantenha os dados consistentes",
@@ -570,8 +575,8 @@ export const tutorials = [
     "steps": [
       {
         "title": "Identifique o tipo de pendência",
-        "text": "Falta vincular o pedido exige correção no Nomus. Aguardando confirmação depende da consulta. O número verde na aba Pendências conta OPs sem vínculo no recorte permitido; abrir a aba não elimina a pendência.",
-        "short": "Abra Pendências e veja se falta vínculo ou se o sistema ainda aguarda a consulta."
+        "text": "Abra Mais → Pendências. Falta vincular o pedido exige correção no Nomus; Aguardando confirmação depende da consulta. O contador de Mais e da opção Pendências indica OPs sem vínculo no recorte permitido. Abrir a tela não elimina a pendência.",
+        "short": "Abra Mais → Pendências e veja se falta vínculo ou se o sistema aguarda a consulta."
       },
       {
         "title": "Corrija o vínculo na origem",
@@ -585,8 +590,8 @@ export const tutorials = [
       },
       {
         "title": "Recupere o salvamento",
-        "text": "Se aparecer Não salvo, mantenha a tela aberta e use Tentar novamente. Se outra sessão mudou o quadro, preserve suas edições e recarregue para conferir a versão compartilhada antes de continuar.",
-        "short": "Se aparecer Não salvo, mantenha a tela aberta e tente novamente. Em conflito, preserve suas edições antes de recarregar."
+        "text": "Se aparecer Não salvo, mantenha a tela aberta e use Tentar novamente. Aguardando gravação e Salvando indicam trabalho ainda pendente. Em conflito entre sessões, preserve suas edições e use Recarregar quadro no menu de três pontos para conferir a versão compartilhada. Recarregar não realiza uma nova consulta ao Nomus; use o indicador do ERP para isso.",
+        "short": "Não salvo: tente novamente. Em conflito, preserve suas edições antes de recarregar pelo menu de três pontos."
       },
       {
         "title": "Confira a última captura",

@@ -22,7 +22,7 @@ export const manual = [
   {
     "category": "documents",
     "title": "Como baixar o packing list em Excel",
-    "text": "Abra Packing lists → envio existente → Revisar e baixar → Baixar Excel editável. Aguarde Salvo. As caixas precisam estar conferidas fisicamente. A planilha contém Packing list, Produtos, Caixas e Guia e pendências. Dados documentais incompletos são sinalizados na planilha e não impedem a cópia editável. O PDF final exige resolver as pendências e confirmar a revisão. Alterações no Excel não voltam ao painel; atualize também o sistema se precisar gerar aqui um PDF com os mesmos dados. Nenhum download registra o despacho."
+    "text": "Abra Packing lists → envio existente → Revisar e baixar → Baixar Excel editável. Aguarde o salvamento e confira fisicamente as caixas. O arquivo tem quatro abas, todas sem linhas ou colunas congeladas: Packing list, Produtos, Caixas e Guia e pendências. A aba principal reúne exportador, comprador/importador, destinatário, condições comerciais, transporte, totais e produtos por caixa. Medidas, pesos e unidades aparecem junto de cada caixa. As abas Produtos e Caixas alimentam as fórmulas da principal. Pendências documentais são sinalizadas e não impedem a cópia editável; o PDF final exige resolvê-las e confirmar a revisão. Alterações no Excel não voltam ao painel. Nenhum download registra despacho."
   },
   {
     "category": "documents",
@@ -47,12 +47,12 @@ export const manual = [
   {
     "category": "start",
     "title": "Menu superior do sistema",
-    "text": "A barra superior reúne Produção, Pedidos de venda, Packing lists, Invoices, Pendências, Caixas e Manual. No celular, deslize o menu na horizontal para acessar as demais opções. No computador, o tipo de produção, a busca e os filtros compartilham a mesma faixa abaixo do título. No celular, os controles se ajustam à largura da tela. Caixas abre os modelos reutilizáveis; a montagem continua dentro de cada envio."
+    "text": "No topo ficam Produção, Pedidos, Packing lists e Invoices. Abra Mais para Pendências, Arquivados, Modelos de caixas e Manual. No menu com seu nome ou suas iniciais ficam o modo claro/escuro e Sair ou trocar funcionário. Em Produção, clique em Pedidos de clientes para alternar para Interna em KG. A busca e Filtros permanecem visíveis; o botão de três pontos abre Recarregar quadro e Exportar planilha. Os mesmos menus funcionam no celular. Escape, clique fora ou saída do foco fecham o menu."
   },
   {
     "category": "production",
     "title": "Aguardando liberação e Na fila",
-    "text": "A primeira coluna do quadro, Aguardando liberação, reúne os pedidos ainda pendentes no Nomus. Havendo itens liberados e OP gerada, o pedido entra em Na fila na próxima consulta, inclusive se a liberação for parcial. No cartão, abra o aviso para ver quais itens ainda não foram liberados; a aba Geral também mostra produto, item e quantidade. Se há itens atendidos e outros ainda pendentes, o pedido com OP permanece na fila e a situação comercial fica recolhida em Ver situação do pedido no Nomus, sem alertar falta de produção. A aba Geral mostra o resumo das OPs com o mesmo cálculo da coluna Produzido na Expedição. O resumo só informa conclusão quando todas as OPs exibidas têm a quantidade produzida completa. Isso não indica produção pendente: uma OP pode ter toda a quantidade produzida enquanto o item do pedido permanece Liberado. O aviso informa a data da consulta do pedido; ao abrir um pedido ele é priorizado na próxima consulta disponível e o botão de atualizar consulta esse pedido diretamente, respeitando os intervalos e eventuais falhas. A quantidade exibida é a pedida, não um saldo calculado. Sem OP, o pedido liberado continua em Pedidos de venda aguardando sua criação. Pedidos já em produção, conferência ou expedição mantêm a etapa e os registros. Consultando liberação indica dados ainda não confirmados. Pedidos já na fila permanecem visíveis na etapa salva, com esse aviso; novos pedidos aguardam no catálogo. Pedidos de venda mantém o catálogo completo enquanto a consulta está incompleta. A liberação é feita no Nomus, sem alterações no ERP pelo painel."
+    "text": "A primeira coluna do quadro, Aguardando liberação, reúne os pedidos ainda pendentes no Nomus. Havendo itens liberados e OP gerada, o pedido entra em Na fila na próxima consulta, inclusive se a liberação for parcial. No cartão, abra o aviso para ver quais itens ainda não foram liberados; a aba Geral também mostra produto, item e quantidade. Se há itens atendidos e outros ainda pendentes, o pedido com OP permanece na fila e a situação comercial fica recolhida em Ver situação do pedido no Nomus, sem alertar falta de produção. A aba Geral mostra o resumo das OPs com o mesmo cálculo da coluna Produzido na Expedição. O resumo só informa conclusão quando todas as OPs exibidas têm a quantidade produzida completa. Isso não indica produção pendente: uma OP pode ter toda a quantidade produzida enquanto o item do pedido permanece Liberado. O aviso informa a data da consulta do pedido; ao abrir um pedido ele é priorizado na próxima consulta disponível e o botão de atualizar consulta esse pedido diretamente, respeitando os intervalos e eventuais falhas. A quantidade exibida é a pedida, não um saldo calculado. Pedidos liberados sem OP continuam em Aguardando liberação até confirmar os dados necessários. Pedidos exclusivamente de revenda, com todos os itens liberados e sem OP confirmada, entram direto em Preparar envio; produtos de fabricação aguardam a criação da OP. Pedidos já em produção, conferência ou expedição mantêm a etapa e os registros. Consultando liberação indica dados ainda não confirmados. Pedidos já na fila permanecem visíveis na etapa salva, com esse aviso; novos pedidos aguardam no catálogo. Pedidos de venda mantém o catálogo completo enquanto a consulta está incompleta. A liberação é feita no Nomus, sem alterações no ERP pelo painel."
   },
   {
     "category": "start",
@@ -72,7 +72,7 @@ export const manual = [
   {
     "category": "production",
     "title": "Pedidos de estoque sem OP",
-    "text": "Em Pedidos de venda, use Separar do estoque quando os produtos estiverem disponíveis e o Nomus confirmar que não há OP. O pedido entra em Preparar envio com seus produtos, seguindo a mesma montagem de caixas, agrupamento e documentação. A ação identifica a forma de atendimento; não confirma saldo nem baixa estoque no Nomus. Mudanças nos itens exigem revisão das caixas."
+    "text": "Artesanatos e demais itens classificados no Nomus como Mercadoria para revenda ou Produtos para revenda seguem automaticamente para Preparar envio quando o pedido está liberado, todos os itens estão liberados ou atendidos parcialmente, os produtos e quantidades estão identificados e a consulta confirma ausência de OP. Não é preciso criar OP nem clicar em Separar do estoque nesses casos. Pedidos mistos com produtos de fabricação seguem o fluxo normal de produção. Pedidos arquivados ou com trabalho iniciado mantêm seus registros. Para outros atendimentos de estoque, Separar do estoque continua disponível em Pedidos quando a liberação e a ausência de OP estiverem confirmadas. A ação não confirma saldo nem baixa estoque no Nomus. Confira fisicamente os produtos e revise as caixas se houver alterações."
   },
   {
     "category": "production",
@@ -107,7 +107,7 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Corrija sem perder o conteúdo",
-    "text": "Em Caixas 40 montadas, selecione a caixa e use Voltar à montagem. Ela retorna à área de criação com seus produtos. Para uma menor já acomodada, Retirar para ajustar devolve a embalagem inteira com o conteúdo. Ajuste, finalize e confira novamente. Mudanças físicas exigem nova pesagem; alterações documentais exigem revisão do documento. Caixas só são excluídas vazias."
+    "text": "Em Caixas 40 montadas, selecione a caixa e use Voltar à montagem. Ela retorna à área de criação com seus produtos. Para uma menor já acomodada, Retirar para ajustar devolve a embalagem inteira com o conteúdo. Ajuste, finalize e confira novamente. Antes de excluir, confira os produtos envolvidos e digite EXCLUIR na confirmação: a exclusão da Caixa 40 retira aquele volume do envio e libera as quantidades para nova montagem. Mudanças físicas exigem nova pesagem e conferência; alterações documentais exigem nova revisão do documento."
   },
   {
     "category": "expedition",
@@ -122,12 +122,12 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Onde configurar os modelos de caixa?",
-    "text": "Abra Configurações de caixas no menu do painel para cadastrar modelos, medidas, limite de peso e tara. Na montagem, escolha o modelo em Modelo para novas caixas antes de criar a Caixa 40. Alterar o cadastro do modelo vale para novas caixas; confira os dados das caixas já existentes. A pesagem real continua sendo feita em Caixas 40 montadas."
+    "text": "Abra Mais → Modelos de caixas para cadastrar medidas, limite de peso e tara. Na montagem, escolha Modelo para novas caixas antes de criar a Caixa 40. A alteração do modelo vale para novas caixas; confira os dados das caixas já existentes. A pesagem real continua sendo feita em Caixas 40 montadas."
   },
   {
     "category": "documents",
     "title": "Qual documento e qual formato usar",
-    "text": "Packing list descreve volumes e pode reunir pedidos; o site gera seu PDF. Invoice FedEx/DHL é comercial, contém um pedido e pode ser exportada em PDF ou Excel editável. Escolha conforme a operação; um não substitui automaticamente o outro. O PDF oficial do pedido de venda continua sendo gerado no Nomus."
+    "text": "Packing list descreve volumes, pode reunir pedidos e pode ser baixado em PDF ou Excel editável. Invoice FedEx/DHL é comercial, contém um pedido e também permite PDF ou Excel. Um documento não substitui automaticamente o outro. O PDF oficial do pedido de venda continua sendo gerado no Nomus."
   },
   {
     "category": "documents",
@@ -148,5 +148,20 @@ export const manual = [
     "category": "support",
     "title": "O que o sistema altera no Nomus",
     "text": "A integração é somente leitura. Prioridades, etapas, notas, caixas, documentos e rastreio são salvos no painel. O site não baixa estoque, fatura pedidos, encerra OPs nem altera o cadastro do Nomus. Exportar CSV considera os pedidos visíveis; informações ausentes podem depender da conclusão das consultas."
+  },
+  {
+    "category": "start",
+    "title": "Como saber se as alterações foram salvas",
+    "text": "Quando o salvamento termina, a barra mostra um sinal de confirmação; passe o mouse para ler Salvo. Enquanto houver mudanças pendentes, aparece Aguardando gravação; durante o envio, Salvando. Não salvo ou Sem sincronização exige atenção ao aviso na tela. Aguarde a confirmação antes de fechar, exportar ou trocar de funcionário. Recarregar quadro fica no menu de três pontos; leia o aviso antes de descartar alterações locais. O horário ao lado do indicador Nomus se refere à consulta do ERP, não ao salvamento das suas alterações."
+  },
+  {
+    "category": "documents",
+    "title": "Comprador, transporte e condições comerciais do packing list",
+    "text": "Em Dados do documento, Informações complementares aparece antes de Destinatário e entrega. Preencha comprador/importador quando diferente, referências e contatos confirmados. Informe país de origem e destino, Incoterm, pagamento, pré-transporte, local de recebimento, voo/navio, portos de embarque e desembarque e destino final conforme cada envio. Valores de demonstração não são padrões. Deixe vazios os opcionais que não se aplicam. Excel e PDF apresentam os dados comerciais e os produtos por caixa; a quantidade de unidades não é repetida em uma coluna extra."
+  },
+  {
+    "category": "support",
+    "title": "Artesanato liberado ainda não apareceu em Preparar envio",
+    "text": "Localize o pedido em Pedidos e confira sua liberação. A classificação de revenda vem do cadastro do produto no Nomus, não de palavras no nome. Verifique se há item de fabricação, item aguardando liberação, consulta pendente ou OP vinculada. Pedidos liberados sem OP têm prioridade para completar a classificação, mas as consultas são feitas por etapas. Use o indicador Nomus para conferir horário e atualizar; recarregar o quadro busca os dados já salvos no painel. Confira também os filtros e Mais → Arquivados antes de criar outro registro."
   }
 ];

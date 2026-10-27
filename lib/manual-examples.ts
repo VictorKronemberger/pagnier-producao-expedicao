@@ -9,7 +9,7 @@ export const manualExamples:Record<string,ManualExample> = {
     ],
     "result": "Você sabe qual pedido está atendendo e qual é a próxima atividade.",
     "image": "quadro.png",
-    "caption": "Quadro do sistema com pedido fictício. As cinco colunas representam as etapas do trabalho."
+    "caption": "Quadro atualizado com pedidos fictícios. As seis colunas representam as etapas do trabalho."
   },
   "handoff": {
     "scenario": "Victor conferiu as caixas, mas saiu antes de preencher o número da invoice.",
@@ -36,14 +36,14 @@ export const manualExamples:Record<string,ManualExample> = {
     "actions": [
       "Abra Novidades neste pedido para comparar Antes e Agora.",
       "Confira com a produção qual quantidade está disponível de fato.",
-      "Consulte Atendido pela produção em Conferir produtos; a mudança de 100 para 80 não prova que 80 foram produzidas."
+      "Consulte Produzido em Conferir produtos; a mudança de 100 para 80 não prova que 80 foram produzidas."
     ],
     "result": "Você separa alteração da programação de quantidade efetivamente produzida."
   },
   "conference": {
     "scenario": "A OP tem 10 unidades, a produção confirmou 7 e há 4 em Caixas 40.",
     "actions": [
-      "Leia Na OP: 10; Atendido pela produção: 7; Em Caixas 40: 4.",
+      "Leia Na OP: 10; Produzido: 7; Em Caixas 40: 4.",
       "Falta embalar mostra 6, pois considera o total programado menos as caixas. Ainda faltam produzir 3.",
       "Confira fisicamente as 3 produzidas ainda fora das caixas antes de embalar."
     ],

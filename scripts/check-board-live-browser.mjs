@@ -63,7 +63,8 @@ try{
   await a.send('Page.bringToFront');await a.send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<640});await pause(150);
   const height=await a.evaluate('document.querySelector(".kanban").getBoundingClientRect().top-document.querySelector(".board-main").getBoundingClientRect().top');heights.push({width,height});
 
-  assert(height<=(width>=1400?100:width>=1000?145:230),'compact header at '+width+': '+height);
+  // The current header includes the active-filter row beneath its controls.
+  assert(height<=(width>=1400?110:width>=1000?145:230),'compact header at '+width+': '+height);
   assert(await a.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'no page overflow at '+width);
   await shot(a,'compact-header-'+width);
  }
@@ -78,7 +79,10 @@ try{
  for(const p of [a,b]){await p.evaluate('document.querySelector(".card-open").click()');await p.until('!!document.querySelector(".card-dialog textarea")')}
 
  const edit=text=>`(()=>{const el=document.querySelector('.card-dialog textarea');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(el,${JSON.stringify(text)});el.dispatchEvent(new Event('input',{bubbles:true}))})()`;
- await a.evaluate(edit('Orientação compartilhada'));await b.until('document.querySelector(".card-dialog textarea").value==="Orientação compartilhada"');
+ await a.evaluate(edit('Orientação compartilhada'));
+ await a.until('document.querySelector(".autosave-status").classList.contains("is-pending")');
+ assert(await a.evaluate('getComputedStyle(document.querySelector(".autosave-status>span")).clipPath==="none"'),'pending save must stay visible');
+ await b.until('document.querySelector(".card-dialog textarea").value==="Orientação compartilhada"');
  await a.evaluate(`(()=>{const el=[...document.querySelectorAll('.card-dialog select')].find(s=>[...s.options].some(o=>o.text==='Produzindo'));el.value=[...el.options].find(o=>o.text==='Produzindo').value;el.dispatchEvent(new Event('change',{bubbles:true}))})()`);
  await b.until(`[...document.querySelectorAll('.card-dialog select')].some(s=>s.selectedOptions[0]?.text==='Produzindo')`);
  // Overlapping writes to the same record: first save wins; the other draft stays visible.

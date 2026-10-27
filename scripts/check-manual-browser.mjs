@@ -7,6 +7,8 @@ import {spawn} from "node:child_process";
 import {mkdirSync,writeFileSync,existsSync,readFileSync} from "node:fs";
 import path from "node:path";
 const dir=path.resolve(".sites-runtime/manual-process-qa");mkdirSync(dir,{recursive:true});
+const port=5181,base="http://127.0.0.1:"+port;
+const server=spawn(process.execPath,["node_modules/next/dist/bin/next","start","--hostname","127.0.0.1","--port",String(port)],{windowsHide:true,stdio:"ignore",env:{...process.env,DATABASE_PROVIDER:"neon",DATABASE_URL:"",TURSO_DATABASE_URL:"",TURSO_AUTH_TOKEN:"",NOMUS_API_KEY:""}});
 const browser=spawn("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",["--headless","--disable-gpu","--no-first-run","--remote-debugging-port=9229","--user-data-dir="+dir,"about:blank"],{windowsHide:true,stdio:"ignore"});
 const pdfDir=path.resolve(".sites-runtime/packing-download-qa");mkdirSync(pdfDir,{recursive:true});const invoice="QA-"+Date.now();
 let clientReads=0;let socket;let rejectNextConfirmation=false;const confirmations=[];const pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -24,7 +26,9 @@ try{
  async function respond(m){
  const url=new URL(m.request.url);
  let payload,status=200;
- if(url.pathname==="/api/board"){
+ if(url.pathname==="/api/chat/session")payload={employee:"Victor",employees:[{name:"Victor",registered:true}]};
+ else if(url.pathname==="/api/chat")payload={employee:"Victor",threads:[],messages:[],hasMore:false};
+ else if(url.pathname==="/api/board"){
  if(m.request.method==="DELETE"){
  const body=JSON.parse(m.request.postData);
  if(body.revision!==revision){status=409;payload={error:"Conflito no teste"}}else{try{board=body.kind==="invoice"?deleteDraftInvoice(board,body.invoiceId):deleteDraftPacking(board,body.owner);revision++;writes++;payload={board,revision,updatedAt:new Date().toISOString(),updatedBy:"Teste"}}catch(e){status=400;payload={error:e.message}}}
@@ -43,11 +47,11 @@ try{
  async function evaluate(expression){const r=await send("Runtime.evaluate",{expression:"{"+expression+"}",awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value}
  async function until(expression){for(let i=0;i<80;i++){if(await evaluate(expression))return;await pause(150)}throw Error("Timeout: "+expression)}
  const waitForSave=async()=>{await pause(150);await until('[...document.querySelectorAll(".autosave-status")].every(el=>el.textContent==="Salvo")')};
- await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:"*://127.0.0.1:5173/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
+ await send("Page.enable");await send("Page.addScriptToEvaluateOnNewDocument",{source:"localStorage.removeItem(\"pagnier-view\")"});await send("Fetch.enable",{patterns:[{urlPattern:base+"/api/*",requestStage:"Request"}]});await send("Emulation.setDeviceMetricsOverride",{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
 
 
- await send("Page.navigate",{url:"http://127.0.0.1:5173/signin-with-chatgpt?return_to=/"});await until('!!document.querySelector(".kanban")');
- await send("Page.navigate",{url:"http://127.0.0.1:5173/?aba=help"});await until('document.querySelectorAll("[data-manual-category]").length===6');
+ await send("Page.navigate",{url:base});await until('!!document.querySelector(".kanban")');
+ await send("Page.navigate",{url:base+"/?aba=help"});await until('document.querySelectorAll("[data-manual-category]").length===6');
  assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial,.manual-note").length'),0);
  assert.equal(await evaluate('!!document.querySelector(".industrial-flow,.pop-metadata,.manual-index")'),false);
  for(const [name,width,height,mobile] of [["desktop",1280,900,false],["mobile",390,844,true]]){
@@ -72,10 +76,13 @@ try{
  await search("POP-05");assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);assert.equal(await evaluate('document.querySelectorAll("[data-manual-topic]").length'),1);
  await evaluate('document.querySelector("[data-manual-topic=boxes]").click()');assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),1);
  await search("rastreio");assert(await evaluate('!!document.querySelector("[data-manual-topic=dispatch]")'));assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);
+ await search("revenda");await until('document.querySelectorAll(".manual-reference-link").length>0');assert(await evaluate('!!document.querySelector("[data-manual-topic=orders]")'));
+ await evaluate('[...document.querySelectorAll(".manual-reference-link")].find(e=>e.textContent.includes("Pedidos de estoque")).click()');await until('!!document.querySelector(".manual-note")');assert(await evaluate('document.querySelector(".manual-note").textContent.includes("Produtos para revenda")'));
+ await search("congeladas");await until('document.querySelectorAll(".manual-reference-link").length>0');await evaluate('document.querySelector(".manual-reference-link").click()');assert(await evaluate('document.querySelector(".manual-note").textContent.includes("sem linhas ou colunas congeladas")'));
  await search("zzzxqnenhum");assert(await evaluate('document.querySelector(".packing-empty").textContent.includes("Nenhuma orientação")'));
  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Limpar busca").click()');assert.equal(await evaluate('document.querySelectorAll("[data-manual-category]").length'),6);
  await evaluate('document.querySelector(".manual-browse-categories").open=true;document.querySelector("[data-manual-category=expedition]").click();');await evaluate('document.querySelector(".manual-category-questions summary").click()');await evaluate('document.querySelector(".manual-reference-link").click()');assert.equal(await evaluate('document.querySelectorAll(".manual-note").length'),1);assert.equal(await evaluate('document.querySelectorAll(".manual-tutorial").length'),0);
  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Voltar às orientações").click()');assert.equal(await evaluate('document.querySelectorAll("[data-manual-topic]").length'),2);
  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="Voltar ao trabalho").click()');await until('!!document.querySelector(".kanban")');
  console.log("OK manual: abertura, índice cronológico, tarefas por etapa, uma leitura por vez, instruções curtas, POPs preservados em detalhes, busca sem abrir textos, navegação, referências e desktop/mobile.");
-}finally{socket?.close();browser.kill()}
+}finally{socket?.close();browser.kill();server.kill()}
