@@ -16,5 +16,5 @@ export async function GET(request:Request){
  const product=await readNomusProduct(productId);
  if(product?.id!==productId)return json({error:"Produto não confirmado pelo Nomus."},502);
  return json(productDocumentData(product,op));
- }catch{return json({error:"Não foi possível confirmar a referência e o NCM do produto. Atualize o pedido ou tente novamente."},503)}
+ }catch{return json({error:"Não foi possível confirmar os dados do produto. Atualize o pedido ou tente novamente."},503)}
 }
