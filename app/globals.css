@@ -1090,3 +1090,16 @@ details:not([open]):has([data-field-pending="true"])>summary.section-action::aft
 .product-suggestion-op{display:block;margin-top:5px;color:light-dark(#86938b,var(--night-muted));font-size:10px;line-height:1.4;overflow-wrap:anywhere}
 .product-suggestions-empty{padding:14px 12px;font-size:12px;line-height:1.5;color:light-dark(#738178,var(--night-muted))}
 .product-picker-status{display:block;margin-top:5px;color:light-dark(#738178,var(--night-muted));font-size:11px}
+/* Expandable net weights for bags and inner boxes. */
+.package-weights>summary{flex-wrap:wrap}
+.package-weights>summary .package-weight-total{margin-left:auto;font-size:12px}
+.package-weight-total b{font-weight:600}
+.package-weight-chevron{flex-shrink:0;transition:transform .15s}
+.package-weights[open]>summary .package-weight-chevron{transform:rotate(180deg)}
+.package-weights>summary:focus-visible{outline:2px solid currentColor;outline-offset:-3px}
+.product-weight-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:12px 0;border-bottom:1px solid light-dark(#dde5d8,var(--night-border))}
+.product-weight-row:last-child{border-bottom:0}
+.product-weight-numbers{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:12px;line-height:1.5}
+.product-weight-numbers strong{font-weight:600}
+.box-content-weights{margin-top:14px}
+@media(max-width:600px){.product-weight-row{grid-template-columns:1fr;gap:8px}.product-weight-numbers{align-items:flex-start}.package-weights>summary .package-weight-total{margin-left:0;flex-basis:calc(100% - 30px)}}
