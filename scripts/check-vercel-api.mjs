@@ -137,6 +137,26 @@ try{
  const persisted=JSON.parse((await db.prepare('SELECT payload FROM production_board WHERE id=?').bind('nomus').first()).payload);
  assert.equal(persisted.orderAbsences,undefined);assert.equal(persisted.orderScan,undefined);
  console.log('OK normal paginated sync: one GET per poll and obsolete deletion checks discarded.');
+ // Cron rejects missing/forged credentials before touching the database.
+ testEnv.DB={prepare(){throw Error('Cron auth must run before DB access')}};
+ assert.equal((await call('cron/nomus','GET',undefined,{anonymous:true})).status,503);
+ testEnv.CRON_SECRET='test-secret-for-cron-at-least-32-characters';
+ assert.equal((await call('cron/nomus','GET',undefined,{anonymous:true})).status,401);
+ assert.equal((await call('cron/nomus','GET',undefined,{anonymous:true,query:'?secret='+testEnv.CRON_SECRET})).status,401);
+ testEnv.DB=db;
+ const economicSeed={...seed(),nextAt:0};await saveSync(economicSeed);
+ const statements=[];testEnv.DB={prepare(sql){statements.push(sql);return db.prepare(sql)},batch:db.batch};
+ let batchReads=0;nomusFetch=async(_url,options)=>{assert.equal(options.method,'GET');batchReads++;return Response.json([])};
+ const cronResponse=await call('cron/nomus','GET',undefined,{anonymous:true,headers:{authorization:'Bearer '+testEnv.CRON_SECRET}});
+ assert.equal(cronResponse.status,200);const cronBody=await cronResponse.json();
+ assert.equal(cronBody.status,'updated');assert.equal(batchReads,3);assert.equal(cronBody.snapshot,undefined);
+ assert.equal(statements.filter(sql=>/^(UPDATE|INSERT)/.test(sql)).length,2,'three ERP reads use one claim and one save');
+ statements.length=0;
+ assert.equal((await (await call('cron/nomus','GET',undefined,{anonymous:true,headers:{authorization:'Bearer '+testEnv.CRON_SECRET}})).json()).status,'cached');
+ assert.equal(batchReads,3);assert.equal(statements.filter(sql=>/^(UPDATE|INSERT)/.test(sql)).length,0,'early calls never write');
+ testEnv.DB=db;
+ console.log('OK scheduled capture: fail-closed authorization, shared cooldown, three GETs with two writes and compact response.');
+
  testEnv.NOMUS_API_KEY='';
  console.log('OK Nomus refresh: immediate GET, unchanged timestamp on failure, one request across concurrent tabs, cooldown, expired lease recovery and authenticated same-origin access.');
  // Archiving is independent of physical completion and survives a fresh board read.

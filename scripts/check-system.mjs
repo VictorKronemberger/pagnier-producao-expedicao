@@ -26,6 +26,7 @@ const unitTests=["check-content-weights.mjs","check-nomus-product-weight.mjs","c
  "check-invoice.mjs",
  "check-nomus-changes.mjs",
  "check-nomus-bootstrap.mjs",
+ "check-nomus-economy.mjs",
  "check-order-release.mjs",
  "check-order-archive.mjs",
  "check-order-visibility.mjs",

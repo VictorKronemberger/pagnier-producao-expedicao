@@ -11,5 +11,6 @@ export const env={
   if(!process.env.DATABASE_URL)return undefined;
   return database=createPostgresDatabase(neon(process.env.DATABASE_URL,{fullResults:true}));
  },
+ get CRON_SECRET(){return process.env.CRON_SECRET??""},
  get NOMUS_API_KEY(){return process.env.NOMUS_API_KEY??""}
 };

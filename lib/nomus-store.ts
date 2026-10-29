@@ -4,6 +4,7 @@ import {applyCompanyScope} from "./company-scope.mjs";
 import {env} from "./server-env";
 import snapshot from "./production-snapshot.json";
 import {initialSync,publicSync,nomusGet,syncStep} from "./nomus-sync.mjs";
+import {runNomusBatch,CAPTURE_INTERVAL_MS} from "./nomus-batch.mjs";
 export const nomusKey=()=>((env as unknown as Record<string,string>).NOMUS_API_KEY??"");
 const readNomusRow=createRevisionReader("nomus");
 export async function readNomus(){
@@ -22,7 +23,7 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
  if(stamp<(state.leaseUntil??0))return reply(state,revision,"busy");
  if(stamp<(state.retryAt??0)||manualRefresh&&stamp<(state.manualNextAt??0))return reply(state,revision,"cooldown");
  if(!manualRefresh&&stamp<state.nextAt)return reply(state,revision,"cached");
- const now=new Date(stamp).toISOString(),lease=JSON.stringify({...state,nextAt:stamp+60000,leaseUntil:stamp+60000});
+ const now=new Date(stamp).toISOString(),lease=JSON.stringify({...state,nextAt:stamp+120000,leaseUntil:stamp+120000});
  let claimed;
  if(revision===0)claimed=await db.prepare("INSERT INTO production_board(id,payload,revision,updated_at,updated_by) VALUES(?,?,1,?,?) ON CONFLICT(id) DO NOTHING RETURNING revision").bind("nomus",lease,now,"Nomus").first();
  else claimed=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(lease,now,"nomus",revision).first();
@@ -30,7 +31,10 @@ export async function pollNomus(requestedProduction:string[]=[],manualRefresh=fa
  const fetcher:typeof fetch=fetch;
  const boardRow=await db.prepare("SELECT payload FROM production_board WHERE id=?").bind("main").first<{payload:string}>();
  const requestedLots=requestedLotNames(boardRow?JSON.parse(boardRow.payload):{});
- const next=await syncStep(manualRefresh?{...state,nextAt:0}:state,key,{fetcher,requestedLots,requestedProduction,requestedOrder,refreshOrder:manualRefresh,refreshRecentOrders:true});
+ const next=manualRefresh?
+  await syncStep({...state,nextAt:0},key,{fetcher,requestedLots,requestedProduction,requestedOrder,refreshOrder:true,refreshRecentOrders:true}):
+  await runNomusBatch(state,key,{fetcher,requestedLots,requestedProduction,requestedOrder});
+ next.nextAt=Math.max(next.nextAt,Date.now()+CAPTURE_INTERVAL_MS);
  delete next.leaseUntil;
  if(manualRefresh)next.manualNextAt=Date.now()+10000;
  const saved=await db.prepare("UPDATE production_board SET payload=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING revision").bind(JSON.stringify(next),new Date().toISOString(),"nomus",revision+1).first<{revision:number}>();
