@@ -1,5 +1,5 @@
 export type ManualVisual = {image:string; width:number; height:number; title:string; text:string; target:[number,number,number,number]};
-const sizes:Record<string,[number,number]>={"buscar-produto":[1200,1200],"conferencia-sku":[1200,1100],"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
+const sizes:Record<string,[number,number]>={"planilha-caixas":[1440,1000],"buscar-produto":[1200,1200],"conferencia-sku":[1200,1100],"historico":[1200,1000],"quadro":[1900,1000],"montar-caixas":[1200,1200],"modalidades":[1200,1200],"bag-conteudo":[1200,1200]};
 const scenes:Record<string,Array<[string,string,string,[number,number,number,number]]>> = {
   "overview": [
     [
@@ -209,119 +209,86 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
   ],
   "boxes": [
     [
-      "modalidades",
-      "Escolha como embalar",
-      "Use Com caixas menores ou Com bags para artesanatos. O modo misto permite juntar os dois tipos e produtos avulsos.",
+      "planilha-caixas",
+      "Abra a planilha do pedido",
+      "Em Expedição → Montar caixas, use Planilha do pedido e Abrir tela da planilha. Menores e Caixa 40 são montadas juntas.",
       [
-        123,
-        235,
-        954,
-        170
+        41,
+        42,
+        700,
+        90
       ]
     ],
     [
-      "buscar-produto",
-      "Digite para ver as opções",
-      "Busque pelo SKU, nome ou OP. As opções aparecem enquanto você digita, sem abrir outra lista.",
+      "planilha-caixas",
+      "Crie ou selecione a Caixa 40",
+      "As caixas maiores ficam no alto. Nova Caixa 40 cria outra; Todas mostra as colunas de todo o envio.",
       [
-        418,
-        899,
-        637,
-        42
+        41,
+        177,
+        585,
+        57
       ]
     ],
     [
-      "buscar-produto",
-      "Confira o SKU e clique no produto",
-      "O SKU diferencia produtos com nomes parecidos. Clique na opção correta para preencher o item da caixa ou da bag.",
+      "planilha-caixas",
+      "Crie várias menores juntas",
+      "Confira Adicionar em, informe o número de embalagens e clique em Adicionar caixas menores. Sem uma maior, ela é criada junto.",
       [
-        418,
-        980,
-        637,
-        88
+        41,
+        248,
+        1358,
+        78
       ]
     ],
     [
-      "buscar-produto",
-      "Selecione também pelo teclado",
-      "Use as setas para escolher e Enter para confirmar. Escape fecha as sugestões; pesquisar não altera o item já selecionado.",
+      "planilha-caixas",
+      "Preencha como uma planilha",
+      "Digite a quantidade na linha do SKU e na coluna da menor. Use Tab, Enter ou cole um intervalo do Excel. O saldo acompanha o pedido inteiro.",
       [
-        418,
-        980,
-        637,
-        88
+        520,
+        568,
+        600,
+        84
       ]
     ],
     [
-      "bag-conteudo",
-      "Prepare a bag",
-      "Clique em Nova bag, selecione o artesanato e informe a quantidade real. Cada bag tem sua identificação.",
+      "planilha-caixas",
+      "Escolha a Caixa 40 no topo da menor",
+      "Mude o destino para transferir a embalagem com todo o conteúdo. + Nova Caixa 40 cria outra maior. A menor continua na planilha.",
       [
-        418,
+        520,
         462,
-        638,
-        145
+        600,
+        106
       ]
     ],
     [
-      "bag-conteudo",
-      "Confira e finalize a bag",
-      "Depois de conferir, finalize a bag e use Distribuir nas Caixas 40. O saldo controla as quantidades já separadas.",
+      "planilha-caixas",
+      "Confira a composição e conclua",
+      "A lateral mostra o conteúdo da Caixa 40. Preencha ou remova menores vazias e clique em Concluir Caixa 40. Reabrir permite corrigir.",
       [
-        401,
-        829,
-        157,
-        42
+        1163,
+        483,
+        235,
+        268
       ]
     ],
     [
-      "montar-caixas",
-      "Selecione a caixa menor",
-      "Cada cartão corresponde a uma caixa. Confira o conteúdo da caixa selecionada.",
+      "planilha-caixas",
+      "Saldo e produtos pendentes",
+      "Pedido é a quantidade prevista. Falta embalar desconta tudo já separado, inclusive menores sem destino. Zero indica distribuição completa desse produto.",
       [
-        97,
-        453,
-        258,
-        104
-      ]
-    ],
-    [
-      "montar-caixas",
-      "Informe o conteúdo real",
-      "Selecione o produto e a quantidade. Em Revisar dados do produto, confira lote, validade e peso.",
-      [
-        425,
-        779,
-        631,
-        120
-      ]
-    ],
-    [
-      "montar-caixas",
-      "Finalize cada caixa menor",
-      "Confira fisicamente antes de finalizar. Depois acomode as menores em Montar Caixa 40.",
-      [
-        412,
-        1122,
-        208,
-        43
-      ]
-    ],
-    [
-      "montar-caixas",
-      "Pese, meça e confira",
-      "Depois de finalizar a Caixa 40, abra Caixas 40 montadas, informe peso bruto e medidas e confirme a conferência física.",
-      [
-        766,
-        219,
-        328,
-        48
+        256,
+        465,
+        264,
+        216
       ]
     ],
     [
       "conferencia-sku",
-      "Confira primeiro o SKU",
-      "O código em destaque identifica o produto. O nome fica abaixo como apoio. Compare o SKU e a quantidade com o conteúdo físico da caixa.",
+      "Depois, pese e confira as caixas reais",
+      "Abra Pesos e detalhes da Caixa 40, informe pesos e medidas e confirme a conferência física. Aguarde Salvo antes de sair.",
       [
         112,
         288,

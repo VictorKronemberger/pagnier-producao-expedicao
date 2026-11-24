@@ -31,6 +31,7 @@ async function clickText(text){await evaluate('(()=>{const el=[...document.query
 async function shot(name){await pause(150);writeFileSync(path.join(dir,name+".png"),Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"))}
 await shot("modalidades");
 await evaluate('[...document.querySelectorAll(".mode-choice")].find(b=>b.textContent.includes("Com bags")).click()');
+await clickText("Formulário por produto");
 await clickText("Nova bag");assert.equal(await evaluate('window.qa.caixasEmMontagem[0].tipo'),"bag");
 await clickText("Adicionar produto");
 async function searchProduct(value){

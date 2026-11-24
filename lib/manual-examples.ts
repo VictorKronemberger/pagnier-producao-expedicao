@@ -52,13 +52,16 @@ export const manualExamples:Record<string,ManualExample> = {
     "caption": "Exemplo no sistema: programação, produção confirmada e embalagem aparecem separadas."
   },
   "boxes": {
-    "scenario": "O envio contém apenas 8 pacotes de 250 g e 2 pacotes de 1 kg.",
+    "scenario": "Um produto do pedido tem 20 unidades. Você quer três caixas menores e duas Caixas 40.",
     "actions": [
-      "O painel abre a montagem direta da Caixa 40, sem criar caixas menores.",
-      "O peso líquido dos produtos é 4 kg (8 × 0,250 + 2 × 1). Pese a caixa pronta para informar o bruto real.",
-      "Finalize a Caixa 40, abra Caixas 40 montadas e confirme a conferência física."
+      "Na planilha, informe Quantidade 3 e clique em Adicionar caixas menores. A primeira Caixa 40 é criada junto.",
+      "Na linha do produto, preencha 8, 6 e 6 nas três colunas. Falta embalar chega a zero para esse produto.",
+      "Na terceira menor, escolha + Nova Caixa 40 no destino. Ela é movida com suas 6 unidades. A primeira maior fica com as outras duas menores.",
+      "Confira os demais produtos do pedido e conclua cada Caixa 40. Abra Pesos e detalhes, informe os valores reais e confirme a conferência física."
     ],
-    "result": "A caixa sai da criação e fica disponível para conferência. Se houver também um produto de 10 g, a escolha de modalidade continua disponível."
+    "result": "As menores e as Caixas 40 foram montadas na mesma tela, sem cadastrar o mesmo conteúdo duas vezes.",
+    "image": "planilha-caixas.png",
+    "caption": "Planilha integrada com dados fictícios: produtos nas linhas, menores nas colunas e composição da Caixa 40 ao lado."
   },
   "packing": {
     "scenario": "Dois pedidos viajarão juntos para o mesmo endereço de entrega.",

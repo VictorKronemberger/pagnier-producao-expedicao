@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"28",updatedAt:"27/10/2026"};
+export const manualEdition = {revision:"29",updatedAt:"24/11/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -266,55 +266,60 @@ export const tutorials = [
   {
     "id": "boxes",
     "category": "expedition",
-    "title": "Monte e confira as caixas",
+    "title": "Monte caixas menores e Caixa 40 na planilha",
     "target": "board",
     "action": "Abrir expedição pelo cartão",
-    "before": "Conclua a conferência dos produtos antes de iniciar a montagem.",
+    "before": "Confira os produtos e abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para trabalhar com mais espaço.",
     "steps": [
       {
-        "title": "Veja qual montagem se aplica",
-        "short": "Escolha Com bags para artesanatos, Com caixas menores ou montagem direta. O modo misto combina embalagens e avulsos.",
-        "text": "Na modalidade Com bags, crie Nova bag, selecione os artesanatos liberados e informe as quantidades. Confira e finalize cada bag antes de distribuir nas Caixas 40. O modo misto permite caixas menores, bags e produtos avulsos; o tipo de cada embalagem permanece ao salvar, copiar ou retirar para ajuste. Quando todos os produtos forem de 250 g, 500 g ou 1 kg, continua a montagem direta automática."
+        "title": "Escolha a modalidade",
+        "short": "Use Com caixas menores, Com bags ou montagem direta. O modo misto permite combinar os três.",
+        "text": "A planilha fica disponível diretamente em Montar caixas, sem precisar preparar as menores em outra etapa. Quando todos os produtos forem de 250 g, 500 g ou 1 kg, o painel mantém a montagem direta automática. Embalagens anteriores continuam preservadas."
       },
       {
-        "title": "Busque e selecione sem abrir outra lista",
-        "short": "Digite SKU, nome ou OP e clique na sugestão. As setas e Enter também selecionam o produto.",
-        "text": "Em Adicionar produto, digite no campo de busca. As sugestões aparecem automaticamente com SKU, nome e OP. Confira o SKU antes de clicar, especialmente quando os nomes forem parecidos. Use as setas e Enter para escolher pelo teclado; Escape fecha a lista. A pesquisa não muda o item salvo até você selecionar uma opção. Depois informe a quantidade. O mesmo fluxo atende caixas maiores, caixas menores e bags."
+        "title": "Crie a Caixa 40 junto com as menores",
+        "short": "Informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags.",
+        "text": "Sem uma Caixa 40 em montagem, o painel cria a maior junto das menores. Para abrir outra, clique em Nova Caixa 40; nas modalidades somente menores ou bags, ela já começa com uma embalagem interna. Selecione a Caixa 40 no alto e confira Adicionar em antes de criar mais. Quantidade é o número de novas embalagens, não a quantidade de produtos."
       },
       {
-        "title": "Monte a Caixa 40 com produtos diretos",
-        "short": "Em Montar Caixa 40, use Nova Caixa 40 → Adicionar produto. Selecione a OP e informe a quantidade.",
-        "text": "Na modalidade Sem caixas menores, abra Montar Caixa 40, crie a caixa e adicione os produtos que estão fisicamente nela. Essa aba mostra somente caixas em criação. Confira o saldo em Produtos a distribuir; quantidades acima do disponível são bloqueadas."
+        "title": "Digite as quantidades do pedido",
+        "short": "Cada linha é um produto/OP e cada coluna é uma caixa menor, bag ou Caixa 40 direta.",
+        "text": "Confira o SKU e digite a quantidade real na unidade da OP. O conteúdo da menor e da Caixa 40 aparece ao lado automaticamente. Pedido mostra a quantidade prevista; Falta embalar desconta tudo já distribuído, inclusive embalagens sem Caixa 40. Tab avança para a próxima caixa e Enter para o próximo produto. Apagar ou digitar 0 retira aquele item. A busca aceita SKU, produto e OP; Só falta embalar mostra o que ainda precisa distribuir ou revisar."
       },
       {
-        "title": "Acomode caixas menores, quando houver",
-        "short": "Prepare e finalize cada caixa menor ou bag. Em Montar Caixa 40, selecione as embalagens e adicione ao volume.",
-        "text": "Na modalidade Com caixas menores, abra Caixas menores → Nova caixa menor, adicione os produtos e use Conferir e finalizar caixa menor. Depois, em Montar Caixa 40, crie ou selecione a maior, escolha uma das Caixas menores prontas e clique em Colocar nesta caixa. Somente o modo misto permite misturar menores e produtos avulsos."
+        "title": "Cole do Excel ou duplique uma menor",
+        "short": "Cole um intervalo de quantidades ou selecione uma coluna e use Duplicar caixa menor / Duplicar bag.",
+        "text": "A colagem segue as linhas e colunas visíveis e deve caber na página e nas caixas existentes. Use Todas para distribuir entre Caixas 40. Se qualquer valor for inválido ou ultrapassar o pedido, o intervalo inteiro é rejeitado. Duplicar repete produtos, quantidades e dados na mesma Caixa 40, quando houver saldo. Confira lotes e validade da cópia. Se a mesma OP tiver vários lotes dentro da mesma embalagem, use Revisar itens para preservar a separação."
+      },
+      {
+        "title": "Escolha o destino sem refazer o conteúdo",
+        "short": "No topo da coluna da menor, escolha a Caixa 40 de destino.",
+        "text": "A lista permite mover a embalagem inteira para outra Caixa 40, criar uma nova ou deixá-la Sem Caixa 40. Produtos, quantidades e dados acompanham a mudança; a menor continua editável na planilha enquanto a maior estiver em montagem. O saldo do pedido não muda por uma transferência. Remover embalagem vazia retira apenas uma menor sem itens. Uma Caixa 40 montada precisa ser reaberta antes de receber ou mover embalagens."
       },
       {
         "title": "Entenda quantidade e conteúdo por embalagem",
         "short": "Em UNID, o padrão é 1 produto por unidade. Em KG, quatro pacotes de 250 g correspondem a 1 kg.",
-        "text": "Em Revisar dados do produto, Unidades embaladas é o número de pacotes ou frascos. Conteúdo por embalagem é quanto produto existe dentro de cada um, na unidade da OP: para pacotes de 250 g e OP em KG, informe 0,250; quatro pacotes somam 1 kg. Para OP em L, dez frascos de 100 ml usam conteúdo 0,100 e somam 1 litro. Em UNID, o padrão é 1 produto por unidade e o campo fica dispensado; conversões já cadastradas continuam visíveis. Esse conteúdo não é o número de caixas. Informe o peso líquido por unidade em kg separadamente; não transforme litros em peso sem pesagem."
+        "text": "Abra Lotes e dados dos produtos na planilha. Em Revisar dados do produto, Unidades embaladas é o número de pacotes ou frascos. Conteúdo por embalagem é quanto produto existe dentro de cada um, na unidade da OP: para pacotes de 250 g e OP em KG, informe 0,250; quatro pacotes somam 1 kg. Para OP em L, dez frascos de 100 ml usam conteúdo 0,100 e somam 1 litro. Em UNID, o padrão é 1 produto por unidade e o campo fica dispensado; conversões já cadastradas continuam visíveis. Esse conteúdo não é o número de caixas. Informe o peso líquido por unidade em kg separadamente; não transforme litros em peso sem pesagem."
       },
       {
         "title": "Confira lote e validade",
         "short": "O lote é preenchido com a OP; a validade vem do lote no Nomus. Confira ambos e ajuste se necessário.",
-        "text": "Em Revisar dados do produto, o lote recebe o número da ordem, como OP5981. A validade é consultada no Nomus para o lote correspondente ao produto e à empresa. Aguarde o salvamento e a sincronização com o painel aberto. A data não é calculada pela criação da OP. Se continuar vazia, confira a validade no sistema e preencha manualmente quando confirmada. Valores já informados manualmente são preservados. Produtos separados do estoque sem OP exigem a identificação manual do lote."
+        "text": "Abra Lotes e dados dos produtos na planilha. Em Revisar dados do produto, o lote recebe o número da ordem, como OP5981. A validade é consultada no Nomus para o lote correspondente ao produto e à empresa. Aguarde o salvamento e a sincronização com o painel aberto. A data não é calculada pela criação da OP. Se continuar vazia, confira a validade no sistema e preencha manualmente quando confirmada. Valores já informados manualmente são preservados. Produtos separados do estoque sem OP exigem a identificação manual do lote."
       },
       {
-        "title": "Finalize e separe as caixas prontas",
-        "short": "Clique em Finalizar Caixa 40. Ela sai de Montar Caixa 40 e aparece em Caixas 40 montadas.",
-        "text": "Depois de completar os produtos e quantidades, clique em Finalizar Caixa 40. A caixa sai da área de criação e permanece salva em Caixas 40 montadas para conferência posterior. Finalizar a caixa não confirma a conferência física nem registra o despacho. Para corrigir uma caixa finalizada, selecione-a em Caixas 40 montadas e use Voltar à montagem. Para corrigir uma menor já acomodada, use Retirar para ajustar; ela volta com seus produtos. Finalize novamente após os ajustes."
+        "title": "Conclua a Caixa 40 na própria planilha",
+        "short": "Confira o conteúdo ao lado e clique em Concluir Caixa 40.",
+        "text": "Não deixe menores vazias: preencha ou remova as que não serão usadas. A Caixa 40 recebe o status Montada e suas quantidades ficam bloqueadas. Ela continua visível na planilha. Para corrigir, use Reabrir Caixa 40 e edite as mesmas colunas. Essa conclusão não substitui a conferência física nem registra despacho. Mudanças no conteúdo ou na composição exigem nova pesagem e conferência."
       },
       {
-        "title": "Pese e meça as caixas montadas",
-        "short": "Em Caixas 40 montadas, selecione cada caixa e informe dimensões em cm e peso bruto real em kg.",
-        "text": "Pese a caixa pronta, incluindo produtos, embalagens e proteções. Registre dimensões externas em cm e peso bruto em kg; a conversão para lb é automática. O peso líquido soma os produtos. Limite de peso e tara ficam recolhidos; a tara inclui embalagens vazias e proteções. Caixa 40 é o nome do modelo, não uma medida. Cadastros de modelos ficam em Mais → Modelos de caixas, fora da montagem. Mudanças físicas no conteúdo exigem nova pesagem."
+        "title": "Confira pesos, medidas e detalhes",
+        "short": "Clique em Pesos e detalhes da Caixa 40 para abrir os dados da caixa concluída.",
+        "text": "Pese a caixa pronta com produtos, embalagens e proteções. Informe o peso bruto em kg e as dimensões externas em cm. A conversão para lb é automática. O peso líquido soma os produtos. Tara inclui embalagens vazias e proteções; limite e tara ficam recolhidos. Caixa 40 é o nome do modelo, não uma medida. Lotes e dados dos produtos abre o formulário detalhado. Para usar a montagem anterior, selecione Formulário por produto; os mesmos dados são preservados."
       },
       {
-        "title": "Confirme a conferência física",
-        "short": "Em Conferir caixas montadas, compare o cadastro com as caixas reais e clique em Conferi as caixas físicas.",
-        "text": "Na aba Caixas 40 montadas, revise o conteúdo, os pesos e as medidas. Em Conferir caixas montadas, compare o resumo com os volumes físicos e use Conferi as caixas físicas. Identifique o responsável em Conferir produtos. Caixas 40 ainda em montagem, menores fora da maior e outras pendências impedem a confirmação. Depois, siga para os documentos. Aguarde Salvo antes de sair."
+        "title": "Confirme a conferência física e aguarde Salvo",
+        "short": "Compare as caixas reais em Conferir caixas montadas e use Conferi as caixas físicas.",
+        "text": "Identifique o responsável em Conferir produtos. Confira produtos, lotes, quantidades, pesos e medidas. Caixas 40 em montagem, menores sem a maior e outras pendências impedem a confirmação. A planilha salva pelo mesmo fluxo do pedido: aguarde Salvo antes de sair. Só depois siga para os documentos."
       }
     ],
     "done": "Conteúdo, peso e medidas foram revisados e a conferência física está confirmada.",
@@ -326,7 +331,7 @@ export const tutorials = [
     "owner": "Equipe de expedição e responsável pela conferência",
     "objective": "Montar volumes rastreáveis, com conteúdo e pesagem corretos.",
     "records": "Produtos por caixa, quantidades, lotes e validades informados, caixas em montagem ou finalizadas, pesos, medidas e conferência física com responsável e data.",
-    "deviation": "Para corrigir uma caixa finalizada, use Voltar à montagem. Corrija faltas, excessos ou embalagens fora da maior, finalize novamente e confira. Mudanças físicas exigem nova pesagem. Validade ausente deve ser confirmada no Nomus; não use a data de criação da OP como validade."
+    "deviation": "Quantidades acima do pedido são bloqueadas. Use Reabrir Caixa 40 para corrigir uma montada. Embalagens sem Caixa 40 precisam de destino. Mudanças físicas exigem nova pesagem e conferência. Se a OP tiver vários lotes na mesma embalagem, revise no formulário. Preserve as edições enquanto o indicador mostrar falha ou espera de gravação."
   },
   {
     "id": "packing",

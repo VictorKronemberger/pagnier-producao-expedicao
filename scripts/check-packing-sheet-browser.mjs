@@ -10,7 +10,7 @@ import ShipmentEditor from "./app/shipment-editor";
 import {emptyShipment,normalizeShipment} from "./lib/shipping.mjs";
 const ops=Array.from({length:23},(_,i)=>({id:"stock-"+i,nome:"OP-"+i,produto:i===2?"Produto a granel":"Artesanato de demonstração",sku:"SKU-"+i,quantidade:i===2?"2,500":"20",unidade:i===2?"KG":"UNID",estoque:true}));
 window.backgroundEscapes=0;document.addEventListener("keydown",e=>{if(e.key==="Escape")window.backgroundEscapes++});
-function App(){const [saveLabel,setSaveLabel]=useState("Salvo (teste)");window.saveLabelQA=setSaveLabel;const [value,setValue]=useState({...emptyShipment(),organizacao:"direct"});const [step,setStep]=useState("outer");const [disabled,setDisabled]=useState(false);window.qa=value;window.disableQA=setDisabled;window.reloadQA=()=>setValue(normalizeShipment(JSON.parse(JSON.stringify(value)),ops));window.resetQA=()=>{setValue({...emptyShipment(),organizacao:"bags"});setStep("small")};return <ShipmentEditor orderLabel="Pedido DEMO-123 · Cliente de demonstração" saveStatus={<span role="status">{saveLabel}</span>} value={value} ops={ops} onChange={setValue} disabled={disabled} assemblyStep={step} onAssemblyStepChange={setStep}/>;}
+function App(){const [saveLabel,setSaveLabel]=useState("Salvo (teste)");window.saveLabelQA=setSaveLabel;const [value,setValue]=useState({...emptyShipment(),organizacao:"direct"});const [step,setStep]=useState("outer");const [disabled,setDisabled]=useState(false);window.qa=value;window.disableQA=setDisabled;window.reloadQA=()=>setValue(normalizeShipment(JSON.parse(JSON.stringify(value)),ops));window.resetQA=(mode="bags")=>{setValue({...emptyShipment(),organizacao:mode});setStep("small")};return <ShipmentEditor orderLabel="Pedido DEMO-123 · Cliente de demonstração" saveStatus={<span role="status">{saveLabel}</span>} value={value} ops={ops} onChange={setValue} disabled={disabled} assemblyStep={step} onAssemblyStepChange={setStep}/>;}
 createRoot(document.getElementById("root")).render(<App/>);`;
 await build({stdin:{contents:fixture,resolveDir:process.cwd(),loader:"tsx"},bundle:true,outfile:path.join(dir,"app.js"),jsx:"automatic",platform:"browser"});
 const css=readFileSync("app/theme.css","utf8")+readFileSync("app/globals.css","utf8").replace(/@import[^;]+;/g,"")+readFileSync(path.join(dir,"app.css"),"utf8");
@@ -38,11 +38,12 @@ try{
  await send("Page.navigate",{url:"http://127.0.0.1:5195"});
  await until('document.querySelector("[aria-label=\'Planilha de montagem\']")');
  await clickText("Nova Caixa 40");await clickText("Nova Caixa 40");
+ await evaluate(`document.querySelector("[aria-label='Caixas 40 da planilha'] button").click()`);await pause(100);
  assert.equal(await evaluate('window.qa.caixas.length'),2);
  await input(cell(0,0),"12");await input(cell(0,1),"8");
  assert.equal(await evaluate('window.qa.caixas[0].itens[0].quantidade'),"12");
  assert.equal(await evaluate('window.qa.caixas[1].itens[0].sku'),"SKU-0");
- assert((await evaluate('document.querySelector(".box-focus").textContent')).includes("8 UNID"),"live content preview");
+ assert((await evaluate('document.querySelector("[aria-label=\'Conteúdo da caixa selecionada\']").textContent')).includes("8"),"live content preview");
  await input(cell(0,1),"9");
  assert.equal(await evaluate('window.qa.caixas[1].itens[0].quantidade'),"8","excess rejected");
  assert.equal(await evaluate(cell(0,1)+'.getAttribute("aria-invalid")'),"true");
@@ -99,20 +100,57 @@ try{
   writeFileSync(path.join(dir,name+".png"),Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  }
  await send("Emulation.setDeviceMetricsOverride",{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
- await clickText("Conferir esta caixa");
+ await clickText("Pesos e detalhes da Caixa 40");
  await until('!document.querySelector("dialog:modal")');
  assert.equal(await evaluate('window.qa.caixas[0].itens.find(i=>i.opId==="stock-1").quantidade'),"6","screen edits survive return");
- await clickText("Abrir tela da planilha");await until('document.querySelector("dialog:modal")');
+ await clickText("Planilha do pedido");await clickText("Abrir tela da planilha");await until('document.querySelector("dialog:modal")');
  await evaluate('window.dispatchEvent(new Event("pagnier-session-expired"))');
  await until('!document.querySelector("dialog:modal")');
- await evaluate('window.resetQA()');await pause(120);
- await clickText("Nova bag");await input(cell(0,0),"7");
- assert.equal(await evaluate('window.qa.caixasEmMontagem[0].itens[0].quantidade'),"7");
- await clickText("Conferir e finalizar bag");assert.equal(await evaluate(cell(0,0)+'.disabled'),true);
- await clickText("Distribuir nas Caixas 40");await clickText("Nova Caixa 40");
- assert.equal(await evaluate('document.querySelector("[aria-label=\'Planilha de montagem\']")'),null,"bags go through physical distribution");
- await evaluate('document.querySelector(".small-picker-option input").click()');await clickText("Adicionar à Caixa 40 (1)");
- assert.equal(await evaluate('window.qa.caixas[0].itens[0].quantidade'),"7");
- await clickText("Finalizar Caixa 40");assert.equal(await evaluate('window.qa.caixas[0].montada'),true);
- console.log("OK packing sheet browser: typing, live preview, limits, atomic Excel paste, decimal units, keyboard, pagination, search, reload, clear, disabled, desktop/mobile, dedicated screen, live preview, pending filter, save status, focus, session expiry and bag-to-box flow.");
+
+ for(const mode of ["bags","inner"]){
+  await evaluate('window.resetQA('+JSON.stringify(mode)+')');await pause(120);
+  await clickText("Nova Caixa 40");
+  assert.equal(await evaluate('window.qa.caixas.length'),1);
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),1,"outer and small created together");
+  assert.equal(await evaluate('(window.qa.caixasEmMontagem??[]).length'),0);
+  await clickText("Abrir tela da planilha");
+  await input(cell(0,0),"7");await input(cell(1,0),"4");
+  assert.equal(await evaluate('window.qa.caixas[0].itens[0].quantidade'),"7");
+  await clickText(mode==="bags"?"Duplicar bag":"Duplicar caixa menor");
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),2);
+  assert.equal(await evaluate('window.qa.caixas[0].itens.length'),4,"duplicates inside same outer");
+  const before=await evaluate('JSON.stringify(window.qa)');
+  await clickText(mode==="bags"?"Duplicar bag":"Duplicar caixa menor");
+  assert.equal(await evaluate('JSON.stringify(window.qa)'),before,"copy cannot exceed order");
+  await input('document.querySelector("[aria-label=\'Quantidade de novas embalagens\']")',"2");
+  await clickText(mode==="bags"?"Adicionar bags":"Adicionar caixas menores");
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),4,"batch creation");
+  await clickText("Concluir Caixa 40");
+  assert.equal(await evaluate('window.qa.caixas[0].montada'),false,"cannot conclude with an empty inner");
+  await clickText("Remover embalagem vazia");
+  await input(cell(0,2),"3");await input(cell(1,2),"2");
+  await evaluate('(()=>{const el=document.querySelectorAll("thead select")[2];el.value="new";el.dispatchEvent(new Event("change",{bubbles:true}))})()');await pause(100);
+  assert.equal(await evaluate('window.qa.caixas.length'),2);
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),2);
+  assert.equal(await evaluate('window.qa.caixas[1].itens[0].quantidade'),"3","move preserves content");
+  await input(cell(0,0),"6");
+  await clickText("Concluir Caixa 40");
+  assert.equal(await evaluate('window.qa.caixas[1].montada'),true);
+  assert.equal(await evaluate(cell(0,0)+'.disabled'),true,"concluded parent locks all inner columns");
+  await clickText("Reabrir Caixa 40");await input(cell(0,0),"5");
+  await evaluate('window.reloadQA()');await pause(100);
+  assert.equal(await evaluate('window.qa.caixas[1].itens[0].quantidade'),"5","nested spreadsheet survives canonical reload");
+  await evaluate('document.querySelector("[aria-label=\'Caixas 40 da planilha\'] button").click()');await pause(100);
+  await paste(0,0,"8\t6\t6");
+  assert.equal(await evaluate('window.qa.caixas[1].itens[0].quantidade'),"6","atomic cross-parent paste");
+  for(const [name,width,height,mobile] of [["unified-"+mode,1440,1000,false],["unified-"+mode+"-mobile",390,844,true]]){
+   await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile});await pause(150);
+   assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),"no viewport overflow "+name);
+   writeFileSync(path.join(dir,name+".png"),Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
+  }
+  await send("Emulation.setDeviceMetricsOverride",{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await clickText("Voltar à montagem");
+ }
+
+ console.log("OK packing sheet browser: typing, live preview, limits, atomic Excel paste, decimal units, keyboard, pagination, search, reload, clear, disabled, desktop/mobile, dedicated screen, live preview, pending filter, save status, focus, session expiry batch creation, duplication, nested quantities, atomic cross-parent paste, parent moves, finalization, reopen and bag/inner persistence.");
 }finally{socket?.close();browser.kill();server.close();}

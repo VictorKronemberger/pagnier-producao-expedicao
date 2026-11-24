@@ -199,3 +199,9 @@ As consultas alternam descoberta de pedidos/OPs, conferência individual e varre
 O `vercel.json` prepara uma chamada diária às 09:00 UTC (06:00 de Brasília), compatível com o plano Hobby. **Essa chamada diária é uma rodada limitada, não uma varredura completa e não uma atualização contínua com o painel fechado.** Para captura regular sem navegador, um agendador já disponível pode chamar a rota a cada cinco minutos com o mesmo cabeçalho; no Vercel Pro, pode-se ajustar o cron para `*/5 * * * *`. Não contrate nem altere planos automaticamente. A ativação exige configurar o segredo e publicar esta versão. Consulte os [limites oficiais do Vercel Cron](https://vercel.com/docs/cron-jobs/usage-and-pricing) e a [autenticação do agendamento](https://vercel.com/docs/cron-jobs/manage-cron-jobs).
 
 Validação isolada: `node scripts/check-nomus-economy.mjs` e `node scripts/check-vercel-api.mjs --turso`. Os testes conferem prioridade, avanço do histórico, intervalo, concorrência, timeout, espera em falhas, autenticação do cron e três GETs com apenas duas gravações usando banco em memória. Nenhum teste acessa o ERP ou o banco real.
+
+### Planilha integrada de caixas — manual revisão 29
+
+Em Expedição → Montar caixas, a planilha cria as menores/bags dentro da Caixa 40, permite criação em lote, cópia de uma embalagem, troca de destino e digitação ou colagem das quantidades do pedido. A composição da maior acompanha as colunas. Finalizar bloqueia a edição; reabrir permite corrigir. Pesagem e conferência física continuam obrigatórias. O formulário detalhado permanece disponível. O manual inclui procedimento, dúvidas, exemplo e captura da interface com dados fictícios.
+
+Validação: 60 verificações de regras/API, build Next.js e testes de navegador da planilha e do formulário de bags, incluindo teclado, colagem atômica, saldos, persistência, limites e visualização no computador/celular.

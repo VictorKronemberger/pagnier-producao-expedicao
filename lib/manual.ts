@@ -1,8 +1,28 @@
 export const manual = [
   {
     "category": "expedition",
+    "title": "Onde fica a planilha de caixas menores e Caixa 40?",
+    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. As menores e bags aparecem em colunas, com o destino Caixa 40 no topo. Crie e preencha tudo nessa tela; a composição da maior aparece ao lado. O formulário antigo continua em Formulário por produto."
+  },
+  {
+    "category": "expedition",
+    "title": "Criar várias caixas menores de uma vez",
+    "text": "Selecione a Caixa 40 no alto, informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags. Sem uma maior disponível, ela é criada junto. Quantidade indica o número de novas embalagens. Cada uma recebe uma coluna para preencher. Para repetir uma já preenchida, selecione sua coluna e use Duplicar caixa menor / Duplicar bag; a cópia respeita o saldo do pedido."
+  },
+  {
+    "category": "expedition",
+    "title": "Digitar, colar do Excel e acompanhar o saldo",
+    "text": "Produtos e OPs ficam nas linhas; embalagens nas colunas. Digite na unidade da OP. Tab avança para a próxima caixa, Enter para o próximo produto e 0 ou apagar retira o item. Cole intervalos que caibam nas linhas e colunas visíveis. Falta embalar considera todas as caixas, inclusive menores sem destino. Valores inválidos ou excessos rejeitam a colagem inteira. Duas linhas da mesma OP com lotes diferentes dentro da mesma embalagem precisam ser editadas em Revisar itens."
+  },
+  {
+    "category": "expedition",
+    "title": "Mudar uma menor de Caixa 40",
+    "text": "Escolha o destino no topo da coluna. A embalagem inteira é movida com seus produtos, quantidades e dados, sem duplicar o saldo. + Nova Caixa 40 cria um novo destino; Sem Caixa 40 deixa a embalagem aguardando alocação. Reabra caixas montadas antes de mover suas menores. A alteração da composição exige nova pesagem e conferência."
+  },
+  {
+    "category": "expedition",
     "title": "Busca automática de produtos nas caixas e bags",
-    "text": "Em Adicionar produto, digite no campo de busca. As sugestões aparecem automaticamente com SKU, nome e OP. Confira o SKU antes de clicar, especialmente quando os nomes forem parecidos. Use as setas e Enter para escolher pelo teclado; Escape fecha a lista. A pesquisa não muda o item salvo até você selecionar uma opção. Depois informe a quantidade. O mesmo fluxo atende caixas maiores, caixas menores e bags."
+    "text": "Na Planilha do pedido, os produtos já aparecem nas linhas e a busca filtra por SKU, produto ou OP. Para o formulário detalhado, use Formulário por produto → Adicionar produto. Em Adicionar produto, digite no campo de busca. As sugestões aparecem automaticamente com SKU, nome e OP. Confira o SKU antes de clicar, especialmente quando os nomes forem parecidos. Use as setas e Enter para escolher pelo teclado; Escape fecha a lista. A pesquisa não muda o item salvo até você selecionar uma opção. Depois informe a quantidade. O mesmo fluxo atende caixas maiores, caixas menores e bags."
   },
   {
     "category": "production",
@@ -122,12 +142,12 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Corrija sem perder o conteúdo",
-    "text": "Em Caixas 40 montadas, selecione a caixa e use Voltar à montagem. Ela retorna à área de criação com seus produtos. Para uma menor já acomodada, Retirar para ajustar devolve a embalagem inteira com o conteúdo. Ajuste, finalize e confira novamente. Antes de excluir, confira os produtos envolvidos e digite EXCLUIR na confirmação: a exclusão da Caixa 40 retira aquele volume do envio e libera as quantidades para nova montagem. Mudanças físicas exigem nova pesagem e conferência; alterações documentais exigem nova revisão do documento."
+    "text": "Na planilha, selecione a Caixa 40 e use Reabrir Caixa 40. Corrija as quantidades nas mesmas colunas ou mude o destino no topo da menor. Para lotes e outros campos, use Lotes e dados dos produtos. O formulário anterior mantém Voltar à montagem e Retirar para ajustar. Para excluir uma caixa com conteúdo, abra o formulário, confira os produtos e digite EXCLUIR na confirmação. Remover embalagem vazia, na planilha, remove somente uma menor sem itens. Mudanças físicas exigem nova pesagem e conferência; alterações documentais exigem nova revisão."
   },
   {
     "category": "expedition",
     "title": "Para onde vai a Caixa 40 finalizada?",
-    "text": "Montar Caixa 40 reúne somente caixas em criação. Ao clicar em Finalizar Caixa 40, ela sai dessa aba e aparece em Caixas 40 montadas para pesagem e conferência posterior. O conteúdo permanece salvo. Finalizar não equivale a conferir fisicamente nem a despachar. Para corrigir, use Voltar à montagem; não crie outra caixa para substituir o mesmo volume."
+    "text": "Concluir Caixa 40 marca a maior como Montada e bloqueia suas colunas. Ela continua visível na planilha, com a opção Reabrir Caixa 40. Pesos e detalhes da Caixa 40 abre a pesagem da caixa concluída no formulário. Na visualização por formulário, Finalizar Caixa 40 continua levando para Caixas 40 montadas. Concluir não confirma a conferência física nem registra despacho."
   },
   {
     "category": "expedition",
@@ -137,7 +157,7 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Onde configurar os modelos de caixa?",
-    "text": "Abra Mais → Modelos de caixas para cadastrar medidas, limite de peso e tara. Na montagem, escolha Modelo para novas caixas antes de criar a Caixa 40. A alteração do modelo vale para novas caixas; confira os dados das caixas já existentes. A pesagem real continua sendo feita em Caixas 40 montadas."
+    "text": "Abra Mais → Modelos de caixas para cadastrar medidas, limite de peso e tara. Em Montar caixas → Formulário por produto → Montar Caixa 40, escolha Modelo para novas caixas antes de criar a Caixa 40. A alteração do modelo vale para novas caixas; confira os dados das caixas já existentes. A pesagem real continua sendo feita em Caixas 40 montadas."
   },
   {
     "category": "documents",
