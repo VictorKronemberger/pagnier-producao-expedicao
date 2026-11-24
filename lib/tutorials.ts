@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"29",updatedAt:"24/11/2026"};
+export const manualEdition = {revision:"30",updatedAt:"24/11/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -279,7 +279,7 @@ export const tutorials = [
       {
         "title": "Crie a Caixa 40 junto com as menores",
         "short": "Informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags.",
-        "text": "Sem uma Caixa 40 em montagem, o painel cria a maior junto das menores. Para abrir outra, clique em Nova Caixa 40; nas modalidades somente menores ou bags, ela já começa com uma embalagem interna. Selecione a Caixa 40 no alto e confira Adicionar em antes de criar mais. Quantidade é o número de novas embalagens, não a quantidade de produtos."
+        "text": "Sem uma Caixa 40 em montagem, o painel cria a maior junto das menores. Para abrir outra, clique em Nova Caixa 40; nas modalidades somente menores ou bags, ela já começa com uma embalagem interna. Selecione a Caixa 40 no alto e confira o destino ao lado do botão de adicionar antes de criar mais. Quantidade é o número de novas embalagens, não a quantidade de produtos."
       },
       {
         "title": "Digite as quantidades do pedido",

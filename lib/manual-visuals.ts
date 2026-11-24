@@ -211,12 +211,12 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
     [
       "planilha-caixas",
       "Abra a planilha do pedido",
-      "Em Expedição → Montar caixas, use Planilha do pedido e Abrir tela da planilha. Menores e Caixa 40 são montadas juntas.",
+      "Em Expedição → Montar caixas, abra a planilha. O topo compacto deixa mais espaço para os produtos; as instruções ficam em Ajuda.",
       [
-        41,
-        42,
-        700,
-        90
+        33,
+        26,
+        600,
+        33
       ]
     ],
     [
@@ -224,21 +224,21 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Crie ou selecione a Caixa 40",
       "As caixas maiores ficam no alto. Nova Caixa 40 cria outra; Todas mostra as colunas de todo o envio.",
       [
-        41,
-        177,
-        585,
-        57
+        33,
+        78,
+        345,
+        30
       ]
     ],
     [
       "planilha-caixas",
       "Crie várias menores juntas",
-      "Confira Adicionar em, informe o número de embalagens e clique em Adicionar caixas menores. Sem uma maior, ela é criada junto.",
+      "Confira o destino ao lado da busca, informe o número de embalagens e clique em Adicionar caixas menores. Sem uma maior, ela é criada junto.",
       [
-        41,
-        248,
-        1358,
-        78
+        999,
+        114,
+        336,
+        36
       ]
     ],
     [
@@ -247,9 +247,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Digite a quantidade na linha do SKU e na coluna da menor. Use Tab, Enter ou cole um intervalo do Excel. O saldo acompanha o pedido inteiro.",
       [
         520,
-        568,
+        296,
         600,
-        84
+        85
       ]
     ],
     [
@@ -258,9 +258,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Mude o destino para transferir a embalagem com todo o conteúdo. + Nova Caixa 40 cria outra maior. A menor continua na planilha.",
       [
         520,
-        462,
+        190,
         600,
-        106
+        105
       ]
     ],
     [
@@ -269,9 +269,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "A lateral mostra o conteúdo da Caixa 40. Preencha ou remova menores vazias e clique em Concluir Caixa 40. Reabrir permite corrigir.",
       [
         1163,
-        483,
-        235,
-        268
+        214,
+        240,
+        265
       ]
     ],
     [
@@ -280,9 +280,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Pedido é a quantidade prevista. Falta embalar desconta tudo já separado, inclusive menores sem destino. Zero indica distribuição completa desse produto.",
       [
         256,
-        465,
+        190,
         264,
-        216
+        191
       ]
     ],
     [

@@ -2,7 +2,7 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Onde fica a planilha de caixas menores e Caixa 40?",
-    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. As menores e bags aparecem em colunas, com o destino Caixa 40 no topo. Crie e preencha tudo nessa tela; a composição da maior aparece ao lado. O formulário antigo continua em Formulário por produto."
+    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. O cabeçalho compacto reúne busca e criação de embalagens. Ajuda mostra as instruções quando necessário. As menores e bags aparecem em colunas, com o destino Caixa 40 no topo. Crie e preencha tudo nessa tela; a composição da maior aparece ao lado. O formulário antigo continua em Formulário por produto."
   },
   {
     "category": "expedition",
