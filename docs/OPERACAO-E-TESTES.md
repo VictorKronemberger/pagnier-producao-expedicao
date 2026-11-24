@@ -1,6 +1,6 @@
 # Operação e testes do painel
 
-Atualizado em 27/10/2026. Manual do site: revisão 28.
+Atualizado em 24/11/2026. Manual do site: revisão 28.
 
 A versão atual usa Next.js na Vercel e Turso em produção, com compatibilidade com Neon. Este checkout é a origem do código publicado; o painel local D1 é legado. Consulte [Vercel e Turso](VERCEL-TURSO.md).
 
@@ -10,7 +10,7 @@ A versão atual usa Next.js na Vercel e Turso em produção, com compatibilidade
 2. Aguardando liberação depende dos itens no Nomus. Produtos de fabricação liberados com OP seguem para Na fila. Pedidos somente de revenda, totalmente liberados e com ausência de OP confirmada, seguem para Preparar envio. Pedidos mistos mantêm o fluxo de produção.
 3. Acompanhe Produzindo. Alterar a etapa no painel não registra produção no ERP.
 4. Em Conferir produtos, compare a quantidade da OP, a produção confirmada e a quantidade embalada. Sem confirmação não significa zero.
-5. Escolha montagem direta, caixas menores, bags ou modo misto. Em Adicionar produto, digite SKU, nome ou OP e selecione a sugestão por clique ou pelas setas e Enter. Pesquisar não altera o item até a seleção; Escape fecha as opções. Confira o SKU e informe a quantidade.
+5. Escolha montagem direta, caixas menores, bags ou modo misto. A Planilha do pedido lista os produtos por SKU e OP, com uma coluna para cada caixa em montagem. Crie as caixas e digite as quantidades; Tab avança e Enter desce. É possível colar um intervalo do Excel dentro da página visível. O saldo considera todas as caixas e bags do envio, e uma colagem inválida é rejeitada por inteiro. Apagar ou digitar zero remove o item daquela caixa. O conteúdo aparece abaixo enquanto você preenche. Para lotes separados da mesma OP, pesos e dados adicionais, use Formulário por produto. As caixas conferidas precisam voltar à montagem para edição. Finalizar e conferir fisicamente continuam sendo etapas explícitas.
 6. Finalize as embalagens internas e distribua nas Caixas 40. Revise o conteúdo, pese e meça os volumes reais e confirme a conferência física.
 7. Abra a documentação pelo pedido. Retome o packing list ou a invoice existente e confirme os dados herdados.
 8. Use Pronto para envio enquanto aguarda a saída física. Registre a data real de despacho e o rastreio para concluir o envio. Baixar documentos não encerra o pedido.
@@ -54,13 +54,14 @@ npm test
 npm run build
 ```
 
-A bateria principal contém 55 verificações de regras, APIs, concorrência, persistência, integração simulada e exportação de documentos, usando fixtures e bancos isolados. Os relatórios ficam em `.sites-runtime/audit/`, ignorada pelo Git.
+A bateria principal inclui verificações de regras, APIs, concorrência, persistência, integração simulada e exportação de documentos, usando fixtures e bancos isolados. Os relatórios ficam em `.sites-runtime/audit/`, ignorada pelo Git.
 
 Os scripts de navegador que iniciam seu próprio Next ou servidor de componentes testam a versão atual sem acessar o banco operacional. Por exemplo:
 
 ```powershell
 node scripts/check-manual-browser.mjs
 node scripts/check-bags-browser.mjs
+node scripts/check-packing-sheet-browser.mjs
 node scripts/check-board-live-browser.mjs
 node scripts/check-order-history-browser.mjs
 node scripts/check-product-autofill-browser.mjs
