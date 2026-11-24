@@ -216,7 +216,7 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
         33,
         26,
         600,
-        33
+        35
       ]
     ],
     [
@@ -225,9 +225,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "As caixas maiores ficam no alto. Nova Caixa 40 cria outra; Todas mostra as colunas de todo o envio.",
       [
         33,
-        78,
-        345,
-        30
+        79,
+        340,
+        32
       ]
     ],
     [
@@ -235,9 +235,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Crie várias menores juntas",
       "Use o botão para criar menores vazias. Em Mais ações (…), crie várias já preenchidas com o mesmo produto e confira total e saldo antes de aplicar.",
       [
-        1030,
-        114,
-        310,
+        1055,
+        118,
+        278,
         36
       ]
     ],
@@ -246,10 +246,10 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Preencha como uma planilha",
       "Digite a quantidade na linha do SKU e na coluna da menor. Use Tab, Enter ou cole um intervalo do Excel. O saldo acompanha o pedido inteiro.",
       [
-        530,
-        229,
-        590,
-        85
+        499,
+        231,
+        650,
+        86
       ]
     ],
     [
@@ -257,10 +257,10 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Mova a menor com seu conteúdo",
       "Selecione uma coluna e escolha o destino na lateral. Para mover várias juntas, use Mais ações (…) → Mover menores em lote.",
       [
-        1163,
-        440,
-        240,
-        58
+        1193,
+        466,
+        200,
+        54
       ]
     ],
     [
@@ -268,10 +268,10 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Confira a composição e conclua",
       "Confira o total e as colunas e conclua a Caixa 40 uma única vez. Ver produtos abre os detalhes da menor. Reabrir permite corrigir.",
       [
-        1163,
-        185,
-        240,
-        166
+        1180,
+        188,
+        227,
+        167
       ]
     ],
     [
@@ -279,10 +279,10 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Saldo e produtos pendentes",
       "Pedido é a quantidade prevista. Falta embalar desconta tudo já separado, inclusive menores sem destino. Zero indica distribuição completa desse produto.",
       [
-        256,
-        160,
-        274,
-        154
+        265,
+        167,
+        234,
+        150
       ]
     ],
     [
