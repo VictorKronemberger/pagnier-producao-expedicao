@@ -233,11 +233,11 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
     [
       "planilha-caixas",
       "Crie várias menores juntas",
-      "Confira o destino ao lado da busca, informe o número de embalagens e clique em Adicionar caixas menores. Sem uma maior, ela é criada junto.",
+      "Use o botão para criar menores vazias. Em Mais ações (…), crie várias já preenchidas com o mesmo produto e confira total e saldo antes de aplicar.",
       [
-        999,
+        1030,
         114,
-        336,
+        310,
         36
       ]
     ],
@@ -246,32 +246,32 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Preencha como uma planilha",
       "Digite a quantidade na linha do SKU e na coluna da menor. Use Tab, Enter ou cole um intervalo do Excel. O saldo acompanha o pedido inteiro.",
       [
-        520,
-        296,
-        600,
+        530,
+        229,
+        590,
         85
       ]
     ],
     [
       "planilha-caixas",
-      "Escolha a Caixa 40 no topo da menor",
-      "Mude o destino para transferir a embalagem com todo o conteúdo. + Nova Caixa 40 cria outra maior. A menor continua na planilha.",
+      "Mova a menor com seu conteúdo",
+      "Selecione uma coluna e escolha o destino na lateral. Para mover várias juntas, use Mais ações (…) → Mover menores em lote.",
       [
-        520,
-        190,
-        600,
-        105
+        1163,
+        440,
+        240,
+        58
       ]
     ],
     [
       "planilha-caixas",
       "Confira a composição e conclua",
-      "A lateral mostra o conteúdo da Caixa 40. Preencha ou remova menores vazias e clique em Concluir Caixa 40. Reabrir permite corrigir.",
+      "Confira o total e as colunas e conclua a Caixa 40 uma única vez. Ver produtos abre os detalhes da menor. Reabrir permite corrigir.",
       [
         1163,
-        214,
+        185,
         240,
-        265
+        166
       ]
     ],
     [
@@ -280,9 +280,9 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Pedido é a quantidade prevista. Falta embalar desconta tudo já separado, inclusive menores sem destino. Zero indica distribuição completa desse produto.",
       [
         256,
-        190,
-        264,
-        191
+        160,
+        274,
+        154
       ]
     ],
     [

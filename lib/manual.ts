@@ -2,12 +2,12 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Onde fica a planilha de caixas menores e Caixa 40?",
-    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. O cabeçalho compacto reúne busca e criação de embalagens. Ajuda mostra as instruções quando necessário. As menores e bags aparecem em colunas, com o destino Caixa 40 no topo. Crie e preencha tudo nessa tela; a composição da maior aparece ao lado. O formulário antigo continua em Formulário por produto."
+    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. O cabeçalho compacto reúne busca e criação de embalagens. Ajuda mostra as instruções quando necessário. A tela abre em uma Caixa 40 e mostra suas menores em colunas. Todas abre a visão geral. A tabela mostra o conteúdo e a lateral reúne total e ações da embalagem selecionada, com Ver produtos recolhido. O formulário antigo continua em Formulário por produto."
   },
   {
     "category": "expedition",
     "title": "Criar várias caixas menores de uma vez",
-    "text": "Selecione a Caixa 40 no alto, informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags. Sem uma maior disponível, ela é criada junto. Quantidade indica o número de novas embalagens. Cada uma recebe uma coluna para preencher. Para repetir uma já preenchida, selecione sua coluna e use Duplicar caixa menor / Duplicar bag; a cópia respeita o saldo do pedido."
+    "text": "Selecione a Caixa 40 no alto, informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags. Sem uma maior disponível, ela é criada junto. Quantidade indica o número de novas embalagens. Cada uma recebe uma coluna para preencher. Para criar já com produto, abra Mais ações (…) → Criar menores preenchidas, informe produto e quantidade por embalagem e confira total e saldo. O lote inteiro é rejeitado se ultrapassar o pedido. Para repetir uma já preenchida, selecione sua coluna e use Duplicar caixa menor / Duplicar bag; a cópia respeita o saldo do pedido."
   },
   {
     "category": "expedition",
@@ -17,7 +17,7 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Mudar uma menor de Caixa 40",
-    "text": "Escolha o destino no topo da coluna. A embalagem inteira é movida com seus produtos, quantidades e dados, sem duplicar o saldo. + Nova Caixa 40 cria um novo destino; Sem Caixa 40 deixa a embalagem aguardando alocação. Reabra caixas montadas antes de mover suas menores. A alteração da composição exige nova pesagem e conferência."
+    "text": "Selecione a menor e escolha o destino na lateral; em Todas, use o topo da coluna. Para mover várias, abra Mais ações (…) → Mover menores em lote, marque as colunas e escolha o destino. A embalagem inteira é movida com seus produtos, quantidades e dados, sem duplicar o saldo. + Nova Caixa 40 cria um novo destino; Sem Caixa 40 deixa a embalagem aguardando alocação. Reabra caixas montadas antes de mover suas menores. A alteração da composição exige nova pesagem e conferência."
   },
   {
     "category": "expedition",
@@ -142,7 +142,7 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Corrija sem perder o conteúdo",
-    "text": "Na planilha, selecione a Caixa 40 e use Reabrir Caixa 40. Corrija as quantidades nas mesmas colunas ou mude o destino no topo da menor. Para lotes e outros campos, use Lotes e dados dos produtos. O formulário anterior mantém Voltar à montagem e Retirar para ajustar. Para excluir uma caixa com conteúdo, abra o formulário, confira os produtos e digite EXCLUIR na confirmação. Remover embalagem vazia, na planilha, remove somente uma menor sem itens. Mudanças físicas exigem nova pesagem e conferência; alterações documentais exigem nova revisão."
+    "text": "Na planilha, selecione a Caixa 40 e use Reabrir Caixa 40. Corrija as quantidades nas mesmas colunas ou escolha o destino da menor na lateral. Desfazer reverte a última ação na planilha, desde que a montagem não tenha recebido outras alterações. Campos gerais do pedido e documentos são preservados. Para lotes e outros campos, use Lotes e dados dos produtos. O formulário anterior mantém Voltar à montagem e Retirar para ajustar. Para excluir uma caixa com conteúdo, abra o formulário, confira os produtos e digite EXCLUIR na confirmação. Remover embalagem vazia, na planilha, remove somente uma menor sem itens. Mudanças físicas exigem nova pesagem e conferência; alterações documentais exigem nova revisão."
   },
   {
     "category": "expedition",

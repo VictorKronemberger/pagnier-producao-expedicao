@@ -52,16 +52,16 @@ export const manualExamples:Record<string,ManualExample> = {
     "caption": "Exemplo no sistema: programação, produção confirmada e embalagem aparecem separadas."
   },
   "boxes": {
-    "scenario": "Um produto do pedido tem 20 unidades. Você quer três caixas menores e duas Caixas 40.",
+    "scenario": "Um produto do pedido tem 20 unidades. Você quer criar três menores com 5 unidades cada e depois reorganizar os volumes.",
     "actions": [
-      "Na planilha, informe Quantidade 3 e clique em Adicionar caixas menores. A primeira Caixa 40 é criada junto.",
-      "Na linha do produto, preencha 8, 6 e 6 nas três colunas. Falta embalar chega a zero para esse produto.",
-      "Na terceira menor, escolha + Nova Caixa 40 no destino. Ela é movida com suas 6 unidades. A primeira maior fica com as outras duas menores.",
-      "Confira os demais produtos do pedido e conclua cada Caixa 40. Abra Pesos e detalhes, informe os valores reais e confirme a conferência física."
+      "Em Mais ações (…) → Criar menores preenchidas, escolha o produto, 3 embalagens e 5 unidades por embalagem. Confira 15 unidades no total e clique em Criar preenchidas. A primeira Caixa 40 é criada junto.",
+      "As três colunas aparecem preenchidas com 5 unidades. Falta embalar mostra as 5 restantes do pedido. Corrija qualquer coluna digitando; Desfazer reverte a última edição.",
+      "Para reorganizar, abra Mais ações (…) → Mover menores em lote, selecione duas colunas e escolha Nova Caixa 40. As duas menores levam suas 10 unidades; o saldo do pedido continua igual.",
+      "Distribua as 5 unidades restantes, confira os demais produtos e conclua cada Caixa 40. Abra Pesos e detalhes, informe os valores reais e confirme a conferência física."
     ],
     "result": "As menores e as Caixas 40 foram montadas na mesma tela, sem cadastrar o mesmo conteúdo duas vezes.",
     "image": "planilha-caixas.png",
-    "caption": "Planilha integrada com dados fictícios: produtos nas linhas, menores nas colunas e composição da Caixa 40 ao lado."
+    "caption": "Planilha integrada com dados fictícios: produtos nas linhas, menores nas colunas e total da Caixa 40 ao lado. As ações extras ficam recolhidas."
   },
   "packing": {
     "scenario": "Dois pedidos viajarão juntos para o mesmo endereço de entrega.",

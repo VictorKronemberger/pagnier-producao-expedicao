@@ -129,7 +129,7 @@ try{
   assert.equal(await evaluate('window.qa.caixas[0].montada'),false,"cannot conclude with an empty inner");
   await clickText("Remover embalagem vazia");
   await input(cell(0,2),"3");await input(cell(1,2),"2");
-  await evaluate('(()=>{const el=document.querySelectorAll("thead select")[2];el.value="new";el.dispatchEvent(new Event("change",{bubbles:true}))})()');await pause(100);
+  await evaluate('(()=>{const el=[...document.querySelectorAll("select")].find(e=>e.getAttribute("aria-label")==="Caixa 40 de "+window.qa.caixas[0].caixasInternas[2].codigo);el.value="new";el.dispatchEvent(new Event("change",{bubbles:true}))})()');await pause(100);
   assert.equal(await evaluate('window.qa.caixas.length'),2);
   assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),2);
   assert.equal(await evaluate('window.qa.caixas[1].itens[0].quantidade'),"3","move preserves content");
@@ -152,5 +152,39 @@ try{
   await clickText("Voltar à montagem");
  }
 
- console.log("OK packing sheet browser: typing, live preview, limits, atomic Excel paste, decimal units, keyboard, pagination, search, reload, clear, disabled, desktop/mobile, dedicated screen, live preview, pending filter, save status, focus, session expiry batch creation, duplication, nested quantities, atomic cross-parent paste, parent moves, finalization, reopen and bag/inner persistence.");
+
+ await evaluate('window.resetQA("inner")');await pause(120);
+ await evaluate('document.querySelector("[aria-label=\'Mais ações\']").click()');await clickText("Criar menores preenchidas");
+ await input('document.querySelector("[aria-label=\'Número de menores preenchidas\']")',"3");
+ await evaluate('(()=>{const el=document.querySelector("[aria-label=\'Produto das menores\']");el.value="stock-0";el.dispatchEvent(new Event("change",{bubbles:true}))})()');await pause(100);
+ await input('document.querySelector("[aria-label=\'Quantidade por embalagem\']")',"5");
+ assert.equal(await evaluate('document.querySelectorAll("[aria-label=\'Quantidade de novas embalagens\']").length'),0,"creation count is not repeated while batch panel is open");
+ await clickText("Criar preenchidas");
+ assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),3,"filled batch creates outer and inners together");
+ assert.equal(await evaluate('window.qa.caixas[0].itens.reduce((n,i)=>n+Number(i.quantidade),0)'),15);
+ assert.equal(await evaluate('document.querySelectorAll("thead select").length'),0,"single outer hides repeated destination");
+ assert.equal(await evaluate('document.querySelector("[aria-label=\'Caixas 40 da planilha\'] [aria-pressed=true]").textContent'),"CX-001");
+ await input(cell(0,0),"4");await input(cell(0,0),"3");
+ await evaluate('document.querySelector("[aria-label=\'Desfazer última ação\']").click()');await pause(120);
+ assert.equal(await evaluate('window.qa.caixas[0].itens[0].quantidade'),"5","undo groups typing in one cell");
+ await evaluate('document.querySelector("[aria-label=\'Mais ações\']").click()');await clickText("Mover menores em lote");
+ await clickText("Selecionar visíveis");await clickText("Mover selecionadas");
+ assert.equal(await evaluate('window.qa.caixas[1].caixasInternas.length'),3);
+ assert.equal(await evaluate('window.qa.caixas[0].itens.length'),0);
+ await evaluate('window.reloadQA()');await pause(120);
+ await evaluate('document.querySelector("[aria-label=\'Desfazer última ação\']").click()');await pause(120);
+ assert.equal(await evaluate('window.qa.caixas.length'),1,"undo batch move also removes its automatically-created destination");
+ assert.equal(await evaluate('window.qa.caixas[0].itens.length'),3);
+ await evaluate('document.querySelector("[aria-label=\'Mais ações\']").click()');await clickText("Criar menores preenchidas");
+ await input('document.querySelector("[aria-label=\'Quantidade por embalagem\']")',"6");
+ const beforeRejectedBatch=await evaluate('JSON.stringify(window.qa)');await clickText("Criar preenchidas");
+ assert.equal(await evaluate('JSON.stringify(window.qa)'),beforeRejectedBatch,"overfilled batch rejected with no partial boxes");await clickText("Cancelar");
+ await clickText("Abrir tela da planilha");
+ for(const [name,width,height,mobile] of [["simplified",1440,1000,false],["simplified-mobile",390,844,true]]){
+  await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile});await pause(150);
+  assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),"no viewport overflow "+name);
+  writeFileSync(path.join(dir,name+".png"),Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
+ }
+
+ console.log("OK packing sheet browser: filled batches, bulk moves, guarded undo, focused outer, compact controls, typing, live preview, limits, atomic Excel paste, decimal units, keyboard, pagination, search, reload, clear, disabled, desktop/mobile, dedicated screen, live preview, pending filter, save status, focus, session expiry batch creation, duplication, nested quantities, atomic cross-parent paste, parent moves, finalization, reopen and bag/inner persistence.");
 }finally{socket?.close();browser.kill();server.close();}

@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"30",updatedAt:"24/11/2026"};
+export const manualEdition = {revision:"31",updatedAt:"24/11/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -279,22 +279,22 @@ export const tutorials = [
       {
         "title": "Crie a Caixa 40 junto com as menores",
         "short": "Informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags.",
-        "text": "Sem uma Caixa 40 em montagem, o painel cria a maior junto das menores. Para abrir outra, clique em Nova Caixa 40; nas modalidades somente menores ou bags, ela já começa com uma embalagem interna. Selecione a Caixa 40 no alto e confira o destino ao lado do botão de adicionar antes de criar mais. Quantidade é o número de novas embalagens, não a quantidade de produtos."
+        "text": "Sem uma Caixa 40 em montagem, o painel cria a maior junto das menores. Para abrir outra, clique em Nova Caixa 40; nas modalidades somente menores ou bags, ela já começa com uma embalagem interna. A tela abre na primeira Caixa 40 em montagem. Selecione outra no alto quando necessário; Todas fica disponível para a visão geral. Quantidade é o número de novas embalagens, não a quantidade de produtos."
       },
       {
         "title": "Digite as quantidades do pedido",
         "short": "Cada linha é um produto/OP e cada coluna é uma caixa menor, bag ou Caixa 40 direta.",
-        "text": "Confira o SKU e digite a quantidade real na unidade da OP. O conteúdo da menor e da Caixa 40 aparece ao lado automaticamente. Pedido mostra a quantidade prevista; Falta embalar desconta tudo já distribuído, inclusive embalagens sem Caixa 40. Tab avança para a próxima caixa e Enter para o próximo produto. Apagar ou digitar 0 retira aquele item. A busca aceita SKU, produto e OP; Só falta embalar mostra o que ainda precisa distribuir ou revisar."
+        "text": "Confira o SKU e digite a quantidade real na unidade da OP. A tabela é a referência do conteúdo; o total da Caixa 40 acompanha a digitação. Ver produtos, na lateral, abre o detalhamento somente quando necessário. No celular, a quantidade do pedido fica abaixo do produto para deixar a coluna editável visível. Pedido mostra a quantidade prevista; Falta embalar desconta tudo já distribuído, inclusive embalagens sem Caixa 40. Tab avança para a próxima caixa e Enter para o próximo produto. Apagar ou digitar 0 retira aquele item. A busca aceita SKU, produto e OP; Só falta embalar mostra o que ainda precisa distribuir ou revisar."
       },
       {
-        "title": "Cole do Excel ou duplique uma menor",
-        "short": "Cole um intervalo de quantidades ou selecione uma coluna e use Duplicar caixa menor / Duplicar bag.",
-        "text": "A colagem segue as linhas e colunas visíveis e deve caber na página e nas caixas existentes. Use Todas para distribuir entre Caixas 40. Se qualquer valor for inválido ou ultrapassar o pedido, o intervalo inteiro é rejeitado. Duplicar repete produtos, quantidades e dados na mesma Caixa 40, quando houver saldo. Confira lotes e validade da cópia. Se a mesma OP tiver vários lotes dentro da mesma embalagem, use Revisar itens para preservar a separação."
+        "title": "Preencha em lote, cole ou duplique",
+        "short": "Em Mais ações (…), use Criar menores preenchidas para repetir um produto em várias embalagens.",
+        "text": "Na criação preenchida, escolha o produto, o número de embalagens e a quantidade por embalagem. Confira o total e o saldo antes de criar. A maior é criada junto quando necessário; falta de saldo rejeita o lote inteiro. Desfazer reverte a última ação da planilha, incluindo digitação, colagem, criação e movimentação, enquanto não houver outras mudanças na montagem. A colagem segue as linhas e colunas visíveis e deve caber na página e nas caixas existentes. Use Todas para distribuir entre Caixas 40. Se qualquer valor for inválido ou ultrapassar o pedido, o intervalo inteiro é rejeitado. Duplicar repete produtos, quantidades e dados na mesma Caixa 40, quando houver saldo. Confira lotes e validade da cópia. Se a mesma OP tiver vários lotes dentro da mesma embalagem, use Revisar itens para preservar a separação."
       },
       {
         "title": "Escolha o destino sem refazer o conteúdo",
-        "short": "No topo da coluna da menor, escolha a Caixa 40 de destino.",
-        "text": "A lista permite mover a embalagem inteira para outra Caixa 40, criar uma nova ou deixá-la Sem Caixa 40. Produtos, quantidades e dados acompanham a mudança; a menor continua editável na planilha enquanto a maior estiver em montagem. O saldo do pedido não muda por uma transferência. Remover embalagem vazia retira apenas uma menor sem itens. Uma Caixa 40 montada precisa ser reaberta antes de receber ou mover embalagens."
+        "short": "Selecione a menor e escolha a Caixa 40 na lateral. Em Todas, o destino fica no topo de cada coluna.",
+        "text": "Para transferir várias, abra Mais ações (…) → Mover menores em lote, marque as colunas, escolha o destino e clique em Mover selecionadas. A lista permite mover a embalagem inteira para outra Caixa 40, criar uma nova ou deixá-la Sem Caixa 40. Produtos, quantidades e dados acompanham a mudança; a menor continua editável na planilha enquanto a maior estiver em montagem. O saldo do pedido não muda por uma transferência. Remover embalagem vazia retira apenas uma menor sem itens. Uma Caixa 40 montada precisa ser reaberta antes de receber ou mover embalagens."
       },
       {
         "title": "Entenda quantidade e conteúdo por embalagem",
@@ -308,7 +308,7 @@ export const tutorials = [
       },
       {
         "title": "Conclua a Caixa 40 na própria planilha",
-        "short": "Confira o conteúdo ao lado e clique em Concluir Caixa 40.",
+        "short": "Confira as colunas e o total na lateral; clique em Concluir Caixa 40 uma única vez para a maior e suas menores.",
         "text": "Não deixe menores vazias: preencha ou remova as que não serão usadas. A Caixa 40 recebe o status Montada e suas quantidades ficam bloqueadas. Ela continua visível na planilha. Para corrigir, use Reabrir Caixa 40 e edite as mesmas colunas. Essa conclusão não substitui a conferência física nem registra despacho. Mudanças no conteúdo ou na composição exigem nova pesagem e conferência."
       },
       {

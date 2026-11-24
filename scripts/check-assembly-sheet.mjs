@@ -1,3 +1,4 @@
+import {fillSheetSmallBoxes,moveSheetSmallBoxes,sheetUndoEntry,canUndoSheet,undoSheet} from "../lib/assembly-sheet-actions.mjs";
 import assert from "node:assert/strict";
 import {emptyShipment,newItem,normalizeShipment} from "../lib/shipping.mjs";
 import {assemblySheetColumns,createSheetOuter,addSheetSmallBoxes,moveSheetSmallBox,duplicateSheetSmallBox,removeEmptySheetSmallBox} from "../lib/assembly-sheet.mjs";
@@ -68,3 +69,35 @@ assert.equal(normalizeShipment(s,ops).caixas[1].itens.length,2);
 const full={...s,caixas:s.caixas.map((b,i)=>i?{...b,itens:Array.from({length:100},(_,n)=>({...newItem("full-"+n),opId:"op-a",produto:ops[0].produto,unidade:"UNID",quantidade:"0",caixaInternaId:b.caixasInternas[0].id}))}:b)};
 assert.throws(()=>edits(full,[[assemblySheetColumns(full).at(-1),"kg","1"]]),/100 itens/);
 console.log("OK integrated sheet: nested/direct modes, batch creation, parent moves, prepared/ready/legacy boxes, duplicate IDs, atomic paste, manual metadata, copy limits, empty-inner validation, locks, weight invalidation and persistence.");
+// Batch fill/move, rollback and undo use the same assembly as the order.
+for(const mode of ["inner","bags","mixed"]){
+ let base=createSheetOuter({...emptyShipment(),organizacao:mode},undefined,ids),target=base.caixas[0].id;
+ const filled=fillSheetSmallBoxes(base,ops,target,3,"op-a","5",mode==="bags"?"bag":undefined,ids);
+ assert.equal(filled.caixas[0].caixasInternas.length,3);assert.equal(packingBalance(filled,ops)[0].packed,"15");
+ assert.equal(normalizeShipment(filled,ops).caixas[0].itens.length,3);
+ let before=snapshot(filled);assert.throws(()=>fillSheetSmallBoxes(filled,ops,target,2,"op-a","3",mode==="bags"?"bag":undefined,ids),/excede/);assert.equal(snapshot(filled),before,"failed batch creates no empty boxes");
+ assert.throws(()=>fillSheetSmallBoxes(base,ops,target,2,"op-a","0",undefined,ids),/quantidade/);
+ assert.throws(()=>fillSheetSmallBoxes(base,ops,target,2,"missing","1",undefined,ids));
+ const entry=sheetUndoEntry(base,filled),reloaded=normalizeShipment(filled,ops);
+ assert(canUndoSheet(reloaded,entry),"undo survives canonical save/reload");
+ const withTransport={...reloaded,transportadora:"Changed after editing",observacoes:"Keep notes"};
+ const undone=undoSheet(withTransport,entry);assert.equal(undone.caixas[0].caixasInternas?.length??0,0);assert.equal(undone.transportadora,withTransport.transportadora);assert.equal(undone.observacoes,withTransport.observacoes);
+ const external=structuredClone(reloaded);external.caixas[0].itens[0].lote="OTHER";
+ assert(!canUndoSheet(external,entry));assert.throws(()=>undoSheet(external,entry),/mudou/);assert.equal(external.caixas[0].itens[0].lote,"OTHER");
+ assert(!canUndoSheet({...reloaded,organizacao:"direct"},entry));assert.equal(sheetUndoEntry(base,base),null);
+ const two=createSheetOuter(filled,undefined,ids),columns=assemblySheetColumns(two).filter(b=>b.inner),destination=two.caixas[1].id;
+ const moved=moveSheetSmallBoxes(two,[columns[0].key,columns[1].key,columns[0].key],destination,ids);
+ assert.equal(moved.caixas[0].caixasInternas.length,1);assert.equal(moved.caixas[1].caixasInternas.length,2);assert.equal(packingBalance(moved,ops)[0].packed,"15");
+ assert.equal(new Set(moved.caixas.flatMap(b=>b.itens.map(i=>i.id))).size,3);
+ const restored=undoSheet(moved,sheetUndoEntry(two,moved));assert.deepEqual(normalizeShipment(restored,ops),normalizeShipment(two,ops));
+ const loose=moveSheetSmallBoxes(two,columns.map(c=>c.key),"",ids);
+ assert.equal(loose.caixasEmMontagem.length,3);const noLoose=undoSheet(loose,sheetUndoEntry(two,loose));assert.equal(normalizeShipment(noLoose,ops,loose).caixasEmMontagem?.length??0,0,"undo explicitly clears prepared boxes");
+ before=snapshot(two);assert.throws(()=>moveSheetSmallBoxes(two,[columns[0].key,"stale"],destination,ids),/mudou/);assert.equal(snapshot(two),before);
+ const crowded={...two,caixas:two.caixas.map((b,i)=>i?{...b,caixasInternas:Array.from({length:99},(_,j)=>({id:"crowd-"+j,codigo:"C"+j,...(mode==="bags"?{tipo:"bag"}:{})}))}:b)};
+ before=snapshot(crowded);assert.throws(()=>moveSheetSmallBoxes(crowded,columns.map(c=>c.key),destination,ids),/100/);assert.equal(snapshot(crowded),before,"later batch failure leaves all sources unchanged");
+ const locked=finishOuterBox(filled,target,ops);assert.throws(()=>fillSheetSmallBoxes(locked,ops,target,1,"op-a","1",undefined,ids),/Reabra/);
+}
+let fractional=createSheetOuter({...emptyShipment(),organizacao:"inner"},undefined,ids);
+fractional=fillSheetSmallBoxes(fractional,ops,fractional.caixas[0].id,10,"kg","0,250",undefined,ids);
+assert.equal(packingBalance(fractional,ops).find(b=>b.opId==="kg").remaining,"0");
+console.log("OK batch fill and move: limits, rollback, quantities, identifiers, decimals; guarded undo preserves other fields and survives persistence.");
