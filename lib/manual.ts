@@ -2,12 +2,12 @@ export const manual = [
   {
     "category": "expedition",
     "title": "Onde fica a planilha de caixas menores e Caixa 40?",
-    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. O cabeçalho compacto reúne busca e criação de embalagens. Ajuda mostra as instruções quando necessário. A tela abre em uma Caixa 40 e mostra suas menores em colunas. Todas abre a visão geral. A tabela mostra o conteúdo e a lateral reúne total e ações da embalagem selecionada, com Ver produtos recolhido. O formulário antigo continua em Formulário por produto."
+    "text": "Abra o pedido → Expedição → Montar caixas → Planilha do pedido. Use Abrir tela da planilha para ampliar. O cabeçalho compacto reúne busca e criação de embalagens. Ajuda mostra as instruções quando necessário. A tela abre em uma Caixa 40 e mostra suas menores em colunas. Digite em Nova menor para criar e colocar a embalagem diretamente nessa maior. Se ainda não existir uma Caixa 40, ela é criada junto. Continue na mesma coluna para acrescentar produtos; não há uma etapa separada de encaixar a menor. Todas abre a visão geral. A tabela mostra o conteúdo e a lateral reúne total e ações da embalagem selecionada, com Ver produtos recolhido. O formulário antigo continua em Formulário por produto."
   },
   {
     "category": "expedition",
     "title": "Criar várias caixas menores de uma vez",
-    "text": "Selecione a Caixa 40 no alto, informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags. Sem uma maior disponível, ela é criada junto. Quantidade indica o número de novas embalagens. Cada uma recebe uma coluna para preencher. Para criar já com produto, abra Mais ações (…) → Criar menores preenchidas, informe produto e quantidade por embalagem e confira total e saldo. O lote inteiro é rejeitado se ultrapassar o pedido. Para repetir uma já preenchida, selecione sua coluna e use Duplicar caixa menor / Duplicar bag; a cópia respeita o saldo do pedido."
+    "text": "Selecione a Caixa 40 no alto, informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags. Sem uma maior disponível, ela é criada junto. Quantidade indica o número de novas embalagens. Cada uma recebe uma coluna para preencher. Para criar uma por vez, basta digitar em Nova menor, sem usar antes o botão de adicionar. Para criar já com produto, abra Mais ações (…) → Criar menores preenchidas, informe produto e quantidade por embalagem e confira total e saldo. O lote inteiro é rejeitado se ultrapassar o pedido. Para repetir uma já preenchida, selecione sua coluna e use Duplicar caixa menor / Duplicar bag; a cópia respeita o saldo do pedido."
   },
   {
     "category": "expedition",

@@ -222,7 +222,7 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
     [
       "planilha-caixas",
       "Crie ou selecione a Caixa 40",
-      "As caixas maiores ficam no alto. Nova Caixa 40 cria outra; Todas mostra as colunas de todo o envio.",
+      "As maiores ficam no alto. Nova Caixa 40 abre outro destino. Ao digitar na coluna Nova menor, a embalagem é criada dentro da maior selecionada.",
       [
         33,
         79,
@@ -244,12 +244,12 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
     [
       "planilha-caixas",
       "Preencha como uma planilha",
-      "Digite a quantidade na linha do SKU e na coluna da menor. Use Tab, Enter ou cole um intervalo do Excel. O saldo acompanha o pedido inteiro.",
+      "Comece na coluna Nova menor: a primeira quantidade cria a menor dentro da Caixa 40. Continue na mesma coluna para outros produtos. Use Tab, Enter ou cole do Excel.",
       [
-        499,
-        231,
-        650,
-        86
+        977,
+        166,
+        175,
+        151
       ]
     ],
     [
@@ -279,10 +279,10 @@ const scenes:Record<string,Array<[string,string,string,[number,number,number,num
       "Saldo e produtos pendentes",
       "Pedido é a quantidade prevista. Falta embalar desconta tudo já separado, inclusive menores sem destino. Zero indica distribuição completa desse produto.",
       [
-        265,
-        167,
-        234,
-        150
+        256,
+        166,
+        196,
+        151
       ]
     ],
     [

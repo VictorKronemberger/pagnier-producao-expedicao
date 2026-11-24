@@ -52,9 +52,9 @@ export const manualExamples:Record<string,ManualExample> = {
     "caption": "Exemplo no sistema: programação, produção confirmada e embalagem aparecem separadas."
   },
   "boxes": {
-    "scenario": "Um produto do pedido tem 20 unidades. Você quer criar três menores com 5 unidades cada e depois reorganizar os volumes.",
+    "scenario": "Um produto do pedido tem 20 unidades. Você quer montar três menores com 5 unidades cada, diretamente dentro da Caixa 40.",
     "actions": [
-      "Em Mais ações (…) → Criar menores preenchidas, escolha o produto, 3 embalagens e 5 unidades por embalagem. Confira 15 unidades no total e clique em Criar preenchidas. A primeira Caixa 40 é criada junto.",
+      "Na linha do produto, digite 5 em Nova menor. A menor e a Caixa 40 são criadas juntas. Digite 5 na próxima coluna Nova menor e repita mais uma vez. As três menores já pertencem à mesma Caixa 40.",
       "As três colunas aparecem preenchidas com 5 unidades. Falta embalar mostra as 5 restantes do pedido. Corrija qualquer coluna digitando; Desfazer reverte a última edição.",
       "Para reorganizar, abra Mais ações (…) → Mover menores em lote, selecione duas colunas e escolha Nova Caixa 40. As duas menores levam suas 10 unidades; o saldo do pedido continua igual.",
       "Distribua as 5 unidades restantes, confira os demais produtos e conclua cada Caixa 40. Abra Pesos e detalhes, informe os valores reais e confirme a conferência física."

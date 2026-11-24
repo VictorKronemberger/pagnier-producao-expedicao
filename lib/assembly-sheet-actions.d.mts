@@ -5,3 +5,6 @@ export type SheetUndo={before:Pick<Shipment,"caixas"|"caixasEmMontagem">;after:s
 export function sheetUndoEntry(before:Shipment,after:Shipment):SheetUndo|null;
 export function canUndoSheet(s:Shipment,entry:SheetUndo|null):boolean;
 export function undoSheet(s:Shipment,entry:SheetUndo|null):Shipment;
+
+export type NewSheetSmallBox={outerId:string;innerId:string;newOuter:boolean;tipo?:"bag"};
+export function applySheetWithNewSmallBox(s:Shipment,ops:ShippingOP[],changes:import("./packing-sheet.mjs").SheetChange[],draft?:NewSheetSmallBox,model?:import("./box-models.mjs").BoxModel,makeId?:()=>string):Shipment;

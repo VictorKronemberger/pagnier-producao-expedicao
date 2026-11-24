@@ -1,4 +1,4 @@
-export const manualEdition = {revision:"32",updatedAt:"24/11/2026"};
+export const manualEdition = {revision:"33",updatedAt:"24/11/2026"};
 export const manualCategories = [
   {
     "id": "start",
@@ -278,13 +278,13 @@ export const tutorials = [
       },
       {
         "title": "Crie a Caixa 40 junto com as menores",
-        "short": "Informe Quantidade e clique em Adicionar caixas menores ou Adicionar bags.",
-        "text": "Sem uma Caixa 40 em montagem, o painel cria a maior junto das menores. Para abrir outra, clique em Nova Caixa 40; nas modalidades somente menores ou bags, ela já começa com uma embalagem interna. A tela abre na primeira Caixa 40 em montagem. Selecione outra no alto quando necessário; Todas fica disponível para a visão geral. Quantidade é o número de novas embalagens, não a quantidade de produtos."
+        "short": "Digite a primeira quantidade em Nova menor ou Nova bag. A embalagem já nasce dentro da Caixa 40.",
+        "text": "A planilha já mostra os produtos do pedido. Na coluna Nova menor ou Nova bag, a primeira quantidade positiva cria a embalagem dentro da Caixa 40 selecionada. Se não existir uma maior, as duas são criadas juntas. Continue na mesma coluna para incluir outros produtos. A próxima coluna Nova menor permite começar outra embalagem. Nova Caixa 40 abre outro destino, sem criar menores vazias. A tela abre na primeira Caixa 40 em montagem. Selecione outra no alto quando necessário; Todas fica disponível para a visão geral. O botão Adicionar caixas menores ou Adicionar bags continua disponível para criar várias colunas vazias; nesse botão, Quantidade é o número de embalagens."
       },
       {
         "title": "Digite as quantidades do pedido",
         "short": "Cada linha é um produto/OP e cada coluna é uma caixa menor, bag ou Caixa 40 direta.",
-        "text": "Confira o SKU e digite a quantidade real na unidade da OP. A tabela é a referência do conteúdo; o total da Caixa 40 acompanha a digitação. Ver produtos, na lateral, abre o detalhamento somente quando necessário. No celular, a quantidade do pedido fica abaixo do produto para deixar a coluna editável visível. Pedido mostra a quantidade prevista; Falta embalar desconta tudo já distribuído, inclusive embalagens sem Caixa 40. Tab avança para a próxima caixa e Enter para o próximo produto. Apagar ou digitar 0 retira aquele item. A busca aceita SKU, produto e OP; Só falta embalar mostra o que ainda precisa distribuir ou revisar."
+        "text": "Confira o SKU e digite a quantidade real na unidade da OP. Nova menor é apenas um espaço de criação: 0, campo vazio ou valor rejeitado não criam caixas. Cada coluna criada corresponde a uma menor já vinculada à maior. A tabela é a referência do conteúdo; o total da Caixa 40 acompanha a digitação. Ver produtos, na lateral, abre o detalhamento somente quando necessário. No celular, a quantidade do pedido fica abaixo do produto para deixar a coluna editável visível. Pedido mostra a quantidade prevista; Falta embalar desconta tudo já distribuído, inclusive embalagens sem Caixa 40. Tab avança para a próxima caixa e Enter para o próximo produto. Apagar ou digitar 0 retira aquele item. A busca aceita SKU, produto e OP; Só falta embalar mostra o que ainda precisa distribuir ou revisar."
       },
       {
         "title": "Preencha em lote, cole ou duplique",

@@ -111,7 +111,7 @@ try{
   await evaluate('window.resetQA('+JSON.stringify(mode)+')');await pause(120);
   await clickText("Nova Caixa 40");
   assert.equal(await evaluate('window.qa.caixas.length'),1);
-  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),1,"outer and small created together");
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas?.length??0'),0,"new outer waits for the first typed quantity");
   assert.equal(await evaluate('(window.qa.caixasEmMontagem??[]).length'),0);
   await clickText("Abrir tela da planilha");
   await input(cell(0,0),"7");await input(cell(1,0),"4");
@@ -149,9 +149,38 @@ try{
    writeFileSync(path.join(dir,name+".png"),Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
   }
   await send("Emulation.setDeviceMetricsOverride",{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await input(cell(1,2),"3");
+  await input(cell(1,3),"21");assert.equal(await evaluate('window.qa.caixas[1].caixasInternas.length'),1,"rejected draft does not change destination");
+  await input(cell(1,3),"1");assert.equal(await evaluate('window.qa.caixas[1].caixasInternas.length'),2,"new inner follows the selected outer in All view");
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),2,"first outer is not chosen implicitly on draft focus");
   await clickText("Voltar à montagem");
  }
 
+
+
+ for(const mode of ["inner","bags"]){
+  await evaluate('window.resetQA('+JSON.stringify(mode)+')');await pause(120);
+  assert.equal(await evaluate('window.qa.caixas.length'),0);
+  assert.equal(await evaluate('document.querySelectorAll("input[data-sheet-col=\'0\']").length'),20,"order rows are editable before creating any box");
+  await input(cell(0,0),"21");assert.equal(await evaluate('window.qa.caixas.length'),0,"invalid first quantity creates nothing");
+  await input(cell(0,0),"1");
+  assert.equal(await evaluate('window.qa.caixas.length'),1);
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),1);
+  assert.equal(await evaluate('document.activeElement.dataset.sheetCol'),"0","creation preserves the editing focus");
+  await send("Input.insertText",{text:"2"});await pause(100);
+  assert.equal(await evaluate('window.qa.caixas[0].itens[0].quantidade'),"12","continued typing stays in the same smaller box");
+  await input(cell(1,0),"3");assert.equal(await evaluate('window.qa.caixas[0].itens.length'),2);
+  assert.equal(await evaluate('(window.qa.caixasEmMontagem??[]).length'),0,"no separate preparation/placement stage");
+  await paste(0,1,"5\n2");
+  assert.equal(await evaluate('window.qa.caixas[0].caixasInternas.length'),2,"paste creates one inner for all its product rows");
+  assert.equal(await evaluate('window.qa.caixas[0].itens.length'),4);
+  await evaluate('window.reloadQA()');await pause(120);
+  await clickText("Concluir Caixa 40");assert.equal(await evaluate('window.qa.caixas[0].montada'),true);
+  assert.equal(await evaluate('document.querySelectorAll("td[data-new=true]").length'),0,"closed outer has no editable creation column");
+ }
+ await evaluate('window.resetQA("inner")');await pause(120);
+ await input(cell(0,0),"5");await evaluate('document.querySelector("[aria-label=\'Desfazer última ação\']").click()');await pause(100);
+ assert.equal(await evaluate('window.qa.caixas.length'),0,"undo removes both automatically-created levels");
 
  await evaluate('window.resetQA("inner")');await pause(120);
  await evaluate('document.querySelector("[aria-label=\'Mais ações\']").click()');await clickText("Criar menores preenchidas");
@@ -186,5 +215,5 @@ try{
   writeFileSync(path.join(dir,name+".png"),Buffer.from((await send("Page.captureScreenshot",{format:"png"})).data,"base64"));
  }
 
- console.log("OK packing sheet browser: filled batches, bulk moves, guarded undo, focused outer, compact controls, typing, live preview, limits, atomic Excel paste, decimal units, keyboard, pagination, search, reload, clear, disabled, desktop/mobile, dedicated screen, live preview, pending filter, save status, focus, session expiry batch creation, duplication, nested quantities, atomic cross-parent paste, parent moves, finalization, reopen and bag/inner persistence.");
+ console.log("OK packing sheet browser: type-to-create nested boxes, focus continuity, automatic placement, filled batches, bulk moves, guarded undo, focused outer, compact controls, typing, live preview, limits, atomic Excel paste, decimal units, keyboard, pagination, search, reload, clear, disabled, desktop/mobile, dedicated screen, live preview, pending filter, save status, focus, session expiry batch creation, duplication, nested quantities, atomic cross-parent paste, parent moves, finalization, reopen and bag/inner persistence.");
 }finally{socket?.close();browser.kill();server.close();}

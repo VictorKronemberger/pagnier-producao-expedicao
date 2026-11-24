@@ -1,4 +1,4 @@
-import {fillSheetSmallBoxes,moveSheetSmallBoxes,sheetUndoEntry,canUndoSheet,undoSheet} from "../lib/assembly-sheet-actions.mjs";
+import {applySheetWithNewSmallBox,fillSheetSmallBoxes,moveSheetSmallBoxes,sheetUndoEntry,canUndoSheet,undoSheet} from "../lib/assembly-sheet-actions.mjs";
 import assert from "node:assert/strict";
 import {emptyShipment,newItem,normalizeShipment} from "../lib/shipping.mjs";
 import {assemblySheetColumns,createSheetOuter,addSheetSmallBoxes,moveSheetSmallBox,duplicateSheetSmallBox,removeEmptySheetSmallBox} from "../lib/assembly-sheet.mjs";
@@ -101,3 +101,29 @@ let fractional=createSheetOuter({...emptyShipment(),organizacao:"inner"},undefin
 fractional=fillSheetSmallBoxes(fractional,ops,fractional.caixas[0].id,10,"kg","0,250",undefined,ids);
 assert.equal(packingBalance(fractional,ops).find(b=>b.opId==="kg").remaining,"0");
 console.log("OK batch fill and move: limits, rollback, quantities, identifiers, decimals; guarded undo preserves other fields and survives persistence.");
+
+// First typed quantity creates the smaller box inside its destination, not in staging.
+for(const mode of ["inner","bags","mixed"]){
+ const original={...emptyShipment(),organizacao:mode},draft={outerId:ids(),innerId:ids(),newOuter:true,tipo:mode==="bags"?"bag":undefined};
+ const change=(opId,quantity)=>({boxId:draft.innerId,parentId:draft.outerId,opId,quantity});
+ assert.strictEqual(applySheetWithNewSmallBox(original,ops,[change("op-a","0")],draft,undefined,ids),original);
+ assert.strictEqual(applySheetWithNewSmallBox(original,ops,[change("op-a","")],draft,undefined,ids),original);
+ let built=applySheetWithNewSmallBox(original,ops,[change("op-a","1")],draft,undefined,ids);
+ assert.equal(built.caixas.length,1);assert.equal(built.caixas[0].caixasInternas.length,1);assert.equal(built.caixasEmMontagem?.length??0,0);
+ built=applySheetWithNewSmallBox(built,ops,[change("op-a","12"),change("kg","0,500")],draft,undefined,ids);
+ assert.equal(built.caixas[0].caixasInternas.length,1,"continued typing does not duplicate the inner");assert.equal(built.caixas[0].itens.length,2);
+ assert.equal(packingBalance(built,ops)[0].packed,"12");assert.equal(built.caixas[0].itens[0].caixaInternaId,draft.innerId);
+ const persisted=normalizeShipment(JSON.parse(JSON.stringify(built)),ops);assert.equal(persisted.caixas[0].caixasInternas[0].id,draft.innerId);
+ assert.equal(finishOuterBox(persisted,draft.outerId,ops).caixas[0].montada,true,"no separate inner-placement action required");
+ const secondDraft={...draft,innerId:ids(),newOuter:false};const before=snapshot(built);
+ assert.throws(()=>applySheetWithNewSmallBox(built,ops,[{...change("op-a","9"),boxId:secondDraft.innerId}],secondDraft,undefined,ids),/excede/);assert.equal(snapshot(built),before);
+ assert.throws(()=>applySheetWithNewSmallBox(original,ops,[change("op-a","21")],draft,undefined,ids),/excede/);assert.equal(original.caixas.length,0);
+ assert.throws(()=>applySheetWithNewSmallBox(original,ops,[change("op-a","-1")],draft,undefined,ids),/quantidade/);
+ assert.throws(()=>applySheetWithNewSmallBox(original,ops,[change("op-a","1")],{...draft,newOuter:false},undefined,ids),/destino/);
+ const pasted=applySheetWithNewSmallBox(original,ops,[change("op-a","5"),change("kg","0,250")],draft,undefined,ids);
+ assert.equal(pasted.caixas[0].itens.length,2);assert.equal(pasted.caixas[0].caixasInternas.length,1);
+ const reversed=undoSheet(pasted,sheetUndoEntry(original,pasted));assert.equal(reversed.caixas.length,0);
+ const mounted=finishOuterBox(built,draft.outerId,ops);
+ assert.throws(()=>applySheetWithNewSmallBox(mounted,ops,[{...change("op-a","1"),boxId:secondDraft.innerId}],secondDraft,undefined,ids),/Reabra/);
+}
+console.log("OK first-cell creation: outer + inner + items saved together, continued typing, multi-product paste, rollback, undo, persistence and outer completion.");
